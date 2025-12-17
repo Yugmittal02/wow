@@ -181,6 +181,12 @@
             transform: scale(1.3) !important;
             color: #fbbf24;
         }
+
+        /* App Blocked Overlay */
+        #app-blocked-overlay {
+            z-index: 100000;
+            background: #fff;
+        }
     </style>
     <link rel="manifest" href="manifest.json">
 
@@ -197,6 +203,15 @@
 </script>
 </head>
 <body>
+
+<div id="app-blocked-overlay" class="fixed inset-0 hidden flex items-center justify-center flex-col text-center p-8 absolute top-0 left-0 w-full h-full">
+    <div class="bg-red-50 p-6 rounded-full mb-6 animate-pulse">
+        <i class="fas fa-store-slash text-6xl text-red-500"></i>
+    </div>
+    <h1 class="text-3xl font-black text-gray-800 mb-2">We are Closed Temporarily</h1>
+    <p class="text-gray-500 mt-2 mb-8 max-w-xs mx-auto">We are currently not accepting orders. Please try again later or contact the restaurant.</p>
+    <button onclick="location.reload()" class="px-6 py-3 bg-gray-800 text-white rounded-xl font-bold text-sm">Refresh Page</button>
+</div>
 
 <div class="mobile-frame bg-orange-50 emoji-bg" id="app-frame">
 
@@ -401,7 +416,7 @@
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between text-gray-600"><span>Item Total</span><span>₹<span id="summary-total">0.00</span></span></div>
                         <div class="flex justify-between text-gray-500 text-[11px]"><span>Tax (5%)</span><span>₹<span id="summary-tax">0.00</span></span></div>
-                        <div class="flex justify-between text-gray-500 text-[11px]"><span>Platform Fee</span><span>₹0.98</span></div>
+                        <div class="flex justify-between text-gray-500 text-[11px]"><span>Platform Fee</span><span>₹1.98</span></div>
                         <div class="flex justify-between text-red-500 text-[11px] font-bold"><span>Donation</span><span>₹<span id="summary-donation">0</span></span></div>
                         <div id="discount-row" class="flex justify-between text-green-600 font-medium hidden"><span>Discount</span><span>- ₹<span id="summary-discount">0</span></span></div>
                         <div class="flex justify-between text-xl font-extrabold text-gray-900 mt-3 pt-3 border-t border-dashed border-gray-300">
@@ -565,8 +580,8 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+    import { getDatabase, ref, push, serverTimestamp, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDSl6L3ym7G9wXJjZoCYGtU6oBuMyswMBA",
@@ -585,7 +600,23 @@
 
     window.rawMenuDocs = [];
     window.allAddons = {}; 
-    window.currentDocId = null; // Store Firestore Document ID for rating
+    window.currentDocId = null;
+
+    // --- 1. APP BLOCKING LISTENER ---
+    const initSecurity = () => {
+        const statusRef = ref(db, 'appStatus');
+        onValue(statusRef, (snapshot) => {
+            const isBlocked = snapshot.val();
+            const overlay = document.getElementById('app-blocked-overlay');
+            if (isBlocked === true) {
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                overlay.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+    };
 
     function processMenuData() {
         window.menuData = window.rawMenuDocs.map(item => {
@@ -672,8 +703,8 @@
                 if(data.offerText && data.offerText !== "No Offer") {
                     window.offerList.push({
                         title: data.discount > 0 ? `${data.discount}% OFF` : 'SPECIAL',
-                        desc: data.offerText, // This acts as the main offer name now
-                        code: 'OFFER' + data.slotId, // kept for internal tracking
+                        desc: data.offerText,
+                        code: 'OFFER' + data.slotId,
                         minAmt: 100,
                         discountPercent: data.discount || 0,
                         color: 'from-orange-500 to-red-600',
@@ -681,13 +712,11 @@
                     });
                 }
             });
-            // Ensure UI updates whenever data changes
             if(window.initBanners) window.initBanners();
             if(window.renderOffers) window.renderOffers();
         });
     }
     
-    // Rating logic specifically for Firestore
     window.submitRating = async (star) => {
         if(typeof Toastify !== 'undefined') {
             Toastify({ 
@@ -698,7 +727,6 @@
             }).showToast();
         }
 
-        // Add to Database
         if(window.currentDocId) {
              try {
                 const orderRef = doc(dbFirestore, "orders", window.currentDocId);
@@ -706,12 +734,12 @@
              } catch(e) { console.log("Rating save error", e); }
         }
 
-        // Animate stars away
         document.getElementById('rating-widget').classList.add('translate-y-full');
     }
 
     const timeout = (ms) => new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), ms));
 
+    // --- UPDATED PROCESS ORDER FUNCTION WITH WALLET DEDUCTION ---
     window.processOrder = async (method) => {
         const btn = document.getElementById('btn-cash-pay');
         const originalContent = btn.innerHTML;
@@ -725,7 +753,6 @@
         btn.innerHTML = `<div class="flex items-center justify-center gap-2"><div class="w-6 h-6 border-4 border-gray-200 border-t-green-500 rounded-full animate-spin"></div> Processing...</div>`;
 
         try {
-            // IMPORTANT FIX: Re-fetch user data from local storage to ensure it's up-to-date before ordering
             const savedUser = localStorage.getItem('wowUser');
             if(savedUser) {
                 window.wowUser = JSON.parse(savedUser);
@@ -738,22 +765,32 @@
             const orderData = {
                 orderId: orderID,
                 customer: { name: currentUser.name, phone: currentUser.phone },
-                customerName: currentUser.name, // <<-- THIS IS THE FIX (To top-level field)
-                customerMobile: currentUser.phone, // <<-- THIS IS THE FIX (To top-level field)
+                customerName: currentUser.name,
+                customerMobile: currentUser.phone,
                 items: window.wowCart,
                 totalAmount: grandTotal,
                 status: "pending", 
                 paymentMethod: method,
                 paymentStatus: "pending", 
-                orderType: window.orderType, // Add Order Type to Database
+                orderType: window.orderType,
                 date: new Date().toLocaleDateString(),
                 time: new Date().toLocaleTimeString(),
                 timestamp: serverTimestamp(),
-                createdAt: new Date()
+                createdAt: new Date(),
+                platformFee: 1.98 // Log Fee
             };
 
+            // 1. DEDUCT WALLET BALANCE
+            const walletRef = ref(db, 'admin/walletBalance');
+            const walletSnap = await get(walletRef);
+            let currentBalance = parseFloat(walletSnap.val() || 0);
+            
+            // Deduct 1.98
+            const newBalance = currentBalance - 1.98;
+            await update(ref(db, 'admin'), { walletBalance: newBalance });
+
+            // 2. PLACE ORDER
             const rtdbPromise = push(ref(db, 'orders'), orderData);
-            // We need to await addDoc to get the reference ID for updating rating later
             const docRef = await addDoc(collection(dbFirestore, "orders"), orderData);
             window.currentDocId = docRef.id;
 
@@ -780,21 +817,20 @@
             document.getElementById('final-amt').innerText = grandTotal;
             document.getElementById('receipt-date').innerText = new Date().toLocaleDateString();
             document.getElementById('receipt-time').innerText = new Date().toLocaleTimeString();
-            document.getElementById('receipt-customer').innerText = currentUser.name; // Update customer name on receipt
-            document.getElementById('receipt-order-type').innerText = window.orderType; // Update order type on receipt
+            document.getElementById('receipt-customer').innerText = currentUser.name;
+            document.getElementById('receipt-order-type').innerText = window.orderType;
 
             document.getElementById('success-screen').classList.remove('hidden');
             document.getElementById('success-screen').classList.add('flex');
             
-            // Trigger Rating Animation with staggered effect
             setTimeout(() => {
                 document.getElementById('rating-widget').classList.remove('translate-y-full');
                 const stars = document.querySelectorAll('.star-rating i');
                 stars.forEach((star, index) => {
-                    star.classList.remove('visible'); // reset
+                    star.classList.remove('visible'); 
                     setTimeout(() => {
                          star.classList.add('visible');
-                    }, index * 100); // 0.1s delay per star
+                    }, index * 100); 
                 });
             }, 800);
 
@@ -832,6 +868,7 @@
         document.getElementById('main-app').classList.remove('opacity-0');
         document.getElementById('main-app').classList.add('fade-in');
         
+        initSecurity(); // Initialize Security Check
         initAddonsSync(); 
         initMenuSync();
         initOffersSync();
@@ -852,7 +889,7 @@
     window.currentCategory = 'All';
     window.currentCustomItem = null; 
     window.donationAmt = 0;
-    const PLATFORM_FEE = 0.98;
+    const PLATFORM_FEE = 1.98; // UPDATED FEE
 
     window.initBanners = () => {
         const container = document.getElementById('banner-container');
@@ -861,17 +898,14 @@
             return;
         }
         
-        // LIMIT TO 3 CARDS ONLY
         const limitedOffers = window.offerList.slice(0, 3);
         
         container.innerHTML = limitedOffers.map(offer => {
-            // Logic: If URL exists, show photo, else gradient.
             const hasImg = offer.img && offer.img.startsWith('http');
             const bgStyle = hasImg 
                 ? `background-image: url('${offer.img}'); background-size: cover; background-position: center;` 
-                : `background-image: linear-gradient(to right, #f97316, #dc2626);`; // Fallback gradient
+                : `background-image: linear-gradient(to right, #f97316, #dc2626);`; 
             
-            // Use a gradient overlay for clarity and readability of white text
             const overlayClass = hasImg ? 'bg-gradient-to-t from-black/80 via-black/40 to-transparent' : 'bg-transparent';
             
             return `
@@ -965,7 +999,6 @@
         items.forEach(item => {
             const totalQty = window.wowCart.filter(c => c.parentId === item.id).reduce((sum, c) => sum + c.qty, 0);
             
-            // --- UPDATED: Force Green Dot for everything by default ---
             const typeColor = 'green'; 
             
             const bestsellerBadge = item.isBestseller 
@@ -1416,4 +1449,4 @@
     }
 </script>
 </body>
-</html>
+                </html>
