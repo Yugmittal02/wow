@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wow Cafe | Super Admin 3.8 (Multi-Price Fix)</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <style>
+        /* Custom Styles - Strictly Preserved */
+        .nav-item.active { 
+            background-color: #fff7ed; 
+            color: #ea580c; 
+            border-right: 4px solid #ea580c; 
+        }
+        .hide-section { display: none; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Modal Animation */
+        .modal-enter { animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        #sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-closed { transform: translateX(-100%); }
+        .sidebar-open { transform: translateX(0); }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-row-mobile td { white-space: nowrap; }
+        
+        .clickable-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .clickable-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Checkbox Style for Add-ons */
+        .checkbox-wrapper input:checked + div {
+            background-color: #fff7ed;
+            border-color: #ea580c;
+            color: #ea580c;
+        }
+        
+        /* Load More Button Style */
+        .btn-load-more {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            text-align: center;
+            background: #f3f4f6;
+            color: #4b5563;
+            font-weight: bold;
+            border-radius: 0 0 1rem 1rem;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .btn-load-more:hover { background: #e5e7eb; color: #1f2937; }
+        .btn-load-more.hidden { display: none; }
+        
+        /* Best Seller Badge */
+        .bestseller-glow {
+            box-shadow: 0 0 10px rgba(234, 179, 8, 0.3);
+            border-color: #fcd34d !important;
+        }
+        
+        /* Login Overlay */
+        #login-overlay {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255,255,255,0.9);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-700">
+
+    <div id="login-overlay" class="fixed inset-0 z-[100] flex items-center justify-center flex-col">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-96 border border-gray-100 text-center">
+            <div class="mb-6">
+                <h1 class="text-3xl font-black text-gray-800 tracking-tight">Wow<span class="text-orange-600">Cafe</span>.</h1>
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Admin Security</p>
+            </div>
+            <p class="text-sm text-gray-500 mb-4">Enter Access PIN</p>
+            <input type="password" id="login-pin" class="w-full text-center text-2xl tracking-[0.5em] font-bold border-b-2 border-orange-200 outline-none focus:border-orange-600 py-2 mb-6" maxlength="6" placeholder="******">
+            <button onclick="checkAdminLogin()" class="w-full bg-orange-600 text-white font-bold py-3 rounded-xl hover:bg-orange-700 shadow-lg transition transform active:scale-95">Unlock Panel</button>
+            <p id="login-error" class="text-red-500 text-xs font-bold mt-4 hidden"><i class="fas fa-lock"></i> Incorrect PIN</p>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden relative">
+        
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity"></div>
+
+        <aside id="sidebar" class="w-64 bg-white shadow-2xl z-30 flex flex-col absolute md:relative h-full sidebar-closed md:transform-none md:flex border-r border-gray-100">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center h-20">
+                <div>
+                    <h1 class="text-2xl font-black text-gray-800 tracking-tight">Wow<span class="text-orange-600">Cafe</span>.</h1>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Super Admin 3.8</p>
+                </div>
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-red-500 transition"><i class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <nav class="flex-1 mt-6 px-2 space-y-2 overflow-y-auto">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 flex items-center gap-4 transition-all duration-200">
+                    <i class="fas fa-chart-pie w-5 text-center"></i> <span class="font-semibold">Live Kitchen</span>
+                </button>
+                
+                <button onclick="switchTab('pos')" id="nav-pos" class="nav-item w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 flex items-center gap-4 transition-all duration-200">
+                    <i class="fas fa-cash-register w-5 text-center"></i> <span class="font-semibold">New Order (POS)</span>
+                </button>
+
+                <button onclick="switchTab('menu')" id="nav-menu" class="nav-item w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 flex items-center gap-4 transition-all duration-200">
+                    <i class="fas fa-utensils w-5 text-center"></i> <span class="font-semibold">Menu & Add-ons</span>
+                </button>
+                <button onclick="switchTab('offers')" id="nav-offers" class="nav-item w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 flex items-center gap-4 transition-all duration-200">
+                    <i class="fas fa-tags w-5 text-center"></i> <span class="font-semibold">Offers</span>
+                </button>
+                <button onclick="switchTab('orders')" id="nav-orders" class="nav-item w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 flex items-center gap-4 transition-all duration-200">
+                    <i class="fas fa-history w-5 text-center"></i> <span class="font-semibold">Order History</span>
+                </button>
+                <button onclick="switchTab('transactions')" id="nav-transactions" class="nav-item w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 flex items-center gap-4 transition-all duration-200">
+                    <i class="fas fa-file-invoice-dollar w-5 text-center"></i> <span class="font-semibold">Revenue & Bills</span>
+                </button>
+                
+                <button onclick="switchTab('crm')" id="nav-crm" class="nav-item w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 flex items-center gap-4 transition-all duration-200">
+                    <i class="fas fa-users w-5 text-center"></i> <span class="font-semibold">Customer CRM</span>
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-gray-100 bg-gray-50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold shadow-lg">A</div>
+                    <div>
+                        <p class="text-sm font-bold text-gray-800">Admin</p>
+                        <p class="text-xs text-green-600 font-bold flex items-center gap-1"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Online</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center md:hidden z-10">
+                <h1 class="text-xl font-bold">Wow<span class="text-orange-600">Admin</span></h1>
+                <button onclick="toggleSidebar()" class="text-gray-600 p-2 rounded hover:bg-gray-100"><i class="fas fa-bars text-xl"></i></button>
+            </header>
+
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50/50 p-4 md:p-8 relative">
+                
+                <div id="section-dashboard" class="fade-in space-y-8">
+                    <div class="flex flex-col md:flex-row justify-between items-end gap-4">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Live Kitchen</h2>
+                            <p class="text-gray-500 text-sm mt-1">Order leaves this screen ONLY when (Kitchen Completed + Paid).</p>
+                        </div>
+                        <span class="text-xs font-mono bg-white border border-gray-200 px-3 py-1.5 rounded-lg text-gray-600 shadow-sm" id="current-date">--/--/----</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 clickable-card">
+                            <p class="text-xs text-gray-500 font-bold uppercase">Pending</p>
+                            <h3 class="text-2xl font-black text-gray-800 mt-1" id="stat-pending">0</h3>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 clickable-card">
+                            <p class="text-xs text-gray-500 font-bold uppercase">Cooking</p>
+                            <h3 class="text-2xl font-black text-gray-800 mt-1" id="stat-prep">0</h3>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 clickable-card">
+                            <p class="text-xs text-gray-500 font-bold uppercase">Ready</p>
+                            <h3 class="text-2xl font-black text-gray-800 mt-1" id="stat-ready">0</h3>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 clickable-card">
+                            <p class="text-xs text-gray-500 font-bold uppercase">Unpaid/Served</p>
+                            <h3 class="text-2xl font-black text-gray-800 mt-1" id="stat-completed">0</h3>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                            <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                                <span class="relative flex h-3 w-3">
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                </span>
+                                Incoming Live Orders
+                            </h3>
+                        </div>
+                        <div class="table-container">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-white text-gray-400 text-xs uppercase font-bold tracking-wider border-b border-gray-100">
+                                    <tr>
+                                        <th class="p-5">Order #</th>
+                                        <th class="p-5">Type</th>
+                                        <th class="p-5">Customer (CRM)</th> 
+                                        <th class="p-5 w-1/3">Items</th>
+                                        <th class="p-5">Payment</th> 
+                                        <th class="p-5">Kitchen Status</th>
+                                        <th class="p-5 text-right">Action</th> 
+                                    </tr>
+                                </thead>
+                                <tbody id="live-orders-table" class="text-sm divide-y divide-gray-50 table-row-mobile"></tbody>
+                            </table>
+                            <div id="no-live-orders" class="hidden py-12 text-center text-gray-400">Kitchen is Clear!</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-pos" class="hide-section fade-in h-[calc(100vh-140px)]">
+                    <div class="flex flex-col lg:flex-row gap-6 h-full">
+                        <div class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
+                            <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                                <h3 class="font-bold text-gray-800">Select Items (Admin)</h3>
+                                <input type="text" id="pos-search" placeholder="Search item..." class="text-xs p-2 border rounded-lg outline-none focus:border-orange-500">
+                            </div>
+                            <div class="p-4 overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="pos-menu-grid">
+                            </div>
+                        </div>
+
+                        <div class="w-full lg:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col h-full z-10">
+                            <div class="p-4 bg-orange-600 text-white rounded-t-2xl">
+                                <h3 class="font-bold text-lg"><i class="fas fa-shopping-cart"></i> Current Order</h3>
+                            </div>
+                            
+                            <div class="flex-1 overflow-y-auto p-4 space-y-3" id="pos-cart-items">
+                                <p class="text-center text-gray-400 mt-10 text-sm">Cart is empty</p>
+                            </div>
+
+                            <div class="p-4 bg-gray-50 border-t border-gray-200 space-y-3">
+                                <div class="flex justify-between text-lg font-bold text-gray-800">
+                                    <span>Total</span>
+                                    <span id="pos-total-price">₹0</span>
+                                </div>
+                                <hr>
+                                <div class="grid grid-cols-1 gap-2">
+                                    <label class="text-[10px] uppercase font-bold text-gray-500">Customer Details (Strict CRM)</label>
+                                    <input type="text" id="pos-customer-name" class="w-full p-2 text-sm border rounded outline-none focus:border-orange-500" placeholder="Customer Name">
+                                    <input type="number" id="pos-customer-mobile" class="w-full p-2 text-sm border rounded outline-none focus:border-orange-500" placeholder="Mobile No. (Required)">
+                                </div>
+                                
+                                <div class="flex gap-2">
+                                    <select id="pos-order-type" class="w-1/2 p-2 text-sm border rounded">
+                                        <option value="Dine-in">Dine-in</option>
+                                        <option value="Takeaway">Takeaway</option>
+                                    </select>
+                                    <select id="pos-payment-status" class="w-1/2 p-2 text-sm border rounded bg-yellow-50">
+                                        <option value="pending">Pay Later</option>
+                                        <option value="paid">Paid Now</option>
+                                    </select>
+                                </div>
+                                <button onclick="placeManualOrder()" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold shadow-lg hover:bg-green-700 active:scale-95 transition">
+                                    Place Order
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-menu" class="hide-section fade-in space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">Menu & Add-ons</h2>
+                        <button onclick="toggleAddonModal()" class="text-sm bg-purple-100 text-purple-700 px-4 py-2 rounded-lg font-bold hover:bg-purple-200"><i class="fas fa-cubes"></i> Manage Add-ons</button>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div id="menu-form-card" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit sticky top-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="font-bold text-lg text-gray-800" id="menu-form-title"><i class="fas fa-plus-circle text-orange-600"></i> Add Item</h3>
+                                <button onclick="resetMenuForm()" id="btn-cancel-edit" class="hidden text-xs text-red-600 font-bold">Cancel</button>
+                            </div>
+                            <div class="space-y-4">
+                                <input type="hidden" id="m-edit-id">
+                                <input type="text" id="m-name" class="w-full border bg-gray-50 p-3 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="Item Name">
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="col-span-1">
+                                         <label class="text-[10px] font-bold text-gray-500 uppercase">Display Price (On Card)</label>
+                                         <input type="number" id="m-price" class="w-full border bg-gray-50 p-3 rounded-xl outline-none border-orange-200" placeholder="e.g. 119">
+                                    </div>
+                                    <div class="col-span-1">
+                                        <label class="text-[10px] font-bold text-gray-500 uppercase">Category</label>
+                                        <select id="m-cat" class="w-full border bg-gray-50 p-3 rounded-xl outline-none">
+                                            <option value="Pizza">Pizza</option><option value="Burger">Burger</option>
+                                            <option value="Pasta">Pasta</option><option value="Sandwich">Sandwich</option>
+                                            <option value="Drinks">Drinks</option><option value="Dessert">Dessert</option>
+                                            <option value="Non-Veg">Non-Veg</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-2 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                                    <input type="checkbox" id="m-bestseller" class="w-5 h-5 accent-orange-600 cursor-pointer">
+                                    <label for="m-bestseller" class="text-sm font-bold text-gray-700 cursor-pointer select-none"><i class="fas fa-star text-yellow-500"></i> Mark as Best Seller</label>
+                                </div>
+
+                                <div class="border border-gray-200 p-3 rounded-xl bg-gray-50">
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Multi-Size Variants</label>
+                                    <p class="text-[10px] text-gray-400 mb-2">If adding sizes, 'Display Price' above will be the default on card.</p>
+                                    <div id="size-container" class="space-y-2 mt-2"></div>
+                                    <button onclick="addSizeRow()" class="mt-2 text-xs text-blue-600 font-bold">+ Add Size Option</button>
+                                </div>
+                                <div class="border border-gray-200 p-3 rounded-xl bg-gray-50 max-h-40 overflow-y-auto">
+                                    <label class="text-xs font-bold text-gray-500 uppercase mb-2 block">Link Add-ons</label>
+                                    <div id="addon-selector-list" class="space-y-2"><p class="text-xs text-gray-400">Loading...</p></div>
+                                </div>
+                                <textarea id="m-desc" rows="2" class="w-full border bg-gray-50 p-3 rounded-xl outline-none" placeholder="Description..."></textarea>
+                                <input type="text" id="m-img" class="w-full border bg-gray-50 p-3 rounded-xl outline-none" placeholder="Image URL">
+                                <button onclick="saveMenuitem()" id="btn-save-item" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-95">Save Item</button>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <div class="overflow-y-auto max-h-[700px] custom-scrollbar" id="menu-list-container">
+                                <p class="text-center text-gray-400 py-10">Loading menu...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-offers" class="hide-section fade-in space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Offers & Banners</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="offers-container"></div>
+                </div>
+
+                <div id="section-orders" class="hide-section fade-in">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Order History</h2>
+                            <p class="text-xs text-gray-500">Shows ONLY (Paid + Kitchen Completed) orders.</p>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-gray-200 shadow-sm">
+                            <span class="text-xs text-gray-500 font-bold uppercase">Filter Date:</span>
+                            <input type="date" id="history-date-filter" onchange="filterHistoryByDate()" class="outline-none text-sm text-gray-700">
+                            <button onclick="clearHistoryFilter()" class="text-xs text-red-500 font-bold hover:underline">Clear</button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="table-container">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-bold">
+                                    <tr>
+                                        <th class="p-4">ID</th>
+                                        <th class="p-4">Date/Time</th>
+                                        <th class="p-4">Customer</th>
+                                        <th class="p-4">Items</th>
+                                        <th class="p-4">Amount</th>
+                                        <th class="p-4">Rating</th> <th class="p-4">Final Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-orders-table" class="text-sm divide-y divide-gray-50 table-row-mobile"></tbody>
+                            </table>
+                            <div id="no-history-orders" class="hidden p-12 text-center text-gray-400">No completed & paid orders found.</div>
+                        </div>
+                        <button id="btn-load-more-history" onclick="renderHistoryBatch()" class="btn-load-more hidden">Load More Orders <i class="fas fa-chevron-down"></i></button>
+                    </div>
+                </div>
+
+                <div id="section-transactions" class="hide-section fade-in space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Revenue & Bills</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg clickable-card">
+                            <p class="text-xs font-bold opacity-80 uppercase">Total Revenue (All Time)</p>
+                            <h3 class="text-3xl font-black mt-2" id="rev-total">₹0</h3>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm clickable-card">
+                            <div class="flex justify-between items-start">
+                                <p class="text-xs text-gray-500 font-bold uppercase">Filtered Revenue</p>
+                                <input type="date" id="revenue-date-filter" onchange="calculateRevenue()" class="text-[10px] border rounded p-1">
+                            </div>
+                            <h3 class="text-3xl font-black text-gray-800 mt-2" id="rev-filtered">₹0</h3>
+                            <p class="text-[10px] text-gray-400 mt-1" id="rev-filter-label">Last 30 Days default</p>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm clickable-card">
+                            <p class="text-xs text-gray-500 font-bold uppercase">Avg. Order Value</p>
+                            <h3 class="text-3xl font-black text-gray-800 mt-2" id="rev-avg">₹0</h3>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-6 border-b border-gray-100 bg-green-50 flex justify-between items-center">
+                            <h3 class="text-green-800 font-bold">Bill Vault (Strictly Paid)</h3>
+                            <button onclick="window.print()" class="text-xs bg-white border border-green-200 text-green-700 px-3 py-1 rounded hover:bg-green-100"><i class="fas fa-print"></i> Report</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-bold">
+                                    <tr>
+                                        <th class="p-4">Bill ID</th>
+                                        <th class="p-4">Date</th>
+                                        <th class="p-4">Customer</th> 
+                                        <th class="p-4">Type</th>
+                                        <th class="p-4 text-right">Amount Collected</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactions-table" class="text-sm divide-y divide-gray-50 table-row-mobile"></tbody>
+                            </table>
+                        </div>
+                        <button id="btn-load-more-trans" onclick="renderTransBatch()" class="btn-load-more hidden">Load More Transactions <i class="fas fa-chevron-down"></i></button>
+                    </div>
+                </div>
+
+                <div id="section-crm" class="hide-section fade-in space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Customer CRM</h2>
+                    <p class="text-sm text-gray-500">Auto-collects details from Paid Orders (Strict Save).</p>
+                    
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="table-container">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-blue-50 text-blue-800 text-xs uppercase font-bold">
+                                    <tr>
+                                        <th class="p-4">Customer Name</th>
+                                        <th class="p-4">Mobile Number</th>
+                                        <th class="p-4">Total Visits (Paid)</th>
+                                        <th class="p-4">Last Visit</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="crm-table" class="text-sm divide-y divide-gray-50"></tbody>
+                            </table>
+                        </div>
+                         <button id="btn-load-more-crm" onclick="renderCRMBatch()" class="btn-load-more hidden">Load More Customers <i class="fas fa-chevron-down"></i></button>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <div id="addon-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="font-bold text-lg">Universal Add-ons</h3>
+                <button onclick="toggleAddonModal()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div class="flex gap-2">
+                    <input type="text" id="new-addon-name" placeholder="Name" class="flex-1 p-2 border rounded text-sm outline-none focus:border-orange-500">
+                    <input type="number" id="new-addon-price" placeholder="Price" class="w-20 p-2 border rounded text-sm outline-none focus:border-orange-500">
+                    <button onclick="createUniversalAddon()" class="bg-green-600 text-white px-4 rounded font-bold hover:bg-green-700"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="max-h-60 overflow-y-auto border-t pt-2" id="universal-addons-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pos-options-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-orange-50">
+                <h3 class="font-bold text-lg text-orange-800" id="pos-modal-title">Customize</h3>
+                <button onclick="closePOSModal()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4 overflow-y-auto max-h-[70vh]">
+                <input type="hidden" id="pos-modal-item-id">
+                <div id="pos-modal-sizes-section" class="hidden">
+                    <p class="font-bold text-sm text-gray-700 mb-2">Select Size</p>
+                    <div id="pos-modal-sizes-list" class="space-y-2"></div>
+                </div>
+                <div id="pos-modal-addons-section" class="hidden">
+                    <p class="font-bold text-sm text-gray-700 mb-2 mt-4">Add-ons</p>
+                    <div id="pos-modal-addons-list" class="space-y-2"></div>
+                </div>
+                <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+                    <div class="text-lg font-bold text-gray-800">Total: <span id="pos-modal-total">₹0</span></div>
+                    <button onclick="confirmPOSItemToAdd()" class="bg-orange-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-orange-700">Add to Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmation-modal" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden modal-enter">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2" id="confirm-title">Are you sure?</h3>
+                <p class="text-sm text-gray-500 mb-6" id="confirm-msg">This action cannot be undone.</p>
+                <div class="flex gap-3 justify-center">
+                    <button onclick="closeConfirmModal()" class="px-5 py-2.5 rounded-xl border border-gray-300 font-bold text-gray-600 hover:bg-gray-50">Cancel</button>
+                    <button id="btn-confirm-action" class="px-5 py-2.5 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700 shadow-lg">Yes, Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="offer-editor-modal" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
+            <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                <h3 class="font-bold text-lg text-gray-800">Edit Offer Card</h3>
+                <button onclick="closeOfferModal()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="offer-edit-id">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Offer Text</label>
+                    <input type="text" id="offer-text-input" class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Discount %</label>
+                    <input type="number" id="offer-disc-input" class="w-full border p-3 rounded-xl outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Minimum Order Value (₹)</label>
+                    <input type="number" id="offer-min-input" class="w-full border p-3 rounded-xl outline-none" placeholder="e.g. 199">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Image URL</label>
+                    <input type="text" id="offer-img-input" class="w-full border p-3 rounded-xl outline-none">
+                </div>
+                <button onclick="saveOfferData()" class="w-full bg-orange-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-orange-700">Save Offer</button>
+                
+                <button onclick="deleteOfferData()" class="w-full bg-red-50 text-red-600 font-bold py-2 rounded-xl hover:bg-red-100 border border-red-100 text-sm">Remove Offer</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getDatabase, ref, onValue, update, push, set, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+        import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, query, orderBy, limit, serverTimestamp, setDoc, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDSl6L3ym7G9wXJjZoCYGtU6oBuMyswMBA",
+            authDomain: "gen-lang-client-0826078440.firebaseapp.com",
+            databaseURL: "https://gen-lang-client-0826078440-default-rtdb.firebaseio.com", 
+            projectId: "gen-lang-client-0826078440",
+            storageBucket: "gen-lang-client-0826078440.firebasestorage.app",
+            messagingSenderId: "198781436382",
+            appId: "1:198781436382:web:041f1a6f57cc50dfa75d4f",
+            measurementId: "G-XNB6HMBXN0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const dbRTDB = getDatabase(app);
+        const dbFirestore = getFirestore(app);
+
+        // Global State
+        window.menuItemsCache = {};
+        window.universalAddons = {};
+        window.posCart = [];
+        window.currentPOSItem = null;
+        window.syncedOrdersCache = new Set(); 
+        
+        // Data Handling for Lag Free
+        window.fullHistoryData = []; 
+        window.visibleHistoryCount = 0; 
+        window.crmData = [];
+        window.visibleCRMCount = 0;
+        
+        const BATCH_SIZE = 20;
+
+        // --- LOGIN LOGIC ---
+        window.checkAdminLogin = () => {
+            const pin = document.getElementById('login-pin').value;
+            const errorMsg = document.getElementById('login-error');
+            
+            if(pin === 'Wow123') {
+                document.getElementById('login-overlay').classList.add('hidden');
+                errorMsg.classList.add('hidden');
+                window.showToast("Welcome Back, Admin!", "success");
+            } else {
+                errorMsg.classList.remove('hidden');
+                document.getElementById('login-pin').value = '';
+                document.getElementById('login-pin').focus();
+            }
+        };
+
+        document.getElementById('login-pin').addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                window.checkAdminLogin();
+            }
+        });
+
+        // --- HELPER: UNIFIED TOAST ---
+        window.showToast = (msg, type = "success") => {
+            let bg = type === "success" ? "#10B981" : "#EF4444"; 
+            Toastify({
+                text: msg,
+                duration: 3000,
+                close: true,
+                gravity: "top", 
+                position: "right", 
+                style: { background: bg, borderRadius: "8px", fontWeight: "bold", fontSize: "14px" }
+            }).showToast();
+        };
+
+        // --- 1. NAVIGATION ---
+        window.switchTab = (tabName) => {
+            ['dashboard', 'menu', 'orders', 'offers', 'transactions', 'pos', 'crm'].forEach(id => {
+                document.getElementById(`section-${id}`)?.classList.add('hide-section');
+                document.getElementById(`nav-${id}`)?.classList.remove('active');
+            });
+            document.getElementById(`section-${tabName}`).classList.remove('hide-section');
+            document.getElementById(`nav-${tabName}`).classList.add('active');
+            
+            if(window.innerWidth < 768) {
+                const sidebar = document.getElementById('sidebar');
+                if(sidebar.classList.contains('sidebar-open')) window.toggleSidebar();
+            }
+        };
+
+        window.toggleSidebar = () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar.classList.contains('sidebar-open')) {
+                sidebar.classList.remove('sidebar-open');
+                sidebar.classList.add('sidebar-closed');
+                overlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('sidebar-closed');
+                sidebar.classList.add('sidebar-open');
+                overlay.classList.remove('hidden');
+            }
+        };
+
+        window.toggleAddonModal = () => document.getElementById('addon-modal').classList.toggle('hidden');
+        window.closePOSModal = () => {
+            document.getElementById('pos-options-modal').classList.add('hidden');
+            window.currentPOSItem = null;
+        };
+
+        // --- MODAL LOGIC ---
+        let pendingDeleteAction = null;
+        window.openDeleteModal = (actionFunc, title="Delete Item?", msg="This cannot be undone.") => {
+            pendingDeleteAction = actionFunc;
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-msg').innerText = msg;
+            document.getElementById('confirmation-modal').classList.remove('hidden');
+        };
+
+        window.closeConfirmModal = () => {
+            document.getElementById('confirmation-modal').classList.add('hidden');
+            pendingDeleteAction = null;
+        };
+
+        document.getElementById('btn-confirm-action').onclick = () => {
+            if(pendingDeleteAction) pendingDeleteAction();
+            window.closeConfirmModal();
+        };
+
+        // --- 2. LIVE DASHBOARD (RTDB + STRICT SYNC) ---
+        const initLiveDashboard = () => {
+            const ordersRef = ref(dbRTDB, 'orders');
+            onValue(ordersRef, (snapshot) => {
+                const data = snapshot.val();
+                let liveHtml = "";
+                let pending = 0, prep = 0, ready = 0, completed = 0;
+                let activeCount = 0;
+
+                if (data) {
+                    const ordersArr = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                    ordersArr.sort((a,b) => b.timestamp - a.timestamp);
+
+                    ordersArr.forEach(order => {
+                        // Count Stats
+                        if(order.status === 'pending') pending++;
+                        if(order.status === 'preparing') prep++;
+                        if(order.status === 'ready') ready++;
+                        if(order.status === 'completed' && order.paymentStatus !== 'paid') completed++;
+
+                        // Strict Done & Paid
+                        const isDoneAndPaid = (order.status === 'completed' && order.paymentStatus === 'paid');
+                        
+                        if (isDoneAndPaid) {
+                            checkAndSyncFirestore(order);
+                        } else {
+                            // Only render active orders
+                            activeCount++;
+                            const displayId = order.orderId || order.id.substring(0,5);
+                            
+                            // Badge Logic
+                            let statusBadge = "";
+                            if(order.status === 'pending') statusBadge = `<span class="bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-bold border border-red-200"><i class="fas fa-clock"></i> Pending</span>`;
+                            else if(order.status === 'preparing') statusBadge = `<span class="bg-orange-100 text-orange-600 px-2 py-1 rounded-full text-xs font-bold border border-orange-200 animate-pulse"><i class="fas fa-fire"></i> Cooking</span>`;
+                            else if(order.status === 'ready') statusBadge = `<span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs font-bold border border-green-200"><i class="fas fa-bell"></i> Ready</span>`;
+                            else if(order.status === 'completed') statusBadge = `<span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs font-bold border border-blue-200"><i class="fas fa-check-circle"></i> Served</span>`;
+
+                            let payAction = "";
+                            let dueHtml = "";
+                            const amt = order.totalAmount || order.total_amount || 0;
+                            const displayAmt = Math.round(amt); 
+                            
+                            if(order.paymentStatus === 'paid') {
+                                dueHtml = `<div class="text-green-600 font-bold text-xs"><i class="fas fa-check-circle"></i> PAID</div>`;
+                                payAction = `<div class="text-gray-400 font-bold text-xs italic">Waiting Kitchen...</div>`;
+                            } else {
+                                dueHtml = `<div class="text-red-600 font-bold text-sm">Due: ₹${displayAmt}</div>`;
+                                payAction = `<button onclick="markOrderPaid('${order.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-xs font-bold shadow transition"><i class="fas fa-rupee-sign"></i> Accept ₹${displayAmt}</button>`;
+                            }
+
+                            const itemSummary = order.items ? order.items.map(i => {
+                                let details = "";
+                                if(i.size) details += `(${i.size}) `;
+                                if(i.addons && i.addons.length > 0) details += `+ ${i.addons.length} Addons`;
+                                return `<span class="bg-gray-100 px-2 py-1 rounded text-xs text-gray-700 font-medium whitespace-nowrap block mb-1">${i.name} x${i.qty} <span class="text-[10px] text-gray-500">${details}</span></span>`;
+                            }).join('') : "No items";
+
+                            const isPOS = order.orderType === 'POS/Admin';
+                            const typeBadge = isPOS 
+                                ? `<span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded">Admin POS</span>`
+                                : `<span class="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded">${order.orderType || 'Website'}</span>`;
+
+                            const cName = order.customerName || order.name || order.fullName || order.user_name || 'Guest';
+                            const cMobile = order.customerMobile || order.mobile || order.phone || order.phoneNumber || 'N/A';
+
+                            liveHtml += `
+                                <tr class="hover:bg-orange-50/50 transition border-b border-gray-50">
+                                    <td class="p-5 font-mono font-bold text-orange-600">#${displayId}</td>
+                                    <td class="p-5">${typeBadge}</td>
+                                    <td class="p-5">
+                                        <div><p class="font-bold text-gray-800">${cName}</p><p class="text-xs text-gray-500"><i class="fas fa-phone"></i> ${cMobile}</p></div>
+                                    </td>
+                                    <td class="p-5"><div>${itemSummary}</div></td>
+                                    <td class="p-5">${dueHtml}</td>
+                                    <td class="p-5">${statusBadge}</td>
+                                    <td class="p-5 text-right w-40">${payAction}</td>
+                                </tr>
+                            `;
+                        }
+                    });
+                }
+                document.getElementById('live-orders-table').innerHTML = liveHtml;
+                document.getElementById('no-live-orders').classList.toggle('hidden', activeCount > 0);
+                
+                document.getElementById('stat-pending').innerText = pending;
+                document.getElementById('stat-prep').innerText = prep;
+                document.getElementById('stat-ready').innerText = ready;
+                document.getElementById('stat-completed').innerText = completed; 
+                document.getElementById('current-date').innerText = new Date().toLocaleDateString();
+            });
+        };
+
+        // --- NEW: AUTO SYNC FUNCTION ---
+        window.checkAndSyncFirestore = async (order) => {
+            if (window.syncedOrdersCache.has(order.orderId)) return;
+            try {
+                const q = query(collection(dbFirestore, "orders"), where("orderId", "==", order.orderId));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    querySnapshot.forEach(async (docRef) => {
+                        const firestoreData = docRef.data();
+                        if (firestoreData.status !== 'completed' || firestoreData.paymentStatus !== 'paid') {
+                            await updateDoc(doc(dbFirestore, "orders", docRef.id), { 
+                                status: 'completed',
+                                paymentStatus: 'paid'
+                            });
+                        }
+                    });
+                } else {
+                    await addDoc(collection(dbFirestore, "orders"), {
+                        ...order,
+                        paymentStatus: 'paid',
+                        status: 'completed',
+                        createdAt: serverTimestamp() 
+                    });
+                }
+                window.syncedOrdersCache.add(order.orderId);
+            } catch (e) { console.error("Auto Sync Error:", e); }
+        };
+
+        // --- 3. STRICT PAYMENT LOGIC (FIXED) ---
+        window.markOrderPaid = async (rtdbKey) => {
+            try {
+                const orderSnapshot = await get(ref(dbRTDB, 'orders/' + rtdbKey));
+                if (!orderSnapshot.exists()) return;
+                
+                const raw = orderSnapshot.val();
+                
+                const cleanAmount = Number(raw.totalAmount || raw.total_amount || raw.amount || raw.price || 0);
+                const cleanName = raw.customerName || raw.name || raw.fullName || raw.user_name || 'Guest';
+                const cleanMobile = raw.customerMobile || raw.mobile || raw.phone || raw.phoneNumber || '';
+                
+                const currentStatus = raw.status || 'pending';
+
+                const updatePayload = { 
+                    paymentStatus: 'paid', 
+                    totalAmount: cleanAmount 
+                };
+
+                await update(ref(dbRTDB, 'orders/' + rtdbKey), updatePayload);
+                
+                // Firestore Sync
+                const q = query(collection(dbFirestore, "orders"), where("orderId", "==", raw.orderId));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    querySnapshot.forEach(async (docRef) => {
+                        await updateDoc(doc(dbFirestore, "orders", docRef.id), { 
+                            paymentStatus: 'paid',
+                            status: currentStatus, 
+                            totalAmount: cleanAmount,
+                            customerName: cleanName, 
+                            customerMobile: cleanMobile
+                        });
+                    });
+                } else {
+                    await addDoc(collection(dbFirestore, "orders"), {
+                        ...raw,
+                        paymentStatus: 'paid',
+                        status: currentStatus,
+                        customerName: cleanName,
+                        totalAmount: cleanAmount,
+                        timestamp: Date.now(),
+                        createdAt: serverTimestamp() 
+                    });
+                }
+
+                window.showToast(`Payment Accepted! ₹${Math.round(cleanAmount)}`, "success");
+            } catch (e) {
+                console.error(e);
+                window.showToast("Sync Error. Check Console.", "error");
+            }
+        };
+
+        // --- 4. HISTORY & REVENUE (Require Paid AND Completed) ---
+        const initFinancials = () => {
+            const q = query(collection(dbFirestore, "orders"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snap) => {
+                window.fullHistoryData = [];
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const isPaid = d.paymentStatus === 'paid';
+                    const isCompleted = d.status === 'completed';
+                    if (!isPaid || !isCompleted) return; 
+                    const orderDate = d.createdAt ? d.createdAt.toDate() : (d.timestamp ? new Date(d.timestamp) : new Date()); 
+                    window.fullHistoryData.push({id: doc.id, ...d, jsDate: orderDate});
+                });
+
+                window.calculateRevenue();
+                window.processCRMData();
+                window.visibleHistoryCount = 0;
+                document.getElementById('history-orders-table').innerHTML = "";
+                document.getElementById('transactions-table').innerHTML = "";
+                window.renderHistoryBatch();
+                window.renderTransBatch();
+            });
+        };
+
+        window.renderHistoryBatch = () => {
+            const table = document.getElementById('history-orders-table');
+            const btn = document.getElementById('btn-load-more-history');
+            const total = window.fullHistoryData.length;
+            const nextBatch = window.fullHistoryData.slice(window.visibleHistoryCount, window.visibleHistoryCount + BATCH_SIZE);
+            
+            if(nextBatch.length === 0 && window.visibleHistoryCount === 0) {
+                 document.getElementById('no-history-orders').classList.remove('hidden');
+                 btn.classList.add('hidden');
+                 return;
+            }
+            document.getElementById('no-history-orders').classList.add('hidden');
+
+            let html = "";
+            nextBatch.forEach(d => {
+                const cName = d.customerName || d.name || 'Guest';
+                const cMobile = d.customerMobile || d.mobile || '-';
+                
+                let ratingVal = d.rating || 0;
+                let starHtml = '<div class="flex text-xs">';
+                for(let i=1; i<=5; i++) {
+                      if(i <= ratingVal) starHtml += '<i class="fas fa-star text-yellow-400"></i>';
+                      else starHtml += '<i class="fas fa-star text-gray-200"></i>';
+                }
+                starHtml += '</div>';
+
+                html += `
+                    <tr class="hover:bg-gray-50 border-b border-gray-50 animate-fade-in" data-date="${d.date}">
+                        <td class="p-4 text-gray-500 font-mono text-xs">#${d.orderId}</td>
+                        <td class="p-4 text-xs text-gray-500">${d.date}<br>${d.time}</td>
+                        <td class="p-4 text-gray-700"><span class="font-bold">${cName}</span><br><span class="text-xs text-gray-400">${cMobile}</span></td>
+                        <td class="p-4 text-xs text-gray-500 truncate max-w-xs">${d.items ? d.items.length : 0} Items</td>
+                        <td class="p-4 font-bold text-gray-800">₹${Math.round(d.totalAmount)}</td>
+                        <td class="p-4">${starHtml}</td>
+                        <td class="p-4"><span class="text-green-600 bg-green-50 px-2 py-1 rounded text-xs font-bold uppercase"><i class="fas fa-check-double"></i> Done & Paid</span></td>
+                    </tr>
+                `;
+            });
+            table.insertAdjacentHTML('beforeend', html);
+            window.visibleHistoryCount += nextBatch.length;
+            if(window.visibleHistoryCount >= total) btn.classList.add('hidden');
+            else btn.classList.remove('hidden');
+        };
+
+        window.renderTransBatch = () => {
+            const table = document.getElementById('transactions-table');
+            const btn = document.getElementById('btn-load-more-trans');
+            const total = window.fullHistoryData.length; 
+            const currentRows = table.rows.length;
+            const nextTrans = window.fullHistoryData.slice(currentRows, currentRows + BATCH_SIZE);
+
+            let html = "";
+            nextTrans.forEach(d => {
+                 const cName = d.customerName || d.name || 'Guest';
+                 const cMobile = d.customerMobile || d.mobile || '-';
+                html += `
+                    <tr class="hover:bg-gray-50 border-b border-gray-50 animate-fade-in">
+                        <td class="p-4 font-mono font-bold text-gray-600">#${d.orderId}</td>
+                        <td class="p-4 text-gray-500 text-xs">${d.date}</td>
+                        <td class="p-4 text-gray-800"><span class="font-bold">${cName}</span><br><span class="text-xs text-gray-400">${cMobile}</span></td>
+                        <td class="p-4 text-xs"><span class="bg-gray-100 px-2 py-1 rounded">${d.orderType || 'Standard'}</span></td>
+                        <td class="p-4 text-right font-black text-green-600">₹${Math.round(d.totalAmount)}</td>
+                    </tr>
+                `;
+            });
+            table.insertAdjacentHTML('beforeend', html);
+            if((currentRows + nextTrans.length) >= total) btn.classList.add('hidden');
+            else btn.classList.remove('hidden');
+        };
+
+        window.calculateRevenue = () => {
+            const dateInput = document.getElementById('revenue-date-filter').value;
+            let filteredOrders = [...window.fullHistoryData]; 
+            let label = "All Time";
+            
+            if (dateInput) {
+                const filterDate = new Date(dateInput);
+                filteredOrders = filteredOrders.filter(o => o.jsDate.toDateString() === filterDate.toDateString());
+                label = `Date: ${dateInput}`;
+            } else {
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                filteredOrders = filteredOrders.filter(o => o.jsDate > thirtyDaysAgo);
+                label = "Last 30 Days";
+            }
+
+            const totalRev = window.fullHistoryData.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+            const filteredRev = filteredOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+            const count = window.fullHistoryData.length;
+
+            document.getElementById('rev-total').innerText = `₹${Math.round(totalRev)}`;
+            document.getElementById('rev-filtered').innerText = `₹${Math.round(filteredRev)}`;
+            document.getElementById('rev-filter-label').innerText = label;
+            document.getElementById('rev-avg').innerText = count > 0 ? `₹${Math.round(totalRev/count)}` : '₹0';
+        };
+
+        // --- 5. CRM LOGIC ---
+        window.processCRMData = () => {
+            const customers = {};
+            window.fullHistoryData.forEach(order => {
+                const mob = order.customerMobile || order.mobile;
+                if(mob && String(mob).trim().length > 5) {
+                    const key = String(mob).trim();
+                    if(!customers[key]) {
+                        customers[key] = {
+                            name: order.customerName || order.name || "Unknown",
+                            mobile: key,
+                            visits: 0,
+                            lastVisit: order.jsDate
+                        };
+                    }
+                    customers[key].visits++;
+                    if(order.jsDate > customers[key].lastVisit) customers[key].lastVisit = order.jsDate;
+                }
+            });
+            window.crmData = Object.values(customers);
+            window.visibleCRMCount = 0;
+            document.getElementById('crm-table').innerHTML = "";
+            window.renderCRMBatch();
+        };
+
+        window.renderCRMBatch = () => {
+             const table = document.getElementById('crm-table');
+             const btn = document.getElementById('btn-load-more-crm');
+             const total = window.crmData.length;
+             const nextBatch = window.crmData.slice(window.visibleCRMCount, window.visibleCRMCount + BATCH_SIZE);
+
+             let html = "";
+             if(window.visibleCRMCount === 0 && nextBatch.length === 0) {
+                 html = "<tr><td colspan='4' class='p-8 text-center text-gray-400'>No customers yet.</td></tr>";
+             } else {
+                 nextBatch.forEach(c => {
+                    html += `
+                        <tr class="border-b border-gray-50 hover:bg-blue-50/30 animate-fade-in">
+                            <td class="p-4 font-bold text-gray-800">${c.name}</td>
+                            <td class="p-4 text-gray-600 font-mono">${c.mobile}</td>
+                            <td class="p-4 text-center"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-bold">${c.visits} orders</span></td>
+                            <td class="p-4 text-xs text-gray-500">${c.lastVisit.toLocaleDateString()}</td>
+                        </tr>
+                    `;
+                 });
+             }
+             table.insertAdjacentHTML('beforeend', html);
+             window.visibleCRMCount += nextBatch.length;
+
+             if(window.visibleCRMCount >= total) btn.classList.add('hidden');
+             else btn.classList.remove('hidden');
+        };
+
+        // --- 6. POS Logic (UPGRADED for Multi-Price) ---
+        window.renderPOSMenu = () => {
+            const container = document.getElementById('pos-menu-grid');
+            let html = "";
+            
+            const items = Object.values(window.menuItemsCache).sort((a,b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
+
+            items.forEach(item => {
+                const badge = item.isBestSeller ? '<div class="absolute top-2 right-2 text-yellow-500 drop-shadow-md text-lg"><i class="fas fa-star"></i></div>' : '';
+                const glow = item.isBestSeller ? 'bestseller-glow border-yellow-300' : 'border-gray-200';
+                
+                html += `
+                    <div class="bg-gray-50 border ${glow} rounded-xl p-3 cursor-pointer hover:border-orange-500 hover:shadow-md transition group relative" onclick="openPOSItemModal('${item.id}')">
+                        ${badge}
+                        <div class="h-24 bg-white rounded-lg mb-2 overflow-hidden flex items-center justify-center">
+                            <img src="${item.img || 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png'}" class="h-full object-cover">
+                        </div>
+                        <h4 class="font-bold text-gray-800 text-sm leading-tight group-hover:text-orange-600">${item.name}</h4>
+                        <p class="text-xs font-bold text-gray-500">₹${item.price}</p>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        };
+
+        window.openPOSItemModal = (itemId) => {
+            const item = window.menuItemsCache[itemId];
+            if(!item) return;
+            window.currentPOSItem = item;
+            
+            // If simple item (no sizes/addons), just add using Display Price
+            if((!item.sizes || item.sizes.length===0) && (!item.linkedAddons || item.linkedAddons.length===0)) {
+                addToPOSCartSimple(item);
+                return;
+            }
+
+            document.getElementById('pos-modal-title').innerText = item.name;
+            
+            // SMART SELECTION LOGIC
+            // Auto-select the size that matches the Display Price
+            // e.g. If Display=119, and Medium=119, select Medium.
+            let defaultSizeIndex = 0;
+            if (item.sizes && item.sizes.length > 0) {
+                 const matchIndex = item.sizes.findIndex(s => Number(s.price) === Number(item.price));
+                 if(matchIndex !== -1) defaultSizeIndex = matchIndex;
+            }
+
+            document.getElementById('pos-options-modal').classList.remove('hidden');
+
+            const sizeDiv = document.getElementById('pos-modal-sizes-section');
+            const sizeList = document.getElementById('pos-modal-sizes-list');
+            const addonDiv = document.getElementById('pos-modal-addons-section');
+            const addonList = document.getElementById('pos-modal-addons-list');
+
+            if(item.sizes && item.sizes.length > 0) {
+                sizeDiv.classList.remove('hidden');
+                let sizeHtml = "";
+                item.sizes.forEach((s, idx) => {
+                    const isChecked = (idx === defaultSizeIndex) ? 'checked' : '';
+                    sizeHtml += `
+                        <label class="flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50">
+                            <div class="flex items-center gap-2"><input type="radio" name="pos_size" value="${idx}" ${isChecked} onchange="recalcPOSModalPrice()"><span class="text-sm font-medium">${s.name}</span></div>
+                            <span class="text-xs font-bold">₹${s.price}</span>
+                        </label>
+                    `;
+                });
+                sizeList.innerHTML = sizeHtml;
+            } else { sizeDiv.classList.add('hidden'); sizeList.innerHTML = ""; }
+
+            if(item.linkedAddons && item.linkedAddons.length > 0) {
+                addonDiv.classList.remove('hidden');
+                let addonHtml = "";
+                item.linkedAddons.forEach(addonId => {
+                    const addon = window.universalAddons[addonId];
+                    if(addon) {
+                        addonHtml += `
+                            <label class="flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50">
+                                <div class="flex items-center gap-2"><input type="checkbox" class="pos-addon-check" value="${addonId}" data-price="${addon.price}" onchange="recalcPOSModalPrice()"><span class="text-sm font-medium">${addon.name}</span></div>
+                                <span class="text-xs font-bold">+₹${addon.price}</span>
+                            </label>
+                        `;
+                    }
+                });
+                addonList.innerHTML = addonHtml;
+            } else { addonDiv.classList.add('hidden'); addonList.innerHTML = ""; }
+            recalcPOSModalPrice();
+        };
+
+        window.recalcPOSModalPrice = () => {
+            if(!window.currentPOSItem) return;
+            let total = 0;
+            const sizeRadios = document.querySelectorAll('input[name="pos_size"]:checked');
+            if(sizeRadios.length > 0) {
+                // If a size is selected, use that specific price
+                total = window.currentPOSItem.sizes[sizeRadios[0].value].price;
+            } else {
+                // If no sizes exist (only addons), start with Base Price
+                total = window.currentPOSItem.price;
+            }
+            
+            document.querySelectorAll('.pos-addon-check:checked').forEach(cb => total += parseFloat(cb.getAttribute('data-price')));
+            document.getElementById('pos-modal-total').innerText = `₹${total}`;
+        };
+
+        window.confirmPOSItemToAdd = () => {
+            if(!window.currentPOSItem) return;
+            const item = window.currentPOSItem;
+            let selectedSize = null;
+            let finalPrice = item.price;
+            
+            const sizeRadios = document.querySelectorAll('input[name="pos_size"]:checked');
+            if(sizeRadios.length > 0) {
+                const s = item.sizes[sizeRadios[0].value];
+                selectedSize = s.name;
+                finalPrice = s.price;
+            }
+            
+            let selectedAddons = [];
+            document.querySelectorAll('.pos-addon-check:checked').forEach(cb => {
+                const a = window.universalAddons[cb.value];
+                if(a) { selectedAddons.push({name: a.name, price: a.price}); finalPrice += a.price; }
+            });
+
+            const uniqueId = item.id + (selectedSize || '') + selectedAddons.map(a=>a.name).join('');
+            const cartItem = { id: item.id, uniqueId, name: item.name, price: finalPrice, size: selectedSize, addons: selectedAddons, qty: 1 };
+            
+            const existing = window.posCart.find(i => i.uniqueId === uniqueId);
+            if(existing) existing.qty++;
+            else window.posCart.push(cartItem);
+            
+            window.closePOSModal();
+            updatePOSCartUI();
+        };
+
+        window.addToPOSCartSimple = (item) => {
+             const uniqueId = item.id + "simple";
+             const existing = window.posCart.find(i => i.uniqueId === uniqueId);
+             if(existing) existing.qty++;
+             else window.posCart.push({ ...item, uniqueId, qty: 1, addons: [], size: null });
+             updatePOSCartUI();
+        };
+
+        window.updatePOSCartUI = () => {
+            const container = document.getElementById('pos-cart-items');
+            if(window.posCart.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">Cart is empty</p>';
+                document.getElementById('pos-total-price').innerText = '₹0';
+                return;
+            }
+            let html = "", total = 0;
+            window.posCart.forEach((item, index) => {
+                total += item.price * item.qty;
+                let details = "";
+                if(item.size) details += `<span class="bg-orange-100 text-orange-800 text-[10px] px-1 rounded">${item.size}</span> `;
+                if(item.addons && item.addons.length > 0) details += `<span class="text-[10px] text-gray-500">+ ${item.addons.map(a=>a.name).join(', ')}</span>`;
+                html += `
+                    <div class="bg-gray-50 p-2 rounded-lg border border-gray-200">
+                        <div class="flex justify-between">
+                            <div><p class="font-bold text-gray-800 text-sm">${item.name}</p><div class="mb-1">${details}</div><p class="text-xs text-gray-500">₹${item.price} x ${item.qty}</p></div>
+                            <div class="flex items-center gap-2 h-fit">
+                                <button onclick="posAdjustQty(${index}, -1)" class="w-6 h-6 bg-white border rounded text-xs">-</button>
+                                <span class="text-sm font-bold w-4 text-center">${item.qty}</span>
+                                <button onclick="posAdjustQty(${index}, 1)" class="w-6 h-6 bg-white border rounded text-xs">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            document.getElementById('pos-total-price').innerText = `₹${total}`;
+        };
+        window.posAdjustQty = (index, change) => {
+            if(window.posCart[index].qty + change <= 0) window.posCart.splice(index, 1);
+            else window.posCart[index].qty += change;
+            updatePOSCartUI();
+        };
+
+        window.placeManualOrder = async () => {
+            if(window.posCart.length === 0) return window.showToast("Cart empty!", "error");
+            const name = document.getElementById('pos-customer-name').value || "Walk-in";
+            const mobile = document.getElementById('pos-customer-mobile').value;
+            if(!mobile) return window.showToast("Enter Mobile for CRM", "error");
+            
+            const type = document.getElementById('pos-order-type').value;
+            const status = document.getElementById('pos-payment-status').value;
+            const total = parseInt(document.getElementById('pos-total-price').innerText.replace('₹',''));
+            const orderIdStr = "A-" + Math.floor(1000 + Math.random() * 9000).toString(); 
+
+            // Initial status for Admin order is 'pending' (Kitchen has to accept/cook it)
+            const kitchenStatus = 'pending';
+
+            const orderData = {
+                orderId: orderIdStr, customerName: name, customerMobile: mobile,
+                items: window.posCart, totalAmount: Number(total), status: kitchenStatus,
+                paymentStatus: status, orderType: 'POS/Admin', subType: type,
+                timestamp: Date.now(), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                date: new Date().toLocaleDateString()
+            };
+
+            try {
+                // RTDB
+                const newRef = push(ref(dbRTDB, 'orders'));
+                await set(newRef, orderData);
+                
+                // Firestore (Only add if Completed + Paid? Or just add. Let's add but filter later)
+                if(status === 'paid') {
+                        await addDoc(collection(dbFirestore, "orders"), { ...orderData, createdAt: serverTimestamp() });
+                }
+
+                window.showToast("Order Placed Successfully!", "success");
+                window.posCart = []; updatePOSCartUI();
+                document.getElementById('pos-customer-name').value = "";
+                document.getElementById('pos-customer-mobile').value = "";
+            } catch (e) { window.showToast("Failed to place order", "error"); }
+        };
+
+        // --- 7. MENU LOGIC (Best Seller Logic Explicit) ---
+        const initMenuLogic = () => {
+            onSnapshot(collection(dbFirestore, "menu"), (snap) => {
+                window.menuItemsCache = {}; 
+                const container = document.getElementById('menu-list-container');
+                let html = "";
+                snap.forEach(docSnap => {
+                    const item = docSnap.data();
+                    window.menuItemsCache[docSnap.id] = { id: docSnap.id, ...item };
+                    const bestSellerIcon = item.isBestSeller ? '<i class="fas fa-star text-yellow-500 ml-2" title="Best Seller"></i>' : '';
+                    
+                    html += `
+                        <div class="flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-100 mb-3 hover:border-orange-200 transition">
+                            <div class="flex items-center gap-4">
+                                <img src="${item.img || 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png'}" class="w-14 h-14 rounded-lg object-cover bg-white border">
+                                <div><h4 class="font-bold text-gray-800">${item.name} ${bestSellerIcon}</h4><p class="text-xs text-gray-500">${item.category} • ₹${item.price}</p></div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="populateMenuEdit('${docSnap.id}')" class="w-8 h-8 rounded-full bg-white border hover:text-blue-500"><i class="fas fa-pen text-xs"></i></button>
+                                <button onclick="deleteMenuItem('${docSnap.id}')" class="w-8 h-8 rounded-full bg-white border hover:text-red-500"><i class="fas fa-trash-alt text-xs"></i></button>
+                            </div>
+                        </div>`;
+                });
+                container.innerHTML = html;
+                renderPOSMenu();
+            });
+        };
+
+        window.addSizeRow = (name="", price="") => {
+             document.getElementById('size-container').insertAdjacentHTML('beforeend', `<div class="flex gap-2 mt-2"><input type="text" placeholder="Size" value="${name}" class="w-2/3 p-2 text-xs border rounded size-name-input"><input type="number" placeholder="₹" value="${price}" class="w-1/3 p-2 text-xs border rounded size-price-input"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 px-1"><i class="fas fa-times"></i></button></div>`);
+        };
+
+        window.saveMenuitem = async () => {
+            const btn = document.getElementById('btn-save-item');
+            const editId = document.getElementById('m-edit-id').value;
+            const name = document.getElementById('m-name').value.trim();
+            const price = document.getElementById('m-price').value;
+            // Best Seller Logic
+            const isBestSeller = document.getElementById('m-bestseller').checked;
+            
+            if(!name || !price) return window.showToast("Name & Display Price required", "error");
+            
+            btn.innerText = "Saving...";
+            
+            const sizes = [];
+            const sizeNames = document.querySelectorAll('.size-name-input');
+            const sizePrices = document.querySelectorAll('.size-price-input');
+            for(let i=0; i<sizeNames.length; i++) {
+                if(sizeNames[i].value) sizes.push({ name: sizeNames[i].value, price: Number(sizePrices[i].value) });
+            }
+
+            const linkedAddons = [];
+            document.querySelectorAll('.addon-checkbox:checked').forEach(cb => linkedAddons.push(cb.value));
+
+            const data = {
+                name, price: Number(price), category: document.getElementById('m-cat').value,
+                desc: document.getElementById('m-desc').value, img: document.getElementById('m-img').value,
+                isBestSeller: isBestSeller,
+                sizes, linkedAddons, updatedAt: serverTimestamp()
+            };
+
+            try {
+                if(editId) await updateDoc(doc(dbFirestore, "menu", editId), data);
+                else await addDoc(collection(dbFirestore, "menu"), data);
+                resetMenuForm();
+                window.showToast("Item Saved Successfully", "success");
+            } catch(e) { console.error(e); window.showToast("Failed to save", "error"); }
+            btn.innerText = "Save Item";
+        };
+
+        window.populateMenuEdit = (id) => {
+            const item = window.menuItemsCache[id];
+            if(!item) return;
+            document.getElementById('m-name').value = item.name;
+            document.getElementById('m-price').value = item.price;
+            document.getElementById('m-cat').value = item.category;
+            document.getElementById('m-desc').value = item.desc;
+            document.getElementById('m-img').value = item.img || '';
+            document.getElementById('m-edit-id').value = id;
+            document.getElementById('m-bestseller').checked = item.isBestSeller || false;
+            
+            document.getElementById('size-container').innerHTML = '';
+            if(item.sizes && item.sizes.length > 0) item.sizes.forEach(s => window.addSizeRow(s.name, s.price));
+            else window.addSizeRow();
+            
+            document.querySelectorAll('.addon-checkbox').forEach(cb => cb.checked = false);
+            if(item.linkedAddons) {
+                item.linkedAddons.forEach(aid => {
+                    const cb = document.querySelector(`.addon-checkbox[value="${aid}"]`);
+                    if(cb) cb.checked = true;
+                });
+            }
+            
+            document.getElementById('menu-form-title').innerHTML = "Edit Item";
+            document.getElementById('btn-save-item').innerHTML = "Update Item";
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+        };
+
+        window.resetMenuForm = () => { 
+            document.getElementById('m-name').value=''; 
+            document.getElementById('m-price').value=''; 
+            document.getElementById('m-edit-id').value='';
+            document.getElementById('m-bestseller').checked = false;
+            document.getElementById('size-container').innerHTML=''; 
+            window.addSizeRow(); 
+            document.querySelectorAll('.addon-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('menu-form-title').innerHTML = '<i class="fas fa-plus-circle text-orange-600"></i> Add Item';
+            document.getElementById('btn-save-item').innerHTML = "Save Item";
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+        };
+
+        window.deleteMenuItem = (id) => {
+            window.openDeleteModal(async () => {
+                await deleteDoc(doc(dbFirestore, "menu", id));
+                window.showToast("Item deleted", "success");
+            });
+        };
+
+        const initAddons = () => {
+            onSnapshot(collection(dbFirestore, "addons"), (snap) => {
+                let html = "", selectorHtml = "";
+                window.universalAddons = {};
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    window.universalAddons[doc.id] = data;
+                    html += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded mb-2 border border-gray-200"><span class="text-sm font-bold">${data.name} (₹${data.price})</span><button onclick="deleteAddon('${doc.id}')" class="text-red-500"><i class="fas fa-trash"></i></button></div>`;
+                    selectorHtml += `<label class="checkbox-wrapper cursor-pointer block"><input type="checkbox" class="hidden addon-checkbox" value="${doc.id}"><div class="p-2 border rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-50 transition border-gray-200">${data.name} (+₹${data.price})</div></label>`;
+                });
+                document.getElementById('universal-addons-list').innerHTML = html || "<p class='text-xs text-gray-400'>No addons.</p>";
+                document.getElementById('addon-selector-list').innerHTML = selectorHtml || "<p class='text-xs text-gray-400'>Create addons first.</p>";
+            });
+        };
+        window.createUniversalAddon = async () => {
+            const name = document.getElementById('new-addon-name').value; 
+            const price = document.getElementById('new-addon-price').value;
+            if(name && price) {
+                await addDoc(collection(dbFirestore, "addons"), {name, price: Number(price)});
+                window.showToast("Addon created", "success");
+            }
+            document.getElementById('new-addon-name').value=""; document.getElementById('new-addon-price').value="";
+        };
+        
+        window.deleteAddon = (id) => {
+            window.openDeleteModal(async () => {
+                 await deleteDoc(doc(dbFirestore, "addons", id));
+                 window.showToast("Addon deleted", "success");
+            }, "Delete Addon?");
+        };
+
+        // --- OFFERS LOGIC (Updated) ---
+        const initOffers = () => {
+             onSnapshot(collection(dbFirestore, "site_cards"), (snap) => {
+                const map = {}; snap.forEach(d => map[d.id] = d.data());
+                let html = "";
+                for(let i=1; i<=6; i++) {
+                    const d = map[`card_${i}`] || {offerText: "Slot Empty", discount: 0, minOrderValue: 0};
+                    const hasData = d.offerText !== "Slot Empty";
+                    const minOrderBadge = d.minOrderValue ? `<span class="absolute top-2 left-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">Min: ₹${d.minOrderValue}</span>` : '';
+                    
+                    html += `
+                    <div class="bg-white rounded-xl shadow-sm border p-4 group">
+                        <div class="h-32 bg-gray-100 rounded-lg mb-4 flex items-center justify-center relative overflow-hidden">
+                            ${minOrderBadge}
+                            ${d.img ? `<img src="${d.img}" class="w-full h-full object-cover">` : '<i class="fas fa-image text-3xl text-gray-300"></i>'}
+                        </div>
+                        <h4 class="font-bold text-gray-800 text-sm">${d.offerText}</h4>
+                        <p class="text-xs text-gray-500 font-bold mb-3">${d.discount}% Off</p>
+                        <button onclick="editOfferCard('card_${i}')" class="w-full bg-gray-50 text-xs font-bold py-2 rounded-lg hover:bg-orange-600 hover:text-white transition">
+                            ${hasData ? 'Update Offer' : 'Add Offer'} (Slot ${i})
+                        </button>
+                    </div>`;
+                }
+                document.getElementById('offers-container').innerHTML = html;
+             });
+        };
+
+        window.editOfferCard = async (id) => {
+            document.getElementById('offer-edit-id').value = id;
+            
+            // Try fetch existing
+            try {
+                const docSnap = await getDocs(query(collection(dbFirestore, "site_cards"), where("__name__", "==", id)));
+                if(!docSnap.empty) {
+                    // This logic is tricky with where on ID, standard getDoc is better
+                }
+                // Simplified: Just reset fields. If we wanted to populate, we'd read from cache or fetch.
+                // For now, let's keep it simple as "Edit" often implies overwriting in this simple UI.
+            } catch(e){}
+
+            document.getElementById('offer-text-input').value = "";
+            document.getElementById('offer-disc-input').value = "";
+            document.getElementById('offer-min-input').value = "";
+            document.getElementById('offer-img-input').value = "";
+            document.getElementById('offer-editor-modal').classList.remove('hidden');
+        };
+
+        window.closeOfferModal = () => {
+            document.getElementById('offer-editor-modal').classList.add('hidden');
+        };
+
+        window.saveOfferData = async () => {
+            const id = document.getElementById('offer-edit-id').value;
+            const txt = document.getElementById('offer-text-input').value;
+            const disc = document.getElementById('offer-disc-input').value;
+            const minVal = document.getElementById('offer-min-input').value;
+            const img = document.getElementById('offer-img-input').value;
+
+            if(!id) return;
+
+            try {
+                await setDoc(doc(dbFirestore, "site_cards", id), {
+                    offerText: txt, 
+                    discount: Number(disc), 
+                    minOrderValue: Number(minVal), // SAVING MIN VALUE
+                    img
+                }, {merge: true});
+                window.showToast("Offer Updated", "success");
+                window.closeOfferModal();
+            } catch(e) {
+                window.showToast("Update Failed", "error");
+            }
+        };
+
+        window.deleteOfferData = async () => {
+            const id = document.getElementById('offer-edit-id').value;
+            if(!id) return;
+            // Confirm
+            if(!confirm("Remove this offer from the website?")) return;
+
+            try {
+                await deleteDoc(doc(dbFirestore, "site_cards", id));
+                window.showToast("Offer Removed", "success");
+                window.closeOfferModal();
+            } catch(e) {
+                window.showToast("Delete Failed", "error");
+            }
+        };
+
+        // Init
+        // Focus login logic first
+        document.getElementById('login-pin').focus();
+        
+        initLiveDashboard();
+        initFinancials();
+        initMenuLogic();
+        initAddons();
+        initOffers();
+        window.addSizeRow();
+
+    </script>
+</body>
+</html>

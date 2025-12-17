@@ -1,0 +1,15 @@
+{
+  "name": "Wow Cafe Kitchen Display",
+  "short_name": "Wow KDS",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1f2937",
+  "theme_color": "#1f2937",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
