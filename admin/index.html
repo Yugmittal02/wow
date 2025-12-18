@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wow Cafe | Super Admin 5.2 (Strict Wallet & Reports)</title>
+    <title>Wow Cafe | Super Admin 6.0 (Auto-Sync Wallet)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -155,7 +155,7 @@
             <i class="fas fa-lock text-6xl text-red-600"></i>
         </div>
         <h1 class="text-4xl font-black text-gray-800 mb-2">Account Blocked</h1>
-        <p class="text-gray-500 mt-2 mb-8 max-w-md">Contact Administrator.</p>
+        <p class="text-gray-500 mt-2 mb-8 max-w-md">System overload (>50 orders) or Admin Lock. Contact Administrator.</p>
     </div>
 
     <div id="low-balance-overlay" class="hidden"></div>
@@ -181,7 +181,7 @@
             <div class="p-6 border-b border-gray-100 flex justify-between items-center h-20 shrink-0">
                 <div>
                     <h1 class="text-2xl font-black text-gray-800 tracking-tight">Wow<span class="text-orange-600">Cafe</span>.</h1>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Super Admin 5.2</p>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Super Admin 6.0</p>
                 </div>
                 <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-red-500 transition"><i class="fas fa-times text-xl"></i></button>
             </div>
@@ -351,10 +351,12 @@
                                         <option value="Dine-in">Dine-in</option>
                                         <option value="Takeaway">Takeaway</option>
                                     </select>
-                                    <select id="pos-payment-status" class="w-1/2 p-2 text-sm border rounded bg-yellow-50">
-                                        <option value="pending">Pay Later</option>
-                                        <option value="paid">Paid Now</option>
+                                    <select id="pos-payment-status" class="w-1/2 p-2 text-sm border rounded bg-yellow-50" disabled>
+                                        <option value="pending" selected>Pay Later (Locked)</option>
                                     </select>
+                                    <div class="text-[10px] text-orange-600 font-bold mt-1">
+                                        <i class="fas fa-lock"></i> Manual Verification Required
+                                    </div>
                                 </div>
                                 <button onclick="placeManualOrder()" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold shadow-lg hover:bg-green-700 active:scale-95 transition">
                                     Place Order
@@ -423,7 +425,7 @@
                 </div>
 
                 <div id="section-offers" class="hide-section fade-in space-y-6 w-full max-w-7xl mx-auto">
-                     <h2 class="text-2xl font-bold text-gray-800">Offers & Banners</h2>
+                      <h2 class="text-2xl font-bold text-gray-800">Offers & Banners</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="offers-container"></div>
                 </div>
 
@@ -580,7 +582,7 @@
                         <tr>
                             <th class="p-4">Time/Date</th>
                             <th class="p-4">Description</th>
-                            <th class="p-4 text-right">Debit</th>
+                            <th class="p-4 text-right">Amount</th>
                         </tr>
                     </thead>
                     <tbody id="wallet-history-list" class="divide-y divide-gray-100">
@@ -593,7 +595,7 @@
             </div>
         </div>
     </div>
-
+    
     <div id="addon-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
             <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -704,13 +706,14 @@
         const dbFirestore = getFirestore(app);
 
         // Global State
+        const PLATFORM_FEE = 1.98; // Centralized Fee
         window.menuItemsCache = {};
         window.universalAddons = {};
         window.posCart = [];
         window.currentPOSItem = null;
         window.syncedOrdersCache = new Set(); 
-        window.walletHistoryCache = new Set(); 
         window.currentAdminBalance = 0; 
+        window.previousBalance = null; // New for Recharge detection
         
         window.fullHistoryData = []; 
         window.visibleHistoryCount = 0; 
@@ -719,6 +722,100 @@
         
         const BATCH_SIZE = 20;
 
+        // --- SECURITY: SAFE WALLET UPDATE WITH PERMISSION CHECK ---
+        // This function ensures wallet is NEVER deducted without admin permission
+        window.lastWalletUpdateSource = null; // Global flag for legitimate updates
+        
+        const safeWalletUpdate = async (newBalance, amount, description, source, requirePermission = true) => {
+            const oldBalance = window.currentAdminBalance;
+            const diff = newBalance - oldBalance;
+            
+            console.log(`🔒 Safe wallet update called:`, { 
+                oldBalance, 
+                newBalance, 
+                diff, 
+                source, 
+                description,
+                requirePermission 
+            });
+            
+            // SECURITY CHECK: Detect unauthorized deductions
+            if (diff < 0 && requirePermission) {
+                // Check if this is a legitimate admin-approved deduction
+                const isLegitimate = source.includes("Admin Approval") || 
+                                   source.includes("POS (Pay Now)") ||
+                                   source === "Admin Approval";
+                
+                if (!isLegitimate) {
+                    const errorMsg = `🚨 UNAUTHORIZED WALLET DEDUCTION DETECTED! 🚨\nAmount: ₹${Math.abs(diff).toFixed(2)}\nSource: ${source}\nDescription: ${description}`;
+                    console.error("CRITICAL SECURITY ALERT:", errorMsg);
+                    console.trace("Stack trace:");
+                    
+                    window.showToast(`🚨 UNAUTHORIZED DEDUCTION: ₹${Math.abs(diff).toFixed(2)}`, "error");
+                    setTimeout(() => {
+                        window.showToast(`Source: ${source}`, "error");
+                    }, 2000);
+                    
+                    // Log security violation
+                    try {
+                        await addDoc(collection(dbFirestore, "security_violations"), {
+                            type: "unauthorized_wallet_deduction",
+                            amount: Math.abs(diff),
+                            oldBalance: oldBalance,
+                            newBalance: newBalance,
+                            source: source,
+                            description: description,
+                            timestamp: serverTimestamp(),
+                            stackTrace: new Error().stack
+                        });
+                    } catch (e) {
+                        console.error("Failed to log security violation:", e);
+                    }
+                    
+                    // REVERT the change if possible
+                    throw new Error("UNAUTHORIZED_WALLET_DEDUCTION: Wallet deduction requires admin permission");
+                }
+            }
+            
+            // Mark as legitimate update before making change
+            window.lastWalletUpdateSource = source;
+            
+            // Safe update
+            await update(ref(dbRTDB, 'admin'), { walletBalance: newBalance });
+            window.currentAdminBalance = newBalance;
+            
+            // Log transaction
+            if (diff !== 0) {
+                await logTransaction(Math.abs(diff), description, diff > 0 ? "credit" : "debit", source);
+            }
+            
+            console.log(`✅ Safe wallet update completed: ${oldBalance} → ${newBalance} (${diff > 0 ? '+' : ''}${diff.toFixed(2)})`, { source, description });
+            
+            // Clear flag after a short delay to allow monitoring to detect it
+            setTimeout(() => {
+                window.lastWalletUpdateSource = null;
+            }, 1000);
+        };
+
+        // --- HELPER: LOG WALLET TRANSACTION ---
+        // Handles both Recharges (Credit) and Deductions (Debit)
+        const logTransaction = async (amount, description, type, source) => {
+            try {
+                 await addDoc(collection(dbFirestore, "wallet_transactions"), {
+                    amount: Number(amount),
+                    description: description,
+                    type: type, // 'credit' or 'debit'
+                    timestamp: serverTimestamp(),
+                    source: source
+                });
+                console.log("Transaction logged successfully:", { amount, description, type, source });
+            } catch(e) { 
+                console.error("Log failed - CRITICAL ERROR:", e);
+                // Show error to user so they know logging failed
+                window.showToast(`Failed to log transaction: ${description}`, "error");
+            }
+        };
+
         // --- AUTH & PERSISTENCE ---
         const initAuth = async () => {
              const session = localStorage.getItem('wowAdminSession');
@@ -726,7 +823,6 @@
                  document.getElementById('login-overlay').classList.add('hidden');
              }
 
-             // Load Settings (Owner)
              const ownerRef = ref(dbRTDB, 'admin/settings');
              onValue(ownerRef, (snapshot) => {
                  const data = snapshot.val();
@@ -736,7 +832,6 @@
                  }
              });
              
-             // Load Theme
              const savedTheme = localStorage.getItem('wowAdminTheme');
              if(savedTheme) setTheme(savedTheme);
         };
@@ -797,39 +892,7 @@
             window.showToast("Owner Details Saved", "success");
         };
 
-        // --- WALLET LOGIC (STRICT DEDUCTION WEBSITE) ---
-        const syncWebsiteOrdersToHistory = (order) => {
-            if(order.paymentStatus === 'paid' && order.orderType !== 'POS/Admin') {
-                const uniqueKey = `hist_${order.orderId}`;
-                if(window.walletHistoryCache.has(uniqueKey)) return;
-
-                const q = query(collection(dbFirestore, "wallet_transactions"), where("description", "==", `Fee: Order #${order.orderId}`));
-                getDocs(q).then(async (snap) => {
-                    if(snap.empty) {
-                        // 1. STRICTLY DEDUCT 1.98 FROM RTDB BALANCE (WEBSITE ORDERS)
-                        const fee = 1.98;
-                        const walletRef = ref(dbRTDB, 'admin/walletBalance');
-                        const walletSnap = await get(walletRef);
-                        let currentBal = parseFloat(walletSnap.val() || 0);
-                        let newBal = currentBal - fee;
-                        
-                        await update(ref(dbRTDB, 'admin'), { walletBalance: newBal });
-
-                        // 2. LOG TO FIRESTORE
-                         addDoc(collection(dbFirestore, "wallet_transactions"), {
-                            amount: fee,
-                            description: `Fee: Order #${order.orderId}`,
-                            type: 'debit',
-                            timestamp: serverTimestamp(),
-                            source: 'Website'
-                        });
-                        console.log("Website Fee Deducted: ", order.orderId);
-                    }
-                    window.walletHistoryCache.add(uniqueKey);
-                });
-            }
-        };
-
+        // --- WALLET HISTORY DISPLAY ---
         window.openWalletHistory = () => {
             document.getElementById('wallet-history-modal').classList.remove('hidden');
             const list = document.getElementById('wallet-history-list');
@@ -848,11 +911,15 @@
                         const timeStr = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                         const dateStr = dateObj.toLocaleDateString();
                         
+                        const isDebit = d.type === 'debit';
+                        const amountColor = isDebit ? 'text-red-600' : 'text-green-600';
+                        const sign = isDebit ? '-' : '+';
+
                         html += `
                             <tr class="hover:bg-gray-50 border-b border-gray-50">
                                 <td class="p-4 text-xs text-gray-500">${dateStr}<br>${timeStr}</td>
-                                <td class="p-4 text-sm font-medium text-gray-700">${d.description || 'Order Fee'} <span class="text-[10px] text-gray-400">(${d.source || 'POS'})</span></td>
-                                <td class="p-4 text-right font-bold text-red-600">-₹${d.amount.toFixed(2)}</td>
+                                <td class="p-4 text-sm font-medium text-gray-700">${d.description || 'Order Fee'} <span class="text-[10px] text-gray-400">(${d.source || 'System'})</span></td>
+                                <td class="p-4 text-right font-bold ${amountColor}">${sign}₹${Number(d.amount).toFixed(2)}</td>
                             </tr>
                         `;
                     });
@@ -864,8 +931,9 @@
             });
         };
 
-        // --- SYSTEM MONITORS ---
+        // --- SYSTEM MONITORS (UPDATED: RECHARGE DETECTION) ---
         const initSystemMonitors = () => {
+            // Monitor Block Status
             const appStatusRef = ref(dbRTDB, 'appStatus');
             onValue(appStatusRef, (snapshot) => {
                 const isBlocked = snapshot.val();
@@ -879,22 +947,110 @@
                 }
             });
 
+            // Monitor Wallet Balance (Enhanced Security Monitoring)
             const walletRef = ref(dbRTDB, 'admin/walletBalance');
-            onValue(walletRef, (snapshot) => {
-                const balance = parseFloat(snapshot.val() || 0);
-                window.currentAdminBalance = balance; 
+            let lastKnownBalance = null;
+            
+            onValue(walletRef, async (snapshot) => {
+                try {
+                    const balanceValue = snapshot.val();
+                    if (balanceValue === null || balanceValue === undefined) {
+                        console.warn("⚠️ Wallet balance is null/undefined");
+                        return;
+                    }
+                    
+                    const newBalance = parseFloat(balanceValue) || 0;
+                    const oldBalance = window.currentAdminBalance || lastKnownBalance;
                 
-                const displayVal = `₹${balance.toFixed(2)}`;
-                document.getElementById('admin-wallet-display').innerText = displayVal;
-                document.getElementById('admin-wallet-mobile').innerText = displayVal;
+                // SECURITY: Detect unauthorized wallet changes
+                if (oldBalance !== null && oldBalance !== newBalance) {
+                    const diff = newBalance - oldBalance;
+                    
+                    // Check if this is a legitimate update (from our safe function)
+                    const isLegitimateUpdate = window.lastWalletUpdateSource !== null;
+                    
+                    console.log("🔍 Wallet change detected:", {
+                        oldBalance,
+                        newBalance,
+                        diff,
+                        isLegitimateUpdate,
+                        source: window.lastWalletUpdateSource
+                    });
+                    
+                    if (diff < 0 && !isLegitimateUpdate) {
+                        // UNAUTHORIZED DEDUCTION DETECTED!
+                        const unauthorizedAmount = Math.abs(diff);
+                        console.error("🚨🚨🚨 UNAUTHORIZED WALLET DEDUCTION DETECTED! 🚨🚨🚨");
+                        console.error(`Amount: ₹${unauthorizedAmount.toFixed(2)}`);
+                        console.error(`Balance changed from ₹${oldBalance.toFixed(2)} to ₹${newBalance.toFixed(2)}`);
+                        console.error("This deduction was NOT authorized by admin!");
+                        console.error("Expected source: 'Admin Approval' or 'POS (Pay Now)'");
+                        console.trace("Detection stack trace:");
+                        
+                        // Show multiple error messages
+                        window.showToast(`🚨 UNAUTHORIZED DEDUCTION: ₹${unauthorizedAmount.toFixed(2)}`, "error");
+                        setTimeout(() => {
+                            window.showToast("⚠️ Wallet changed without permission!", "error");
+                        }, 2000);
+                        setTimeout(() => {
+                            window.showToast("Check console for details", "error");
+                        }, 4000);
+                        
+                        // Log security violation
+                        try {
+                            await addDoc(collection(dbFirestore, "security_violations"), {
+                                type: "unauthorized_wallet_deduction_detected",
+                                amount: unauthorizedAmount,
+                                oldBalance: oldBalance,
+                                newBalance: newBalance,
+                                detectedAt: serverTimestamp(),
+                                stackTrace: new Error().stack,
+                                userAgent: navigator.userAgent,
+                                timestamp: Date.now()
+                            });
+                        } catch (e) {
+                            console.error("Failed to log security violation:", e);
+                        }
+                    } else if (diff > 0) {
+                        // Legitimate recharge
+                        logTransaction(diff, "Wallet Recharge", "credit", "Console/Admin");
+                        window.showToast(`Wallet Recharged: +₹${diff.toFixed(2)}`, "success");
+                    } else if (diff < 0 && isLegitimateUpdate) {
+                        console.log("✅ Legitimate deduction detected:", window.lastWalletUpdateSource);
+                    }
+                }
+                
+                    // Update tracking
+                    window.currentAdminBalance = newBalance;
+                    lastKnownBalance = newBalance;
+                    window.previousBalance = newBalance; // Keep for backward compatibility
+                    
+                    const displayVal = `₹${newBalance.toFixed(2)}`;
+                    const walletDisplay = document.getElementById('admin-wallet-display');
+                    const walletMobile = document.getElementById('admin-wallet-mobile');
+                    
+                    if (walletDisplay) walletDisplay.innerText = displayVal;
+                    if (walletMobile) walletMobile.innerText = displayVal;
 
-                const alertOverlay = document.getElementById('low-balance-overlay');
-                if (balance < 100) {
-                    alertOverlay.classList.remove('hidden');
-                    alertOverlay.classList.add('low-balance-active');
-                } else {
-                    alertOverlay.classList.add('hidden');
-                    alertOverlay.classList.remove('low-balance-active');
+                    const alertOverlay = document.getElementById('low-balance-overlay');
+                    if (alertOverlay) {
+                        if (newBalance < 100) {
+                            alertOverlay.classList.remove('hidden');
+                            alertOverlay.classList.add('low-balance-active');
+                        } else {
+                            alertOverlay.classList.add('hidden');
+                            alertOverlay.classList.remove('low-balance-active');
+                        }
+                    }
+                } catch (error) {
+                    console.error("❌ Error in wallet monitoring:", error);
+                    // Don't crash - continue monitoring
+                }
+            }, (error) => {
+                console.error("❌ Firebase wallet listener error:", error);
+                // Show user-friendly error
+                if (window.showToast) {
+                    window.showToast("Connection issue. Retrying...", "error");
                 }
             });
         };
@@ -973,11 +1129,32 @@
             window.closeConfirmModal();
         };
 
-        // --- LIVE DASHBOARD (UPDATED STATUS BADGES) ---
+        // --- GLOBAL ERROR HANDLERS (CRASH PREVENTION) ---
+        window.addEventListener('error', (event) => {
+            console.error("🚨 Global Error Caught:", event.error);
+            console.error("Error details:", { message: event.message, filename: event.filename, lineno: event.lineno });
+            // Prevent crash - show user-friendly message
+            if (window.showToast) {
+                window.showToast("An error occurred. System is still running.", "error");
+            }
+            return true; // Prevent default error handling
+        });
+        
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error("🚨 Unhandled Promise Rejection:", event.reason);
+            // Prevent crash from unhandled promises
+            if (window.showToast) {
+                window.showToast("Network error. Please refresh if issues persist.", "error");
+            }
+            event.preventDefault(); // Prevent default error handling
+        });
+        
+        // --- LIVE DASHBOARD (WITH AUTO FEE DEDUCTION) ---
         const initLiveDashboard = () => {
             const ordersRef = ref(dbRTDB, 'orders');
-            onValue(ordersRef, (snapshot) => {
-                const data = snapshot.val();
+            onValue(ordersRef, async (snapshot) => {
+                try {
+                    const data = snapshot.val();
                 let liveHtml = "";
                 let pending = 0, prep = 0, ready = 0, completed = 0;
                 let activeCount = 0;
@@ -986,9 +1163,11 @@
                     const ordersArr = Object.keys(data).map(key => ({ id: key, ...data[key] }));
                     ordersArr.sort((a,b) => b.timestamp - a.timestamp);
 
-                    ordersArr.forEach(order => {
-                        syncWebsiteOrdersToHistory(order);
+                    // AUTO-DEDUCTION DISABLED - All orders require manual admin approval
+                    // No automatic wallet deduction - admin must verify and approve each order
 
+                    // THEN: Build HTML and process display logic
+                    ordersArr.forEach(order => {
                         if(order.status === 'pending') pending++;
                         if(order.status === 'preparing') prep++;
                         if(order.status === 'ready') ready++;
@@ -999,10 +1178,10 @@
                         if (isDoneAndPaid) {
                             checkAndSyncFirestore(order);
                         } else {
-                            activeCount++;
+                            activeCount++; 
+                            
                             const displayId = order.orderId || order.id.substring(0,5);
                             
-                            // UPDATED BADGE STYLES FOR VISIBILITY
                             let statusBadge = "";
                             if(order.status === 'pending') statusBadge = `<span class="status-badge status-pending"><i class="fas fa-clock"></i> PENDING</span>`;
                             else if(order.status === 'preparing') statusBadge = `<span class="status-badge status-preparing"><i class="fas fa-fire"></i> COOKING</span>`;
@@ -1015,11 +1194,17 @@
                             const displayAmt = Math.round(amt); 
                             
                             if(order.paymentStatus === 'paid') {
-                                dueHtml = `<div class="text-green-600 font-bold text-xs"><i class="fas fa-check-circle"></i> PAID</div>`;
-                                payAction = `<div class="text-gray-400 font-bold text-xs italic">Waiting Kitchen...</div>`;
+                                if(order.isFeeDeducted === true) {
+                                    dueHtml = `<div class="text-green-600 font-bold text-xs"><i class="fas fa-check-circle"></i> PAID</div>`;
+                                    payAction = `<div class="text-gray-400 font-bold text-xs italic">Fee Deducted.</div>`;
+                                } else {
+                                     // Fallback for visual indication if auto-deduct lags
+                                     dueHtml = `<div class="text-green-600 font-bold text-xs"><i class="fas fa-check-circle"></i> PAID (Processing)</div>`;
+                                     payAction = `<button onclick="markOrderPaid('${order.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-xs font-bold shadow transition disabled:opacity-50 disabled:cursor-not-allowed" id="btn-pay-${order.id}"><i class="fas fa-sync"></i> Sync Fee</button>`;
+                                }
                             } else {
                                 dueHtml = `<div class="text-red-600 font-bold text-sm">Due: ₹${displayAmt}</div>`;
-                                payAction = `<button onclick="markOrderPaid('${order.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-xs font-bold shadow transition"><i class="fas fa-rupee-sign"></i> Accept ₹${displayAmt}</button>`;
+                                payAction = `<button onclick="markOrderPaid('${order.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-xs font-bold shadow transition disabled:opacity-50 disabled:cursor-not-allowed" id="btn-pay-${order.id}"><i class="fas fa-rupee-sign"></i> Accept & Deduct Fee</button>`;
                             }
 
                             const itemSummary = order.items ? order.items.map(i => {
@@ -1053,15 +1238,59 @@
                         }
                     });
                 }
+                
+                if (activeCount > 50) {
+                     const statusRef = ref(dbRTDB, 'appStatus');
+                     get(statusRef).then(snap => {
+                         if(snap.val() !== true) {
+                             update(ref(dbRTDB, '/'), { appStatus: true });
+                             window.showToast("System Overload: App Blocked (>50 Live Orders)", "error");
+                         }
+                     });
+                }
+
                 document.getElementById('live-orders-table').innerHTML = liveHtml;
                 document.getElementById('no-live-orders').classList.toggle('hidden', activeCount > 0);
                 
-                document.getElementById('stat-pending').innerText = pending;
-                document.getElementById('stat-prep').innerText = prep;
-                document.getElementById('stat-ready').innerText = ready;
-                document.getElementById('stat-completed').innerText = completed; 
-                document.getElementById('current-date').innerText = new Date().toLocaleDateString();
+                    // Safe DOM updates with null checks
+                    const statPending = document.getElementById('stat-pending');
+                    const statPrep = document.getElementById('stat-prep');
+                    const statReady = document.getElementById('stat-ready');
+                    const statCompleted = document.getElementById('stat-completed');
+                    const currentDate = document.getElementById('current-date');
+                    
+                    if (statPending) statPending.innerText = pending;
+                    if (statPrep) statPrep.innerText = prep;
+                    if (statReady) statReady.innerText = ready;
+                    if (statCompleted) statCompleted.innerText = completed;
+                    if (currentDate) currentDate.innerText = new Date().toLocaleDateString();
+                } catch (error) {
+                    console.error("❌ Error in live dashboard update:", error);
+                    // Don't crash - continue with next update
+                }
+            }, (error) => {
+                console.error("❌ Firebase listener error:", error);
+                // Show user-friendly error
+                if (window.showToast) {
+                    window.showToast("Connection issue. Retrying...", "error");
+                }
             });
+        };
+
+        // --- AUTO DEDUCT DISABLED - MANUAL APPROVAL REQUIRED ---
+        // This function is kept for reference but will NEVER be called automatically
+        // All wallet deductions now require explicit admin approval via markOrderPaid()
+        const autoDeductFee = async (order) => {
+            // DISABLED: Auto-deduction is now locked
+            console.warn("⚠️ AUTO-DEDUCTION ATTEMPTED BUT DISABLED:", order.orderId);
+            console.warn("⚠️ This order requires manual admin approval");
+            
+            // Show error to admin
+            window.showToast(`⚠️ Order #${order.orderId} requires manual verification`, "error");
+            window.showToast("Auto-deduction is disabled for security", "error");
+            
+            // DO NOT DEDUCT - Return without action
+            return;
         };
 
         window.checkAndSyncFirestore = async (order) => {
@@ -1092,55 +1321,96 @@
             } catch (e) { console.error("Auto Sync Error:", e); }
         };
 
+        // --- STRICT PAYMENT HANDLER (POS & Website Confirmation) ---
+        // Double-click prevention: Track processing orders
+        window.processingOrders = new Set();
+        
         window.markOrderPaid = async (rtdbKey) => {
+            // DOUBLE-CLICK PREVENTION: Check if already processing
+            if (window.processingOrders.has(rtdbKey)) {
+                console.warn("⚠️ Payment already being processed for order:", rtdbKey);
+                window.showToast("Payment is being processed... Please wait", "info");
+                return;
+            }
+            
+            // Disable button immediately to prevent double-click
+            const payButton = document.getElementById(`btn-pay-${rtdbKey}`);
+            if (payButton) {
+                payButton.disabled = true;
+                payButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            }
+            
+            // Mark as processing immediately
+            window.processingOrders.add(rtdbKey);
+            
             try {
                 const orderSnapshot = await get(ref(dbRTDB, 'orders/' + rtdbKey));
-                if (!orderSnapshot.exists()) return;
+                if (!orderSnapshot.exists()) {
+                    window.processingOrders.delete(rtdbKey);
+                    return;
+                }
                 
                 const raw = orderSnapshot.val();
-                
                 const cleanAmount = Number(raw.totalAmount || raw.total_amount || raw.amount || raw.price || 0);
-                const cleanName = raw.customerName || raw.name || raw.fullName || raw.user_name || 'Guest';
-                const cleanMobile = raw.customerMobile || raw.mobile || raw.phone || raw.phoneNumber || '';
                 const currentStatus = raw.status || 'pending';
 
-                const updatePayload = { 
-                    paymentStatus: 'paid', 
-                    totalAmount: cleanAmount 
-                };
-
-                await update(ref(dbRTDB, 'orders/' + rtdbKey), updatePayload);
+                // GATEKEEPER: CHECK FOR DOUBLE PAYMENT (STRICT) - Double check before processing
+                if (raw.isFeeDeducted === true) {
+                    console.log("✅ Fee already deducted for order:", raw.orderId);
+                    await update(ref(dbRTDB, 'orders/' + rtdbKey), { paymentStatus: 'paid' });
+                    window.showToast("Status updated (Fee was already collected)", "success");
+                    window.processingOrders.delete(rtdbKey);
+                    return;
+                }
                 
-                // Firestore Sync
-                const q = query(collection(dbFirestore, "orders"), where("orderId", "==", raw.orderId));
-                const querySnapshot = await getDocs(q);
-
-                if (!querySnapshot.empty) {
-                    querySnapshot.forEach(async (docRef) => {
-                        await updateDoc(doc(dbFirestore, "orders", docRef.id), { 
-                            paymentStatus: 'paid',
-                            status: currentStatus, 
-                            totalAmount: cleanAmount,
-                            customerName: cleanName, 
-                            customerMobile: cleanMobile
-                        });
-                    });
-                } else {
-                    await addDoc(collection(dbFirestore, "orders"), {
-                        ...raw,
-                        paymentStatus: 'paid',
-                        status: currentStatus,
-                        customerName: cleanName,
-                        totalAmount: cleanAmount,
-                        timestamp: Date.now(),
-                        createdAt: serverTimestamp() 
-                    });
+                // CRITICAL: Re-check after getting snapshot to prevent race condition
+                const recheckSnapshot = await get(ref(dbRTDB, 'orders/' + rtdbKey));
+                const recheckData = recheckSnapshot.val();
+                if (recheckData && recheckData.isFeeDeducted === true) {
+                    console.warn("⚠️ Fee was deducted between checks - preventing double deduction");
+                    window.showToast("Payment already processed", "info");
+                    window.processingOrders.delete(rtdbKey);
+                    return;
                 }
 
-                window.showToast(`Payment Accepted! ₹${Math.round(cleanAmount)}`, "success");
+                // MANUAL DEDUCTION (Triggered by Admin for POS Pay Later / Unverified Website)
+                const newBalance = window.currentAdminBalance - PLATFORM_FEE;
+                
+                console.log("💰 Processing payment for order:", raw.orderId, "Current balance:", window.currentAdminBalance, "New balance:", newBalance);
+                
+                // 1. Mark as deducted FIRST to prevent race condition
+                await update(ref(dbRTDB, 'orders/' + rtdbKey), { 
+                    isFeeDeducted: true // Lock immediately
+                });
+                
+                // 2. Update Wallet with SAFE function (requires permission)
+                await safeWalletUpdate(newBalance, PLATFORM_FEE, `Fee: Order #${raw.orderId}`, "Admin Approval", true);
+
+                // 3. Update Order with Payment Status
+                await update(ref(dbRTDB, 'orders/' + rtdbKey), { 
+                    paymentStatus: 'paid', 
+                    totalAmount: cleanAmount
+                });
+                
+                console.log("✅ Payment processed successfully for order:", raw.orderId);
+                window.showToast(`Payment Accepted! Wallet Deducted: ₹${PLATFORM_FEE}`, "success");
+                
+                // Firestore Sync (Trigger status update)
+                checkAndSyncFirestore({...raw, paymentStatus: 'paid', status: currentStatus, isFeeDeducted: true});
+
             } catch (e) {
-                console.error(e);
+                console.error("❌ Payment processing error:", e);
                 window.showToast("Sync Error. Check Console.", "error");
+            } finally {
+                // Re-enable button and remove from processing set
+                setTimeout(() => {
+                    const payButton = document.getElementById(`btn-pay-${rtdbKey}`);
+                    if (payButton && !payButton.disabled) {
+                        // Button will be updated by the next render cycle
+                    }
+                    window.processingOrders.delete(rtdbKey);
+                    console.log("🧹 Cleaned up processing state for order:", rtdbKey);
+                }, 2000); // Remove after 2 seconds to allow UI updates
             }
         };
 
@@ -1320,20 +1590,21 @@
             if(!mobile) return window.showToast("Enter Mobile for CRM", "error");
             
             const type = document.getElementById('pos-order-type').value;
-            const status = document.getElementById('pos-payment-status').value;
+            // POS is now locked to Pay Later only - no automatic deduction
+            const status = 'pending'; // Always pending - admin must verify
             let total = parseInt(document.getElementById('pos-total-price').innerText.replace('₹',''));
             
-            const PLATFORM_FEE = 1.98;
-            total = total + PLATFORM_FEE; 
-
             const orderIdStr = "A-" + Math.floor(1000 + Math.random() * 9000).toString(); 
             const kitchenStatus = 'pending';
 
+            // SECURITY: All POS orders are Pay Later - no automatic deduction
             const orderData = {
                 orderId: orderIdStr, customerName: name, customerMobile: mobile,
                 items: window.posCart, totalAmount: Number(total), status: kitchenStatus,
-                paymentStatus: status, orderType: 'POS/Admin', subType: type,
+                paymentStatus: 'pending', // Always pending - requires admin verification
+                orderType: 'POS/Admin', subType: type,
                 platformFee: PLATFORM_FEE, 
+                isFeeDeducted: false, // Never auto-deducted - admin must approve
                 timestamp: Date.now(), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
                 date: new Date().toLocaleDateString()
             };
@@ -1343,31 +1614,18 @@
                 const newRef = push(ref(dbRTDB, 'orders'));
                 await set(newRef, orderData);
                 
-                // 2. Deduct from Admin Wallet
-                const newBalance = window.currentAdminBalance - PLATFORM_FEE;
-                await update(ref(dbRTDB, 'admin'), { walletBalance: newBalance });
+                console.log("✅ POS Order created (Pay Later - requires admin verification):", orderIdStr);
                 
-                // 3. Log Transaction
-                await addDoc(collection(dbFirestore, "wallet_transactions"), {
-                    amount: PLATFORM_FEE,
-                    description: `Fee: Order #${orderIdStr}`,
-                    type: 'debit',
-                    timestamp: serverTimestamp(),
-                    source: 'POS'
-                });
+                // Firestore Sync
+                await addDoc(collection(dbFirestore, "orders"), { ...orderData, createdAt: serverTimestamp() });
+                window.showToast("Order Placed. Admin verification required to deduct fee.", "success");
 
-                // 4. Firestore Sync if Paid
-                if(status === 'paid') {
-                        await addDoc(collection(dbFirestore, "orders"), { ...orderData, createdAt: serverTimestamp() });
-                }
-
-                window.showToast(`Order Placed! Wallet Deducted: ₹${PLATFORM_FEE}`, "success");
                 window.posCart = []; updatePOSCartUI();
                 document.getElementById('pos-customer-name').value = "";
                 document.getElementById('pos-customer-mobile').value = "";
             } catch (e) { 
                 console.error(e);
-                window.showToast("Failed to place order/deduct wallet", "error"); 
+                window.showToast("Failed to place order", "error"); 
             }
         };
 
@@ -1490,7 +1748,6 @@
             document.getElementById('rev-avg').innerText = count > 0 ? `₹${Math.round(totalRev/count)}` : '₹0';
         };
 
-        // --- NEW: DOWNLOAD FULL REPORT (CSV) ---
         window.downloadRevenueReport = () => {
             const dateInput = document.getElementById('revenue-date-filter').value;
             let data = [...window.fullHistoryData];
@@ -1804,4 +2061,4 @@
 
     </script>
 </body>
-    </html>
+                     </html>
