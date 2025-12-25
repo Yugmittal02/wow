@@ -1802,8 +1802,30 @@
 
                         <!-- Tax/GST Settings -->
                         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <h3 class="font-bold text-lg mb-4 text-gray-800"><i class="fas fa-file-invoice-dollar text-amber-600"></i> Tax & GST</h3>
+                            <h3 class="font-bold text-lg mb-4 text-gray-800"><i class="fas fa-file-invoice-dollar text-amber-600"></i> Tax & Fees</h3>
                             <div class="space-y-3">
+                                <!-- Tax Enable Toggle -->
+                                <div class="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-percentage text-amber-600"></i>
+                                        <label for="setting-tax-enabled" class="text-sm font-bold text-gray-700 cursor-pointer select-none">Enable Tax</label>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="setting-tax-enabled" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                                    </label>
+                                </div>
+                                
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Tax Percentage (%)</label>
+                                    <input type="number" id="setting-tax-percent" placeholder="5" value="5" class="w-full p-3 border rounded-lg outline-none">
+                                </div>
+                                
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Convenience Fee (₹)</label>
+                                    <input type="number" id="setting-convenience-fee" placeholder="1.98" value="1.98" step="0.01" class="w-full p-3 border rounded-lg outline-none">
+                                </div>
+                                
                                 <div>
                                     <label class="text-xs font-bold text-gray-500 uppercase">GSTIN Number</label>
                                     <input type="text" id="setting-gstin" placeholder="e.g., 22AAAAA0000A1Z5" class="w-full p-3 border rounded-lg outline-none">
@@ -1818,9 +1840,120 @@
                                         <input type="number" id="setting-sgst" placeholder="2.5" class="w-full p-2 border rounded-lg outline-none">
                                     </div>
                                 </div>
-                                <button onclick="saveTaxSettings()" class="w-full bg-amber-600 text-white font-bold py-2 rounded-lg hover:bg-amber-700">Save Tax Settings</button>
+                                <button onclick="saveTaxSettings()" class="w-full bg-amber-600 text-white font-bold py-2 rounded-lg hover:bg-amber-700">Save Tax & Fee Settings</button>
                                 <button onclick="downloadGSTReport()" class="w-full border border-amber-200 text-amber-700 font-bold py-2 rounded-lg hover:bg-amber-50">
                                     <i class="fas fa-download mr-1"></i> Download GST Report
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Feature Toggles -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-lg mb-4 text-gray-800"><i class="fas fa-magic text-purple-600"></i> Premium Features</h3>
+                            <p class="text-xs text-gray-500 mb-4">Features enabled by Super Admin. Contact support to enable more features.</p>
+                            <div class="space-y-3">
+                                
+                                <!-- Spin Wheel Toggle -->
+                                <div id="spinWheel-feature-row" class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-dharmachakra text-yellow-600 text-xl"></i>
+                                        <div>
+                                            <label for="setting-spin-wheel" class="text-sm font-bold text-gray-700 cursor-pointer select-none block">Spin Wheel</label>
+                                            <span class="text-[10px] text-gray-400">Show spin wheel after payment</span>
+                                        </div>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="setting-spin-wheel" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                                    </label>
+                                </div>
+                                
+                                <!-- Donations Toggle -->
+                                <div id="donations-feature-row" class="flex items-center justify-between p-3 bg-pink-50 rounded-lg border border-pink-200">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-heart text-pink-600 text-xl"></i>
+                                        <div>
+                                            <label for="setting-donations" class="text-sm font-bold text-gray-700 cursor-pointer select-none block">Donations</label>
+                                            <span class="text-[10px] text-gray-400">Allow customer donations</span>
+                                        </div>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="setting-donations" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-pink-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-500"></div>
+                                    </label>
+                                </div>
+                                
+                                <!-- Promo Ads Toggle -->
+                                <div id="promoAds-feature-row" class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-bullhorn text-blue-600 text-xl"></i>
+                                        <div>
+                                            <label for="setting-promo-ads" class="text-sm font-bold text-gray-700 cursor-pointer select-none block">Promo Ads</label>
+                                            <span class="text-[10px] text-gray-400">Show promotional banners</span>
+                                        </div>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="setting-promo-ads" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                                    </label>
+                                </div>
+                                
+                                <button onclick="saveFeatureSettings()" class="w-full bg-purple-600 text-white font-bold py-2 rounded-lg hover:bg-purple-700">
+                                    <i class="fas fa-save mr-1"></i> Save Feature Settings
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Promo Ad Configuration -->
+                        <div id="promo-ad-config" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-lg mb-4 text-gray-800"><i class="fas fa-bullhorn text-blue-600"></i> Promotional Ad</h3>
+                            <p class="text-xs text-gray-500 mb-4">Configure the promotional banner shown to customers after order</p>
+                            <div class="space-y-3">
+                                <!-- Enable Toggle -->
+                                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-toggle-on text-blue-600"></i>
+                                        <label for="promo-ad-enabled" class="text-sm font-bold text-gray-700 cursor-pointer select-none">Enable Promo Ad</label>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="promo-ad-enabled" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                                    </label>
+                                </div>
+                                
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Ad Title</label>
+                                    <input type="text" id="promo-ad-title" placeholder="e.g., Special Offer!" class="w-full p-3 border rounded-lg outline-none">
+                                </div>
+                                
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Description</label>
+                                    <input type="text" id="promo-ad-description" placeholder="e.g., Get 20% off on your next order!" class="w-full p-3 border rounded-lg outline-none">
+                                </div>
+                                
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Button Text</label>
+                                    <input type="text" id="promo-ad-button" placeholder="e.g., View Offer" class="w-full p-3 border rounded-lg outline-none">
+                                </div>
+                                
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Link URL (optional)</label>
+                                    <input type="url" id="promo-ad-link" placeholder="https://..." class="w-full p-3 border rounded-lg outline-none">
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-500 uppercase">Background Color</label>
+                                        <input type="color" id="promo-ad-bg-color" value="#7c3aed" class="w-full h-10 rounded-lg cursor-pointer">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-500 uppercase">Text Color</label>
+                                        <input type="color" id="promo-ad-text-color" value="#ffffff" class="w-full h-10 rounded-lg cursor-pointer">
+                                    </div>
+                                </div>
+                                
+                                <button onclick="savePromoAdSettings()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">
+                                    <i class="fas fa-save mr-1"></i> Save Promo Ad
                                 </button>
                             </div>
                         </div>
@@ -8318,6 +8451,183 @@ Report generated by Orderly Admin Dashboard
             }
         };
         
+        // --- TAX & FEE SETTINGS ---
+        window.saveTaxSettings = async () => {
+            try {
+                const taxEnabled = document.getElementById('setting-tax-enabled')?.checked ?? true;
+                const taxPercent = parseFloat(document.getElementById('setting-tax-percent')?.value) || 5;
+                const convenienceFee = parseFloat(document.getElementById('setting-convenience-fee')?.value) || 1.98;
+                const gstin = document.getElementById('setting-gstin')?.value || '';
+                const cgst = parseFloat(document.getElementById('setting-cgst')?.value) || 2.5;
+                const sgst = parseFloat(document.getElementById('setting-sgst')?.value) || 2.5;
+                
+                const taxData = {
+                    taxEnabled,
+                    taxPercent,
+                    convenienceFee,
+                    gstin,
+                    cgst,
+                    sgst,
+                    updatedAt: Date.now()
+                };
+                
+                await setDoc(doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'tax'), taxData);
+                window.showToast('Tax & Fee settings saved!', 'success');
+                console.log('✅ Tax settings saved:', taxData);
+            } catch (e) {
+                console.error('❌ Error saving tax settings:', e);
+                window.showToast('Failed to save: ' + e.message, 'error');
+            }
+        };
+        
+        window.loadTaxSettings = async () => {
+            try {
+                const settingsSnap = await getDoc(doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'tax'));
+                if (settingsSnap.exists()) {
+                    const data = settingsSnap.data();
+                    const taxEnabledEl = document.getElementById('setting-tax-enabled');
+                    const taxPercentEl = document.getElementById('setting-tax-percent');
+                    const convFeeEl = document.getElementById('setting-convenience-fee');
+                    const gstinEl = document.getElementById('setting-gstin');
+                    const cgstEl = document.getElementById('setting-cgst');
+                    const sgstEl = document.getElementById('setting-sgst');
+                    
+                    if (taxEnabledEl) taxEnabledEl.checked = data.taxEnabled !== false;
+                    if (taxPercentEl) taxPercentEl.value = data.taxPercent || 5;
+                    if (convFeeEl) convFeeEl.value = data.convenienceFee || 1.98;
+                    if (gstinEl) gstinEl.value = data.gstin || '';
+                    if (cgstEl) cgstEl.value = data.cgst || 2.5;
+                    if (sgstEl) sgstEl.value = data.sgst || 2.5;
+                    
+                    console.log('✅ Tax settings loaded');
+                }
+            } catch (e) {
+                console.log('ℹ️ No tax settings found, using defaults');
+            }
+        };
+        
+        // Load tax settings on page load
+        setTimeout(loadTaxSettings, 2000);
+        
+        // --- FEATURE SETTINGS (Admin control, Super Admin allocation) ---
+        window.saveFeatureSettings = async () => {
+            try {
+                // First check if features are allocated by Super Admin
+                const allocatedSnap = await getDoc(doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'features'));
+                const allocated = allocatedSnap.exists() ? allocatedSnap.data() : {};
+                
+                const featureData = {
+                    spinWheel: document.getElementById('setting-spin-wheel')?.checked && allocated.spinWheel,
+                    donations: document.getElementById('setting-donations')?.checked && (allocated.donations !== false),
+                    promoAds: document.getElementById('setting-promo-ads')?.checked && allocated.promoAds,
+                    adminEnabled: {
+                        spinWheel: document.getElementById('setting-spin-wheel')?.checked,
+                        donations: document.getElementById('setting-donations')?.checked,
+                        promoAds: document.getElementById('setting-promo-ads')?.checked
+                    },
+                    updatedAt: Date.now()
+                };
+                
+                await setDoc(doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'features'), featureData, { merge: true });
+                window.showToast('Feature settings saved!', 'success');
+                console.log('✅ Feature settings saved:', featureData);
+            } catch (e) {
+                console.error('❌ Error saving features:', e);
+                window.showToast('Failed to save: ' + e.message, 'error');
+            }
+        };
+        
+        window.loadFeatureSettings = async () => {
+            try {
+                const featuresSnap = await getDoc(doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'features'));
+                const features = featuresSnap.exists() ? featuresSnap.data() : {};
+                
+                // Check Super Admin allocation
+                const spinWheelAllocated = features.spinWheel || false;
+                const donationsAllocated = features.donations !== false;
+                const promoAdsAllocated = features.promoAds || false;
+                
+                // Set checkbox states based on admin preferences
+                const adminEnabled = features.adminEnabled || {};
+                document.getElementById('setting-spin-wheel').checked = adminEnabled.spinWheel || false;
+                document.getElementById('setting-donations').checked = adminEnabled.donations !== false;
+                document.getElementById('setting-promo-ads').checked = adminEnabled.promoAds || false;
+                
+                // Show/hide or disable features not allocated by Super Admin
+                const spinRow = document.getElementById('spinWheel-feature-row');
+                const donRow = document.getElementById('donations-feature-row');
+                const promoRow = document.getElementById('promoAds-feature-row');
+                
+                if (!spinWheelAllocated && spinRow) {
+                    spinRow.classList.add('opacity-50');
+                    spinRow.querySelector('input').disabled = true;
+                    spinRow.querySelector('span.text-\\[10px\\]').textContent = '❌ Not allocated by Super Admin';
+                }
+                if (!donationsAllocated && donRow) {
+                    donRow.classList.add('opacity-50');
+                    donRow.querySelector('input').disabled = true;
+                    donRow.querySelector('span.text-\\[10px\\]').textContent = '❌ Not allocated by Super Admin';
+                }
+                if (!promoAdsAllocated && promoRow) {
+                    promoRow.classList.add('opacity-50');
+                    promoRow.querySelector('input').disabled = true;
+                    promoRow.querySelector('span.text-\\[10px\\]').textContent = '❌ Not allocated by Super Admin';
+                }
+                
+                console.log('✅ Feature settings loaded:', features);
+            } catch (e) {
+                console.log('ℹ️ No feature settings found, using defaults');
+            }
+        };
+        
+        // Load feature settings on page load
+        setTimeout(loadFeatureSettings, 2500);
+        
+        // --- PROMO AD SETTINGS ---
+        window.savePromoAdSettings = async () => {
+            try {
+                const promoData = {
+                    enabled: document.getElementById('promo-ad-enabled')?.checked || false,
+                    title: document.getElementById('promo-ad-title')?.value || 'Special Offer!',
+                    description: document.getElementById('promo-ad-description')?.value || 'Check out our amazing deals',
+                    buttonText: document.getElementById('promo-ad-button')?.value || 'View Offer',
+                    linkUrl: document.getElementById('promo-ad-link')?.value || '',
+                    bgColor: document.getElementById('promo-ad-bg-color')?.value || '#7c3aed',
+                    textColor: document.getElementById('promo-ad-text-color')?.value || '#ffffff',
+                    updatedAt: Date.now()
+                };
+                
+                await setDoc(doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'promoAd'), promoData);
+                window.showToast('Promo ad saved!', 'success');
+                console.log('✅ Promo ad saved:', promoData);
+            } catch (e) {
+                console.error('❌ Error saving promo ad:', e);
+                window.showToast('Failed to save: ' + e.message, 'error');
+            }
+        };
+        
+        window.loadPromoAdSettings = async () => {
+            try {
+                const promoSnap = await getDoc(doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'promoAd'));
+                if (promoSnap.exists()) {
+                    const data = promoSnap.data();
+                    document.getElementById('promo-ad-enabled').checked = data.enabled || false;
+                    document.getElementById('promo-ad-title').value = data.title || '';
+                    document.getElementById('promo-ad-description').value = data.description || '';
+                    document.getElementById('promo-ad-button').value = data.buttonText || '';
+                    document.getElementById('promo-ad-link').value = data.linkUrl || '';
+                    document.getElementById('promo-ad-bg-color').value = data.bgColor || '#7c3aed';
+                    document.getElementById('promo-ad-text-color').value = data.textColor || '#ffffff';
+                    console.log('✅ Promo ad settings loaded');
+                }
+            } catch (e) {
+                console.log('ℹ️ No promo ad settings found');
+            }
+        };
+        
+        // Load promo ad settings on page load
+        setTimeout(loadPromoAdSettings, 3000);
+        
         window.downloadGSTReport = () => {
             const today = new Date();
             const month = today.toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -9048,6 +9358,27 @@ Report generated by Orderly Admin Dashboard
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
