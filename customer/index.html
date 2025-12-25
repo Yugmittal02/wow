@@ -594,7 +594,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
     import { getDatabase, ref, push, set, serverTimestamp, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDSl6L3ym7G9wXJjZoCYGtU6oBuMyswMBA",
@@ -611,13 +611,23 @@
     const db = getDatabase(app);        
     const dbFirestore = getFirestore(app);
 
+    // --- 1. GET RESTAURANT ID FROM URL ---
+const urlParams = new URLSearchParams(window.location.search);
+const RESTAURANT_ID = urlParams.get('id');
+
+if (!RESTAURANT_ID) {
+    document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px;'>⚠️ Error: No Cafe ID Found! <br> Use link like: customer.html?id=cafe-name</h1>";
+    throw new Error("Missing Restaurant ID");
+}
+console.log("Connected to Restaurant:", RESTAURANT_ID);
+
     window.rawMenuDocs = [];
     window.allAddons = {}; 
     window.currentDocId = null;
 
     // --- 1. APP BLOCKING LISTENER ---
     const initSecurity = () => {
-        const statusRef = ref(db, 'appStatus');
+        const statusRef = ref(db, `restaurants/${RESTAURANT_ID}/appStatus`);
         onValue(statusRef, (snapshot) => {
             const isBlocked = snapshot.val();
             const overlay = document.getElementById('app-blocked-overlay');
@@ -658,7 +668,7 @@
     }
 
     function initAddonsSync() {
-        const addonRef = collection(dbFirestore, "addons");
+        const addonRef = collection(dbFirestore, "restaurants", RESTAURANT_ID, "addons");
         onSnapshot(addonRef, (snapshot) => {
             window.allAddons = {};
             snapshot.forEach(doc => {
@@ -670,7 +680,7 @@
     }
 
     function initMenuSync() {
-        const menuRef = collection(dbFirestore, "menu");
+        const menuRef = collection(dbFirestore, "restaurants", RESTAURANT_ID, "menu");
         onSnapshot(menuRef, (snapshot) => {
             window.rawMenuDocs = [];
             snapshot.forEach(doc => {
@@ -708,7 +718,7 @@
     }
 
     function initOffersSync() {
-        const cardsRef = collection(dbFirestore, "site_cards");
+        const cardsRef = collection(dbFirestore, "restaurants", RESTAURANT_ID, "site_cards");
         onSnapshot(cardsRef, (snapshot) => {
             window.offerList = [];
             snapshot.forEach(doc => {
@@ -1048,11 +1058,11 @@
             console.log("✅ Order placed from customer website - Admin verification required for wallet deduction");
             
             // PLACE ORDER (No wallet deduction - admin will verify and deduct manually)
-            const rtdbRef = push(ref(db, 'orders'));
+            const rtdbRef = push(ref(db, `restaurants/${RESTAURANT_ID}/orders`));
             await set(rtdbRef, orderData);
             const rtdbKey = rtdbRef.key; // Get RTDB key for real-time listening
             
-            const docRef = await addDoc(collection(dbFirestore, "orders"), orderData);
+            const docRef = await addDoc(collection(dbFirestore, "restaurants", RESTAURANT_ID, "orders"), orderData);
             window.currentDocId = docRef.id;
             window.currentOrderId = orderID; // Store order ID for payment status monitoring
             window.currentRTDBKey = rtdbKey; // Store RTDB key for real-time updates
@@ -1129,7 +1139,61 @@
         }, 2000);
     };
 
-    function initUI() {
+    // --- DYNAMIC BRANDING & THEME ---
+    async function applyBranding() {
+        try {
+            // 1. Fetch Brand Config from Firebase
+            const brandRef = doc(dbFirestore, "restaurants", RESTAURANT_ID, "settings", "brandConfig");
+            const snapshot = await getDoc(brandRef);
+
+            if (snapshot.exists()) {
+                const data = snapshot.data();
+
+                // 2. Set Colors (CSS Variables)
+                const root = document.documentElement;
+                root.style.setProperty('--primary', data.primaryColor || '#ea580c');
+                root.style.setProperty('--secondary', data.secondaryColor || '#dc2626');
+                
+                // 3. Update Text Content
+                if(data.cafeName) document.title = data.cafeName;
+                const logoText = document.querySelector('h1.font-black'); 
+                if(logoText && data.cafeName) {
+                    const parts = data.cafeName.split(' ');
+                    const first = parts[0];
+                    const rest = parts.slice(1).join(' ');
+                    logoText.innerHTML = `${first}<span style="color: ${data.primaryColor || '#ea580c'}">${rest}</span>`;
+                }
+
+                // 4. Update Splash Screen & Header
+                const splash = document.getElementById('splash-screen');
+                if(splash) splash.style.background = `linear-gradient(to bottom right, ${data.primaryColor || '#ea580c'}, ${data.secondaryColor || '#dc2626'})`;
+
+                // 5. Update All Buttons dynamically
+                const buttons = document.querySelectorAll('button, .bg-orange-600, .text-orange-600');
+                buttons.forEach(btn => {
+                    if(btn.classList.contains('bg-orange-600')) {
+                        btn.style.backgroundColor = data.primaryColor;
+                        btn.classList.remove('bg-orange-600');
+                    }
+                    if(btn.classList.contains('text-orange-600')) {
+                        btn.style.color = data.primaryColor;
+                        btn.classList.remove('text-orange-600');
+                    }
+                });
+
+                console.log("🎨 Branding Applied:", data.cafeName);
+            } else {
+                console.log("📝 Using default branding (no config found)");
+            }
+        } catch (e) {
+            console.warn("Using default branding (Network error or no config):", e.message);
+        }
+    }
+
+    async function initUI() {
+        // Apply dynamic branding first
+        await applyBranding();
+        
         document.getElementById('display-name').innerText = window.wowUser.name.split(' ')[0];
         document.getElementById('main-app').classList.remove('opacity-0');
         document.getElementById('main-app').classList.add('fade-in');
