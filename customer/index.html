@@ -318,9 +318,6 @@
         <div class="px-5 mt-0">
             <h3 class="font-bold text-gray-800 text-lg mb-3">Explore Menu</h3>
             <div class="flex overflow-x-auto gap-3 hide-scrollbar pb-2">
-                <div onclick="filterByExplore('All')" class="explore-btn active flex-shrink-0 w-20 h-24 bg-gray-800 rounded-xl flex flex-col items-center justify-center gap-1 border border-gray-600 cursor-pointer transition-all active:scale-95 shadow-sm" id="exp-all">
-                    <span class="text-2xl">🍽️</span><span class="text-[10px] font-bold text-white">All Menu</span>
-                </div>
                 <div onclick="filterByExplore('Pizza')" class="explore-btn flex-shrink-0 w-20 h-24 bg-red-50 rounded-xl flex flex-col items-center justify-center gap-1 border border-red-100 cursor-pointer transition-all active:scale-95 hover:bg-red-100" id="exp-pizza">
                     <span class="text-2xl">🍕</span><span class="text-[10px] font-bold text-red-800">Pizza</span>
                 </div>
@@ -926,73 +923,45 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     // --- REAL-TIME PAYMENT STATUS MONITORING ---
     window.paymentStatusListener = null; // Store listener reference
     
+    // --- FIXED PAYMENT LISTENER ---
     window.initPaymentStatusListener = (rtdbKey, orderId) => {
-        console.log("🔍 Initializing payment status listener for order:", orderId, "RTDB Key:", rtdbKey);
+        console.log("🔍 Listening for Payment Confirmation on Path:", `restaurants/${RESTAURANT_ID}/orders/${rtdbKey}`);
         
-        // Remove previous listener if exists
+        // Purana listener band karein agar chal raha hai
         if (window.paymentStatusListener) {
-            window.paymentStatusListener(); // Unsubscribe
+            try { window.paymentStatusListener(); } catch(e){}
         }
         
-        // Listen for payment status changes in real-time
-        const orderRef = ref(db, `orders/${rtdbKey}`);
+        // 🔴 MAIN FIX: Path mein 'restaurants/' + RESTAURANT_ID add kiya hai
+        const orderRef = ref(db, `restaurants/${RESTAURANT_ID}/orders/${rtdbKey}`);
+        
         window.paymentStatusListener = onValue(orderRef, (snapshot) => {
-            try {
-                const orderData = snapshot.val();
+            const data = snapshot.val();
+            if (!data) return;
 
-                if (!orderData) {
-                    console.warn("⚠️ Order data not found for key:", rtdbKey);
-                    return;
+            // Check karo agar Admin ne status change kiya
+            const status = String(data.paymentStatus || data.status || '').toLowerCase();
+            const isPaid = data.paid === true || data.isPaid === true || status.includes('paid') || status.includes('success');
+
+            console.log(`📡 Payment Update: ${status} | Paid: ${isPaid}`);
+
+            // Agar Payment Done hai aur pehle se update nahi hua
+            if (isPaid && !window.currentOrderPaid) {
+                console.log("✅ Admin Accepted Payment!");
+                window.currentOrderPaid = true;
+                
+                // Screen Update Karo
+                if (typeof updateReceiptForPaidPayment === 'function') {
+                    updateReceiptForPaidPayment(orderId);
+                }
+                
+                // Rating Widget Dikhao
+                if (typeof showRatingWidgetAnimated === 'function') {
+                    setTimeout(() => showRatingWidgetAnimated(), 1000);
                 }
 
-                // Derive a robust 'paid' detection from multiple possible fields
-                const rawStatus = orderData.paymentStatus || orderData.status || orderData.txnStatus || '';
-                const paymentStatusLower = String(rawStatus).toLowerCase();
-                const booleanPaid = orderData.isPaid === true || orderData.paid === true || orderData.paymentDone === true;
-
-                console.log("📊 Payment status update:", { orderId, rawStatus, booleanPaid, orderData });
-
-                const isPaid = booleanPaid || paymentStatusLower.includes('paid') || paymentStatusLower.includes('success');
-
-                if (isPaid) {
-                    console.log("✅ Payment confirmed! Updating receipt UI...");
-
-                    try {
-                        if (typeof updateReceiptForPaidPayment === 'function') updateReceiptForPaidPayment(orderId);
-                        // show rating after a short delay so user sees receipt first
-                        if (typeof showRatingWidgetAnimated === 'function') setTimeout(() => showRatingWidgetAnimated(), 700);
-                    } catch (uiError) {
-                        console.error("❌ Error updating UI:", uiError);
-                    }
-
-                    // Try to mark payment as paid in Firestore copy of the order if we have the doc id
-                    if (window.currentDocId && typeof updateDoc === 'function') {
-                        try {
-                            const docRefToUpdate = doc(dbFirestore, 'orders', window.currentDocId);
-                            updateDoc(docRefToUpdate, { paymentStatus: 'PAID', paidAt: new Date().toISOString() }).catch(()=>{});
-                        } catch (e) { console.warn('Could not update Firestore payment status', e); }
-                    }
-
-                    // Unsubscribe listener to avoid repeated handling
-                    try { if (window.paymentStatusListener) window.paymentStatusListener(); } catch(e){}
-                    window.paymentStatusListener = null;
-                } else {
-                    console.log("⏳ Payment still pending...");
-                }
-            } catch (error) {
-                console.error("❌ Error in payment status listener:", error);
-                // Don't crash - continue listening
-            }
-        }, (error) => {
-            console.error("❌ Payment status listener error:", error);
-            // Show user-friendly error
-            if(typeof Toastify !== 'undefined') {
-                Toastify({ 
-                    text: "Connection issue. Retrying...", 
-                    className: "toast-center", 
-                    style: { background: "#F59E0B" },
-                    duration: 2000
-                }).showToast();
+                // Listener Band Karo (Taaki baar baar run na ho)
+                if (window.paymentStatusListener) window.paymentStatusListener();
             }
         });
     };
@@ -1101,63 +1070,49 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     let promoAdData = null;
     let promoAdLinkUrl = '';
     
-    window.loadPromoAd = async () => {
-        console.log("📢 Loading promo ad from Firebase...");
-        try {
-            // First check if promo ads feature is enabled
-            const featuresRef = doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'features');
-            const featuresSnap = await getDoc(featuresRef);
-            const features = featuresSnap.exists() ? featuresSnap.data() : {};
-            
-            if (!features.promoAds) {
-                console.log("ℹ️ Promo ads not enabled by Super Admin");
-                document.getElementById('promo-ad-section')?.classList.add('hidden');
-                return;
-            }
-            
-            const promoRef = doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'promoAd');
-            const promoSnap = await getDoc(promoRef);
-            
-            if (promoSnap.exists()) {
-                promoAdData = promoSnap.data();
-                console.log("✅ Promo ad loaded:", promoAdData);
+    // --- LIVE PROMO AD SYSTEM (BROADCAST) ---
+    window.loadPromoAd = () => {
+        console.log("📡 Connecting to Live Promo Broadcast...");
+        // Real-time listener on 'settings/promoAd'
+        const promoRef = doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'promoAd');
+        
+        onSnapshot(promoRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const promoSection = document.getElementById('promo-ad-section');
                 
-                if (promoAdData.enabled) {
-                    const promoSection = document.getElementById('promo-ad-section');
+                if (data.enabled) {
                     const promoCard = document.getElementById('promo-ad-card');
                     const promoTitle = document.getElementById('promo-ad-title');
                     const promoDesc = document.getElementById('promo-ad-desc');
                     const promoBtn = document.getElementById('promo-ad-btn');
-                    
+
                     if (promoSection && promoCard) {
-                        // Apply gradient background for live look
-                        const bgColor = promoAdData.bgColor || '#7c3aed';
+                        // Dynamic Colors from Admin
+                        const bgColor = data.bgColor || '#7c3aed';
                         promoCard.style.background = `linear-gradient(135deg, ${bgColor} 0%, ${adjustColor(bgColor, -30)} 100%)`;
-                        promoTitle.style.color = promoAdData.textColor || '#ffffff';
-                        promoDesc.style.color = promoAdData.textColor || '#ffffff';
-                        promoBtn.style.color = promoAdData.textColor || '#ffffff';
+                        promoTitle.style.color = data.textColor || '#ffffff';
+                        promoDesc.style.color = data.textColor || '#ffffff';
+                        promoBtn.style.color = data.textColor || '#ffffff';
                         
-                        // Set content
-                        promoTitle.textContent = promoAdData.title || 'Special Offer!';
-                        promoDesc.textContent = promoAdData.description || 'Check out our amazing deals';
-                        promoBtn.innerHTML = `<i class="fas fa-arrow-right mr-2"></i> ${promoAdData.buttonText || 'View Offer'}`;
-                        promoAdLinkUrl = promoAdData.linkUrl || '';
-                        
-                        // Show promo section with animation
+                        // Dynamic Text
+                        promoTitle.textContent = data.title || 'Special Offer!';
+                        promoDesc.textContent = data.description || 'Check out our amazing deals';
+                        promoBtn.innerHTML = `<i class="fas fa-arrow-right mr-2"></i> ${data.buttonText || 'View Offer'}`;
+                        window.promoAdLinkUrl = data.linkUrl || '';
+
+                        // Show with animation
                         promoSection.classList.remove('hidden');
-                        promoSection.style.animation = 'fadeIn 0.5s ease-out forwards';
-                        console.log("✅ Promo ad displayed");
+                        promoSection.classList.add('animate-fade-in');
+                        console.log("✅ Live Promo Ad displayed");
                     }
                 } else {
-                    console.log("ℹ️ Promo ad is disabled");
-                    document.getElementById('promo-ad-section')?.classList.add('hidden');
+                    // Hide immediately if Admin disables it
+                    if(promoSection) promoSection.classList.add('hidden');
+                    console.log("❌ Promo Ad disabled by Admin");
                 }
-            } else {
-                console.log("ℹ️ No promo ad configured");
             }
-        } catch (e) {
-            console.error("❌ Error loading promo ad:", e);
-        }
+        });
     };
     
     // Helper to darken/lighten color for gradient
@@ -1200,18 +1155,20 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     ];
     const WHEEL_COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
     
-    // Load spin wheel settings
-    window.loadSpinWheelSettings = async () => {
-        try {
-            const settingsRef = doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'features');
-            const snap = await getDoc(settingsRef);
+    // --- CHECK IF WHEEL IS ENABLED (REAL-TIME) ---
+    window.loadSpinWheelSettings = () => {
+        const featuresRef = doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'features');
+        onSnapshot(featuresRef, (snap) => {
             if (snap.exists()) {
-                spinWheelEnabled = snap.data().spinWheel === true;
-                console.log('🎰 Spin wheel enabled:', spinWheelEnabled);
+                const data = snap.data();
+                window.spinWheelEnabled = data.spinWheel === true;
+                spinWheelEnabled = window.spinWheelEnabled; // Also update local var
+                console.log('🎰 Spin Wheel Feature is:', window.spinWheelEnabled ? "ON ✅" : "OFF ❌");
+            } else {
+                window.spinWheelEnabled = false; // Default OFF if doc missing
+                spinWheelEnabled = false;
             }
-        } catch (e) {
-            console.log('ℹ️ Spin wheel settings not found');
-        }
+        });
     };
     
     // Initialize wheel segments
@@ -1290,27 +1247,35 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
         }, 4500);
     };
     
-    // Show spin result
+    // --- SAVE PRIZE TO PHONE (LOCAL STORAGE) ---
     window.showSpinResult = (prize) => {
         if (prize.value === 0) {
             if (typeof Toastify !== 'undefined') {
                 Toastify({ text: "Better luck next time! 🍀", className: "toast-center", style: { background: "#6B7280" }, duration: 3000 }).showToast();
             }
+            setTimeout(() => { closeSpinResult(); window.resetApp(); }, 3000);
             return;
         }
         
-        // Save to localStorage for next order
+        // 💾 SAVE TO LOCAL STORAGE
         const savedCoupons = JSON.parse(localStorage.getItem('wowSpinCoupons') || '[]');
-        savedCoupons.push({
-            code: prize.code,
-            value: prize.value,
-            isFlat: prize.isFlat || false,
-            isFree: prize.isFree || false,
-            text: prize.text,
-            wonAt: Date.now(),
-            used: false
-        });
-        localStorage.setItem('wowSpinCoupons', JSON.stringify(savedCoupons));
+        
+        // Check duplication (don't save same code twice if unused)
+        const alreadyHas = savedCoupons.some(c => c.code === prize.code && !c.used);
+        
+        if(!alreadyHas) {
+            savedCoupons.push({
+                code: prize.code,
+                value: prize.value,
+                isFlat: prize.isFlat || false,
+                isFree: prize.isFree || false,
+                text: prize.text,
+                wonAt: Date.now(),
+                used: false // Next order mein check karne ke liye
+            });
+            localStorage.setItem('wowSpinCoupons', JSON.stringify(savedCoupons));
+            console.log("🎁 Coupon Saved to Phone:", prize.code);
+        }
         
         // Show result modal
         document.getElementById('spin-prize').innerText = prize.text;
@@ -1326,9 +1291,11 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
         }
     };
     
+    // Update close button to reset app
     window.closeSpinResult = () => {
         document.getElementById('spin-result-modal').classList.add('hidden');
         document.getElementById('spin-result-modal').classList.remove('flex');
+        window.resetApp(); // Game over, go home
     };
     
     // Load settings on init
@@ -1400,10 +1367,11 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
         });
     };
     
+    // --- SUBMIT RATING & TRIGGER WHEEL ---
     window.submitRating = async (star) => {
         console.log("⭐ Rating submitted:", star);
         
-        // Highlight selected stars with animation
+        // Stars animation logic
         const stars = document.querySelectorAll('.star-rating i');
         stars.forEach((s, i) => {
             if (i < star) {
@@ -1413,55 +1381,41 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             }
         });
         
-        if(typeof Toastify !== 'undefined') {
-            Toastify({ 
-                text: `Thanks for ${star} star${star > 1 ? 's' : ''} rating! ⭐`, 
-                className: "toast-center", 
-                style: { background: "#10B981" },
-                duration: 2000
-            }).showToast();
-        }
-
-        // Save rating to both Firestore and RTDB
+        // Save Rating to DB
         if(window.currentDocId) {
-             try {
-                const orderRef = doc(dbFirestore, "orders", window.currentDocId);
-                await updateDoc(orderRef, { rating: star });
-                console.log("✅ Rating saved to Firestore");
-             } catch(e) { 
-                 console.error("❌ Rating save error (Firestore):", e); 
-             }
+             try { await updateDoc(doc(dbFirestore, "orders", window.currentDocId), { rating: star }); } catch(e) {}
+        }
+        if(window.currentRTDBKey) {
+            try { await update(ref(db, `restaurants/${RESTAURANT_ID}/orders/${window.currentRTDBKey}`), { rating: star }); } catch(e) {}
         }
         
-        // Also save to RTDB if we have the key
-        if(window.currentRTDBKey) {
-            try {
-                await update(ref(db, `orders/${window.currentRTDBKey}`), { rating: star });
-                console.log("✅ Rating saved to RTDB");
-            } catch(e) {
-                console.error("❌ Rating save error (RTDB):", e);
-            }
+        if(typeof Toastify !== 'undefined') {
+            Toastify({ text: `Thanks for ${star} star rating! ⭐`, className: "toast-center", style: { background: "#10B981" }, duration: 2000 }).showToast();
         }
 
-        // Hide rating widget with animation after delay (center modal)
+        // 🟢 MAIN LOGIC CHANGE HERE 🟢
         setTimeout(() => {
             const ratingWidget = document.getElementById('rating-widget');
-            if (ratingWidget) {
-                const ratingCard = ratingWidget.querySelector('.bg-white');
-                if (ratingCard) {
-                    ratingCard.classList.remove('scale-100');
-                    ratingCard.classList.add('scale-0');
+            
+            // Hide Rating Widget
+            if(ratingWidget) {
+                const card = ratingWidget.querySelector('.bg-white');
+                if(card) {
+                    card.classList.remove('scale-100');
+                    card.classList.add('scale-0');
                 }
+                
                 setTimeout(() => {
                     ratingWidget.classList.add('hidden');
                     ratingWidget.classList.remove('flex');
                     
-                    // Show Spin Wheel after rating (if enabled)
-                    setTimeout(() => {
-                        if (spinWheelEnabled) {
-                            showSpinWheel();
-                        }
-                    }, 500);
+                    // IF ADMIN ENABLED WHEEL -> SHOW WHEEL
+                    if (window.spinWheelEnabled || spinWheelEnabled) {
+                        setTimeout(() => showSpinWheel(), 300);
+                    } else {
+                        // ELSE -> RESET APP
+                        window.resetApp();
+                    }
                 }, 300);
             }
         }, 1500);
