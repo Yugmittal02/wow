@@ -773,9 +773,10 @@ if (!RESTAURANT_ID) {
 console.log("Connected to Restaurant:", RESTAURANT_ID);
 
     // --- FEE & TAX CONFIG (loaded from Firebase) ---
-    let CONVENIENCE_FEE = 1.98;
-    let TAX_ENABLED = true;
-    let TAX_PERCENT = 5; // Default 5%
+    // Using window. to make accessible in non-module scripts
+    window.CONVENIENCE_FEE = 1.98;
+    window.TAX_ENABLED = true;
+    window.TAX_PERCENT = 5; // Default 5%
 
     window.rawMenuDocs = [];
     window.allAddons = {}; 
@@ -808,12 +809,12 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             
             if (settingsSnap.exists()) {
                 const data = settingsSnap.data();
-                TAX_ENABLED = data.taxEnabled !== false; // Default true
-                TAX_PERCENT = data.taxPercent || 5;
-                CONVENIENCE_FEE = data.convenienceFee || 1.98;
-                console.log('✅ Tax settings loaded:', { TAX_ENABLED, TAX_PERCENT, CONVENIENCE_FEE });
+                window.TAX_ENABLED = data.taxEnabled !== false; // Default true
+                window.TAX_PERCENT = data.taxPercent || 5;
+                window.CONVENIENCE_FEE = data.convenienceFee || 1.98;
+                console.log('✅ Tax settings loaded:', { TAX_ENABLED: window.TAX_ENABLED, TAX_PERCENT: window.TAX_PERCENT, CONVENIENCE_FEE: window.CONVENIENCE_FEE });
             }
-            calculateTotals();
+            if (window.calculateTotals) window.calculateTotals();
         } catch (e) {
             console.log('ℹ️ Using default tax settings:', e.message);
         }
@@ -1533,14 +1534,14 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
 
             const savedHistory = JSON.parse(localStorage.getItem('wowRecentOrders') || '[]');
             const subtotal = window.wowCart.reduce((a,b) => a + (b.price * b.qty), 0);
-            const taxAmt = TAX_ENABLED ? (subtotal * (TAX_PERCENT / 100)) : 0;
+            const taxAmt = window.TAX_ENABLED ? (subtotal * (window.TAX_PERCENT / 100)) : 0;
             
             savedHistory.unshift({
                 id: orderID,
                 amount: grandTotal,
                 subtotal: subtotal.toFixed(2),
                 tax: taxAmt.toFixed(2),
-                fee: CONVENIENCE_FEE.toFixed(2),
+                fee: (window.CONVENIENCE_FEE || 1.98).toFixed(2),
                 donation: window.donationAmt,
                 date: new Date().toLocaleDateString(),
                 time: new Date().toLocaleTimeString(),
@@ -2020,15 +2021,21 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     }
 
     window.addToCart = (id, parentId, name, variantDetails, price) => {
+        // Fix: Force price to be a number
+        const cleanPrice = Number(price) || 0;
+        
         const existing = window.wowCart.find(c => c.id === id);
         if(existing) {
             existing.qty++;
         } else {
-            window.wowCart.push({ id, parentId, name, variantDetails, price, qty: 1 });
+            window.wowCart.push({ id, parentId, name, variantDetails, price: cleanPrice, qty: 1 });
         }
         window.saveCartToStorage();
-        updateCartBar();
-        renderMenu(window.currentCategory === 'All' ? window.menuData : window.menuData.filter(i => i.category === window.currentCategory));
+        window.updateCartBar();
+        // Check if renderMenu exists before calling
+        if(window.renderMenu) {
+             window.renderMenu(window.currentCategory === 'All' ? window.menuData : window.menuData.filter(i => i.category === window.currentCategory));
+        }
     }
 
     window.updateQty = (id, change) => {
@@ -2038,9 +2045,9 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             if(item.qty <= 0) window.wowCart = window.wowCart.filter(c => c.id !== id);
         }
         window.saveCartToStorage(); 
-        updateCartBar();
-        renderBill();
-        renderMenu(window.currentCategory === 'All' ? window.menuData : window.menuData.filter(i => i.category === window.currentCategory));
+        window.updateCartBar();
+        window.renderBill();
+        window.renderMenu(window.currentCategory === 'All' ? window.menuData : window.menuData.filter(i => i.category === window.currentCategory));
     }
 
     window.editCartItem = (id) => {
@@ -2049,9 +2056,9 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             const parentId = window.wowCart[itemIndex].parentId;
             window.wowCart.splice(itemIndex, 1); 
             window.saveCartToStorage();
-            updateCartBar();
-            renderBill();
-            openCustomModal(parentId); 
+            window.updateCartBar();
+            window.renderBill();
+            window.openCustomModal(parentId); 
         }
     }
 
@@ -2071,16 +2078,16 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     }
 
     window.openCheckout = () => {
-        document.getElementById('customer-info-bill').innerText = window.wowUser.name;
-        document.getElementById('receipt-customer').innerText = window.wowUser.name;
+        document.getElementById('customer-info-bill').innerText = window.wowUser ? window.wowUser.name : 'Guest';
+        document.getElementById('receipt-customer').innerText = window.wowUser ? window.wowUser.name : 'Guest';
         const sheet = document.getElementById('checkout-sheet');
         sheet.classList.remove('hidden');
         setTimeout(() => {
             document.getElementById('checkout-bg').classList.remove('opacity-0');
             document.getElementById('checkout-panel').classList.remove('translate-y-full');
         }, 10);
-        renderBill();
-        renderOffers();
+        window.renderBill();
+        window.renderOffers();
         // Render recommended products when checkout opens
         setTimeout(() => {
             if (typeof window.renderRecommendedProducts === 'function') {
@@ -2115,7 +2122,7 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
                 </div>
             </div>
         `).join('');
-        calculateTotals();
+        window.calculateTotals();
         
         // Show recommended products after rendering cart
         if (typeof window.renderRecommendedProducts === 'function') {
@@ -2266,7 +2273,7 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 50, origin: { y: 0.7 }, colors: ['#ec4899'] });
             setTimeout(() => { btn.innerText = originalText; }, 1500);
         }
-        calculateTotals();
+        window.calculateTotals();
     }
 
     window.toggleLoveDonation = () => {
@@ -2282,7 +2289,7 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#ec4899', '#f472b6'] });
         }
         updateDonationUI();
-        calculateTotals();
+        window.calculateTotals();
     }
 
     window.updateDonationUI = () => {
@@ -2293,33 +2300,41 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     }
 
     window.calculateTotals = () => {
-        let total = window.wowCart.reduce((a,b) => a + (b.price * b.qty), 0);
+        // Fix: Force convert price and qty to Number to prevent NaN or 0 errors
+        let total = window.wowCart.reduce((a,b) => a + (Number(b.price || 0) * Number(b.qty || 1)), 0);
+        
         let discount = 0;
         if(window.selectedOffer !== null) {
             const offer = window.offerList[window.selectedOffer];
-            if(total >= offer.minAmt) {
+            if(offer && total >= offer.minAmt) {
                 if(offer.discountPercent > 0) discount = Math.round(total * (offer.discountPercent / 100));
-                else discount = offer.discountFlat;
+                else discount = offer.discountFlat || 0;
             } else window.selectedOffer = null;
         }
         
         const taxableAmount = total - discount;
-        const tax = TAX_ENABLED ? (taxableAmount * (TAX_PERCENT / 100)) : 0;
-        const grand = taxableAmount + tax + CONVENIENCE_FEE + window.donationAmt;
+        const tax = window.TAX_ENABLED ? (taxableAmount * (window.TAX_PERCENT / 100)) : 0;
+        
+        // Fix: Ensure fee is a number
+        const convFee = Number(window.CONVENIENCE_FEE || 1.98); 
+        const donation = Number(window.donationAmt || 0);
 
-        document.getElementById('summary-total').innerText = total;
+        const grand = taxableAmount + tax + convFee + donation;
+
+        document.getElementById('summary-total').innerText = total.toFixed(2);
         document.getElementById('summary-tax').innerText = tax.toFixed(2);
-        document.getElementById('summary-convenience').innerText = CONVENIENCE_FEE.toFixed(2);
-        document.getElementById('summary-donation').innerText = window.donationAmt;
+        document.getElementById('summary-convenience').innerText = convFee.toFixed(2);
+        document.getElementById('summary-donation').innerText = donation;
+        
+        // Grand total updates
         document.getElementById('summary-grand').innerText = grand.toFixed(2);
         document.getElementById('btn-pay-amt').innerText = grand.toFixed(2);
         document.getElementById('pay-modal-amt').innerText = grand.toFixed(2);
         
-        // Update tax row visibility
         const taxRow = document.getElementById('tax-row');
         if (taxRow) {
-            taxRow.style.display = TAX_ENABLED ? 'flex' : 'none';
-            document.getElementById('tax-percent').innerText = TAX_PERCENT;
+            taxRow.style.display = window.TAX_ENABLED ? 'flex' : 'none';
+            document.getElementById('tax-percent').innerText = window.TAX_PERCENT || 5;
         }
         
         if(discount > 0) {
@@ -2349,14 +2364,14 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
                 <div class="text-[10px] font-bold ${isSelected ? 'text-orange-600' : 'text-blue-600'}">${isSelected ? 'APPLIED' : 'APPLY'}</div>
             </div>`;
         });
-        calculateTotals();
+        window.calculateTotals();
     }
 
     window.applyOffer = (index) => {
         const total = window.wowCart.reduce((a,b) => a + (b.price * b.qty), 0);
         if(window.selectedOffer === index) {
             window.selectedOffer = null;
-            renderOffers();
+            window.renderOffers();
         } else {
             if(total >= window.offerList[index].minAmt) {
                 window.selectedOffer = index;
@@ -2367,15 +2382,15 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
                 
                 // Show savings celebration
                 if(savings > 0) {
-                    showSavingsCelebration(savings, offer.code);
+                    window.showSavingsCelebration(savings, offer.code);
                 }
-                renderOffers();
+                window.renderOffers();
             } else { 
                 if(typeof Toastify !== 'undefined') Toastify({text: `Add items worth ₹${window.offerList[index].minAmt} to apply`, className: "toast-center", style: {background: "#F59E0B"}, duration: 2500}).showToast(); 
                 return; 
             }
         }
-        toggleOffers();
+        window.toggleOffers();
     };
     
     // Savings celebration with confetti
