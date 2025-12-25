@@ -1461,6 +1461,70 @@ The AI will analyze:
 
                     <hr class="border-slate-800">
 
+                    <!-- Feature Allocation Section -->
+                    <div class="bg-purple-500/10 border border-purple-500/20 p-4 rounded-xl">
+                        <h4 class="text-purple-400 font-semibold text-sm mb-3 flex items-center gap-2">
+                            <i class="fas fa-magic"></i> Feature Allocation
+                        </h4>
+                        <p class="text-xs text-slate-400 mb-4">Enable/disable premium features for this cafe</p>
+                        
+                        <div class="space-y-3">
+                            <label class="flex items-center justify-between p-3 bg-slate-900 rounded-lg cursor-pointer hover:bg-slate-800 transition">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-dharmachakra text-yellow-400"></i>
+                                    <span class="text-white text-sm">Spin Wheel</span>
+                                </div>
+                                <input type="checkbox" id="feature-spinWheel" onchange="updateFeatureAllocation()" class="w-5 h-5 accent-purple-500">
+                            </label>
+                            
+                            <label class="flex items-center justify-between p-3 bg-slate-900 rounded-lg cursor-pointer hover:bg-slate-800 transition">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-heart text-pink-400"></i>
+                                    <span class="text-white text-sm">Donations</span>
+                                </div>
+                                <input type="checkbox" id="feature-donations" onchange="updateFeatureAllocation()" class="w-5 h-5 accent-purple-500">
+                            </label>
+                            
+                            <label class="flex items-center justify-between p-3 bg-slate-900 rounded-lg cursor-pointer hover:bg-slate-800 transition">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-bullhorn text-blue-400"></i>
+                                    <span class="text-white text-sm">Promo Ads</span>
+                                </div>
+                                <input type="checkbox" id="feature-promoAds" onchange="updateFeatureAllocation()" class="w-5 h-5 accent-purple-500">
+                            </label>
+                            
+                            <label class="flex items-center justify-between p-3 bg-slate-900 rounded-lg cursor-pointer hover:bg-slate-800 transition">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-robot text-cyan-400"></i>
+                                    <span class="text-white text-sm">AI Assistant</span>
+                                </div>
+                                <input type="checkbox" id="feature-aiAssistant" onchange="updateFeatureAllocation()" class="w-5 h-5 accent-purple-500">
+                            </label>
+                            
+                            <label class="flex items-center justify-between p-3 bg-slate-900 rounded-lg cursor-pointer hover:bg-slate-800 transition">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-wallet text-green-400"></i>
+                                    <span class="text-white text-sm">Wallet System</span>
+                                </div>
+                                <input type="checkbox" id="feature-wallet" onchange="updateFeatureAllocation()" class="w-5 h-5 accent-purple-500">
+                            </label>
+                            
+                            <label class="flex items-center justify-between p-3 bg-slate-900 rounded-lg cursor-pointer hover:bg-slate-800 transition">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-chart-line text-orange-400"></i>
+                                    <span class="text-white text-sm">Analytics Dashboard</span>
+                                </div>
+                                <input type="checkbox" id="feature-analytics" onchange="updateFeatureAllocation()" class="w-5 h-5 accent-purple-500">
+                            </label>
+                        </div>
+                        
+                        <button onclick="saveFeatureAllocation()" class="w-full py-2.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition flex items-center justify-center gap-2 mt-4">
+                            <i class="fas fa-save"></i> Save Feature Settings
+                        </button>
+                    </div>
+
+                    <hr class="border-slate-800">
+
                     <!-- Initialize Subcollections Section -->
                     <div class="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl">
                         <h4 class="text-emerald-400 font-semibold text-sm mb-2 flex items-center gap-2">
@@ -1625,7 +1689,7 @@ The AI will analyze:
                     <div class="space-y-3">
                         <div>
                             <label class="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Base URL</label>
-                            <input id="settingsBaseUrl" type="text" value="https://orderly-app.vercel.app"
+                            <input id="settingsBaseUrl" type="text" value="https://orderlysystems.vercel.app"
                                 class="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-white outline-none focus:border-blue-500 text-sm font-mono">
                         </div>
                     </div>
@@ -1676,9 +1740,14 @@ The AI will analyze:
                     </div>
                 </div>
 
-                <button onclick="saveSettings()" class="w-full btn-primary text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2">
-                    <i class="fas fa-save"></i> Save Settings
-                </button>
+                <div class="flex gap-3 mt-2">
+                    <button onclick="closeModal('settingsModal')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                    <button onclick="saveSettings()" class="flex-1 btn-primary text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1837,7 +1906,7 @@ The AI will analyze:
         };
 
         const DEFAULT_SETTINGS = {
-            baseUrl: 'https://orderly-app.vercel.app',
+            baseUrl: 'https://orderlysystems.vercel.app',
             geminiApiKey: '',
             notifLowBalance: true,
             notifNewNode: true,
@@ -2194,9 +2263,9 @@ The AI will analyze:
             const s = getSettings();
             const base = (s.baseUrl || DEFAULT_SETTINGS.baseUrl).replace(/\/$/, '');
             return {
-                owner: `${base}/admin`,
-                customer: `${base}/customer`,
-                kitchen: `${base}/kitchen`
+                owner: `${base}/admin/index.html`,
+                customer: `${base}/customer/index.html`,
+                kitchen: `${base}/kitchen/index.html`
             };
         }
 
@@ -2247,6 +2316,9 @@ The AI will analyze:
             document.getElementById('inspectorModal').classList.remove('hidden');
             switchInspTab('links');
             startLogs(currentInspData.name);
+            
+            // Load feature allocation settings
+            loadFeatureAllocation();
 
             // Fetch menu item count from tenant subcollection (non-blocking)
             (async () => {
@@ -3530,6 +3602,59 @@ If balance < 200, mark as HIGH ALERT.`;
                 console.error(e);
                 showToast('Failed to save settings.', 'error');
             }
+        };
+
+        // --- FEATURE ALLOCATION SYSTEM ---
+        window.loadFeatureAllocation = async () => {
+            if (!currentInspData) return;
+            try {
+                const featuresDoc = await getDoc(doc(db, `restaurants/${currentInspData.id}/settings`, 'features'));
+                const features = featuresDoc.exists() ? featuresDoc.data() : {};
+                
+                // Set checkbox states
+                document.getElementById('feature-spinWheel').checked = features.spinWheel || false;
+                document.getElementById('feature-donations').checked = features.donations !== false; // Default true
+                document.getElementById('feature-promoAds').checked = features.promoAds || false;
+                document.getElementById('feature-aiAssistant').checked = features.aiAssistant || false;
+                document.getElementById('feature-wallet').checked = features.wallet !== false; // Default true
+                document.getElementById('feature-analytics').checked = features.analytics || false;
+            } catch (e) {
+                console.error('Error loading features:', e);
+            }
+        };
+
+        window.saveFeatureAllocation = async () => {
+            if (!currentInspData) return;
+            const features = {
+                spinWheel: document.getElementById('feature-spinWheel').checked,
+                donations: document.getElementById('feature-donations').checked,
+                promoAds: document.getElementById('feature-promoAds').checked,
+                aiAssistant: document.getElementById('feature-aiAssistant').checked,
+                wallet: document.getElementById('feature-wallet').checked,
+                analytics: document.getElementById('feature-analytics').checked
+            };
+            
+            try {
+                await setDoc(doc(db, `restaurants/${currentInspData.id}/settings`, 'features'), features);
+                logActivity({ type: 'system', title: 'Features updated', details: `${currentInspData.name}: ${Object.entries(features).filter(([k,v]) => v).map(([k]) => k).join(', ')}`, ts: Date.now() });
+                showToast('Feature allocation saved!', 'success');
+            } catch (e) {
+                console.error('Error saving features:', e);
+                showToast('Failed to save features.', 'error');
+            }
+        };
+
+        window.updateFeatureAllocation = () => {
+            // Called on checkbox change - visual feedback only
+            const checkboxes = document.querySelectorAll('[id^="feature-"]');
+            checkboxes.forEach(cb => {
+                const parent = cb.closest('label');
+                if (cb.checked) {
+                    parent.classList.add('ring-2', 'ring-purple-500/50');
+                } else {
+                    parent.classList.remove('ring-2', 'ring-purple-500/50');
+                }
+            });
         };
 
         window.resetNodeData = async () => {
