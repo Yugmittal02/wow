@@ -4,7 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wow CafeBusiness Admin Pro</title>
+    <title>Orderly Management - Business Admin Pro</title>
+
+    <!-- Initial Loading Screen (shows immediately) -->
+    <style>
+        #initial-loader {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #1f2937, #111827);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 999999; font-family: system-ui;
+        }
+        #initial-loader .loader-content {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        #initial-loader .spinner {
+            width: 60px; height: 60px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #f97316;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        #initial-loader .brand { color: #f97316; font-size: 1.75rem; font-weight: 800; text-align: center; }
+        #initial-loader .sub { color: #9ca3af; font-size: 0.9rem; margin-top: 10px; text-align: center; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -471,35 +495,145 @@
 
 <body class="bg-gray-50 font-sans text-gray-700">
 
-    <div id="app-blocked-overlay"
-        class="fixed inset-0 hidden flex items-center justify-center flex-col text-center p-8">
-        <div class="bg-red-50 p-6 rounded-full mb-6 animate-bounce">
-            <i class="fas fa-lock text-6xl text-red-600"></i>
+    <!-- Initial Loading Spinner (shows immediately on page load) -->
+    <div id="initial-loader">
+        <div class="loader-content">
+            <div class="spinner"></div>
+            <div class="brand">Orderly Management</div>
+            <div class="sub">Loading dashboard...</div>
         </div>
-        <h1 class="text-4xl font-black text-gray-800 mb-2">Account Blocked</h1>
-        <p class="text-gray-500 mt-2 mb-8 max-w-md">System overload (>50 orders) or Admin Lock. Contact Administrator.
-        </p>
     </div>
 
-    <div id="low-balance-overlay" class="hidden"></div>
+    <div id="app-blocked-overlay"
+        class="fixed inset-0 hidden flex items-center justify-center flex-col text-center p-8 bg-white z-[100000]">
+        <div class="max-w-md">
+            <div class="bg-red-50 p-6 rounded-full mb-6 animate-bounce inline-block">
+                <i class="fas fa-ban text-6xl text-red-600"></i>
+            </div>
+            <h1 class="text-4xl font-black text-gray-800 mb-2">Account Suspended</h1>
+            <div class="bg-red-100 border border-red-200 rounded-xl p-4 mb-6">
+                <p class="text-red-700 font-bold text-lg"><i class="fas fa-exclamation-triangle mr-2"></i>Payment Not Received</p>
+                <p class="text-red-600 text-sm mt-1">Your subscription has been suspended due to non-payment.</p>
+            </div>
+            <p class="text-gray-500 mb-6">All services (Admin, Customer, Kitchen) are currently blocked. Please contact the administrator to restore access.</p>
+            
+            <div class="bg-gray-50 rounded-xl p-4 mb-6 text-left">
+                <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-headset text-orange-600"></i> Contact Administrator
+                </h3>
+                <div class="space-y-2">
+                    <a href="tel:+919876543210" class="flex items-center gap-3 text-gray-600 hover:text-orange-600 transition">
+                        <i class="fas fa-phone w-5"></i>
+                        <span>+91 98765 43210</span>
+                    </a>
+                    <a href="https://wa.me/919876543210" target="_blank" class="flex items-center gap-3 text-gray-600 hover:text-green-600 transition">
+                        <i class="fab fa-whatsapp w-5"></i>
+                        <span>WhatsApp Support</span>
+                    </a>
+                    <a href="mailto:support@orderly.com" class="flex items-center gap-3 text-gray-600 hover:text-blue-600 transition">
+                        <i class="fas fa-envelope w-5"></i>
+                        <span>support@orderly.com</span>
+                    </a>
+                </div>
+            </div>
+            
+            <button onclick="location.reload()" class="px-6 py-3 bg-gray-800 text-white rounded-xl font-bold text-sm hover:bg-gray-900 transition">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh Page
+            </button>
+        </div>
+    </div>
+
+    <div id="low-balance-overlay" class="hidden fixed top-0 left-0 right-0 z-[9998] pointer-events-none">
+        <div class="bg-gradient-to-r from-red-600 to-red-500 text-white p-3 shadow-lg animate-pulse">
+            <div class="max-w-7xl mx-auto flex items-center justify-center gap-3">
+                <i class="fas fa-exclamation-triangle text-yellow-300 text-lg"></i>
+                <span class="font-bold text-sm">⚠️ LOW BALANCE ALERT: Your wallet balance is below ₹100. Recharge now to avoid service interruption!</span>
+                <a href="https://wa.me/919876543210?text=Hi,%20I%20need%20to%20recharge%20my%20Orderly%20wallet" target="_blank" class="pointer-events-auto bg-white text-red-600 px-4 py-1.5 rounded-lg font-bold text-xs hover:bg-red-50 transition">
+                    <i class="fab fa-whatsapp mr-1"></i> Recharge Now
+                </a>
+            </div>
+        </div>
+    </div>
 
     <div id="login-overlay"
-        class="fixed inset-0 z-[100] flex items-center justify-center flex-col transition-all duration-300 hidden">
+        class="fixed inset-0 z-[100] flex items-center justify-center flex-col transition-all duration-300">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-96 border border-gray-100 text-center">
+            <!-- Branding -->
             <div class="mb-6">
-                <h1 class="text-3xl font-black text-gray-800 tracking-tight">Wow<span
-                        class="text-orange-600">Cafe</span>.</h1>
-                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Admin Security</p>
+                <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+                    <i class="fas fa-utensils text-white text-2xl"></i>
+                </div>
+                <h1 class="text-3xl font-black text-gray-800 tracking-tight">Orderly<span
+                        class="text-orange-600"> Management</span></h1>
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Restaurant Admin Portal</p>
             </div>
-            <p class="text-sm text-gray-500 mb-4">Enter Access Password</p>
+            
+            <!-- Cafe ID Display -->
+            <div id="login-cafe-id" class="bg-gray-50 rounded-lg px-3 py-2 mb-4">
+                <p class="text-[10px] text-gray-400 uppercase font-bold">Cafe ID</p>
+                <p class="text-sm font-mono font-bold text-orange-600">Loading...</p>
+            </div>
+            
+            <p class="text-sm text-gray-500 mb-4">Enter your admin password</p>
             <input type="password" id="login-pin"
-                class="w-full text-lg font-medium border-2 border-gray-200 rounded-xl outline-none focus:border-orange-600 px-4 py-3 mb-6 tracking-normal"
+                class="w-full text-lg font-medium border-2 border-gray-200 rounded-xl outline-none focus:border-orange-600 px-4 py-3 mb-4 tracking-normal"
                 placeholder="Enter password..." autocomplete="current-password">
             <button onclick="checkAdminLogin()"
-                class="w-full bg-orange-600 text-white font-bold py-3 rounded-xl hover:bg-orange-700 shadow-lg transition transform active:scale-95">Unlock
-                Panel</button>
-            <p id="login-error" class="text-red-500 text-xs font-bold mt-4 hidden"><i class="fas fa-lock"></i> Incorrect
-                PIN</p>
+                class="w-full bg-orange-600 text-white font-bold py-3 rounded-xl hover:bg-orange-700 shadow-lg transition transform active:scale-95">
+                <i class="fas fa-unlock-alt mr-2"></i>Unlock Panel
+            </button>
+            <p id="login-error" class="text-red-500 text-xs font-bold mt-4 hidden"><i class="fas fa-lock"></i> Incorrect Password</p>
+            
+            <!-- Forgot Password -->
+            <div class="mt-6 pt-4 border-t border-gray-100">
+                <button onclick="openForgotPassword()" class="text-sm text-gray-400 hover:text-orange-600 transition">
+                    <i class="fas fa-key mr-1"></i>Forgot Password?
+                </button>
+            </div>
+        </div>
+        
+        <!-- Footer Branding -->
+        <p class="text-xs text-gray-400 mt-6">Powered by <span class="font-bold text-orange-500">Orderly</span> Platform</p>
+    </div>
+    
+    <!-- FORGOT PASSWORD MODAL -->
+    <div id="forgot-password-modal" class="fixed inset-0 bg-black/60 z-[101] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-gray-100 bg-orange-50 flex justify-between items-center">
+                <h3 class="font-bold text-lg text-orange-800"><i class="fas fa-key mr-2"></i>Reset Password</h3>
+                <button onclick="closeForgotPassword()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-headset text-orange-600 text-2xl"></i>
+                    </div>
+                    <h4 class="font-bold text-gray-800 mb-2">Contact Super Admin</h4>
+                    <p class="text-sm text-gray-500">Your password can only be reset by the Orderly Super Admin who onboarded your restaurant.</p>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="bg-gray-50 p-4 rounded-xl">
+                        <p class="text-xs text-gray-400 uppercase font-bold mb-1">Email Support</p>
+                        <a href="mailto:support@orderly.in" class="text-orange-600 font-bold hover:underline">
+                            <i class="fas fa-envelope mr-2"></i>support@orderly.in
+                        </a>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl">
+                        <p class="text-xs text-gray-400 uppercase font-bold mb-1">WhatsApp Support</p>
+                        <a href="https://wa.me/919999999999?text=Hi, I forgot my Orderly admin password. My Cafe ID is: " target="_blank" class="text-green-600 font-bold hover:underline" id="whatsapp-support-link">
+                            <i class="fab fa-whatsapp mr-2"></i>Chat on WhatsApp
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="mt-6 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <p class="text-xs text-yellow-700"><i class="fas fa-info-circle mr-1"></i>Please have your <b>Cafe ID</b> ready when contacting support.</p>
+                </div>
+            </div>
+            <div class="p-4 border-t bg-gray-50">
+                <button onclick="closeForgotPassword()" class="w-full bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300">Close</button>
+            </div>
         </div>
     </div>
 
@@ -509,11 +643,11 @@
             class="fixed inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity"></div>
 
         <aside id="sidebar"
-            class="w-64 bg-white shadow-2xl z-30 flex flex-col absolute md:relative h-full sidebar-closed md:transform-none md:flex border-r border-gray-100 transition-transform duration-300">
+            class="w-64 bg-white shadow-2xl z-30 flex flex-col absolute md:relative h-full -translate-x-full md:translate-x-0 border-r border-gray-100 transition-transform duration-300">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center h-20 shrink-0">
                 <div>
-                    <h1 class="text-2xl font-black text-gray-800 tracking-tight">Wow<span
-                            class="text-orange-600">Cafe</span>.</h1>
+                    <h1 class="text-2xl font-black text-gray-800 tracking-tight">Orderly<span
+                            class="text-orange-600"> Mgmt</span></h1>
                     <p id="sidebar-tenant-id" class="text-[10px] text-orange-500 font-bold uppercase tracking-widest mt-1 truncate max-w-[150px]">Loading...</p>
                 </div>
                 <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-red-500 transition"><i
@@ -674,7 +808,7 @@
                     </div>
                     <div class="flex justify-between items-center mt-1">
                         <span class="text-xl font-black text-gray-800 group-hover:text-blue-800"
-                            id="admin-wallet-display"> ₹...</span>
+                            id="admin-wallet-display">₹...</span>
                         <i class="fas fa-wallet text-orange-400 group-hover:text-blue-500"></i>
                     </div>
                 </div>
@@ -700,12 +834,12 @@
 
         <div class="flex-1 flex flex-col h-screen overflow-hidden">
             <header class="bg-white shadow-sm p-4 flex justify-between items-center md:hidden z-10 shrink-0">
-                <h1 class="text-xl font-bold">Wow<span class="text-orange-600">Admin</span></h1>
+                <h1 class="text-xl font-bold">Orderly<span class="text-orange-600"> Mgmt</span></h1>
                 <div class="flex items-center gap-2">
                     <button onclick="openWalletHistory()"
                         class="flex items-center gap-2 text-sm font-bold bg-orange-50 text-orange-800 px-3 py-1.5 rounded-lg border border-orange-100 hover:bg-orange-100">
                         <i class="fas fa-wallet"></i>
-                        <span id="admin-wallet-mobile"> ₹...</span>
+                        <span id="admin-wallet-mobile">₹...</span>
                     </button>
                     <button onclick="toggleSidebar()" class="text-gray-600 p-2 rounded hover:bg-gray-100"><i
                             class="fas fa-bars text-xl"></i></button>
@@ -714,9 +848,9 @@
 
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50/50 p-4 md:p-6 relative">
 
-                <!-- ••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••• -->
-                <!-- ommand Center - REAL-TIME ANALYTICS DASHBOARD -->
-                <!-- ••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••• -->
+                <!--₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹ -->
+                <!-- Command Center - REAL-TIME ANALYTICS DASHBOARD -->
+                <!--₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹₹€¢₹ -->
                 <div id="section-dashboard" class="fade-in space-y-6 w-full max-w-7xl mx-auto">
                     
                     <!-- Header with Live Sales Ticker & Quick Actions -->
@@ -847,7 +981,7 @@
                         </div>
                     </div>
 
-                    <!-- ¨ ALERTS PANEL -->
+                    <!--₹¨ ALERTS PANEL -->
                     <div id="alerts-panel" class="hidden">
                         <div class="glass-card rounded-2xl overflow-hidden border-2 border-red-200 bg-gradient-to-r from-red-50 to-orange-50">
                             <div class="p-4 border-b border-red-100 flex justify-between items-center">
@@ -862,13 +996,13 @@
                         </div>
                     </div>
 
-                    <!-- able Occupancy MAP & Top Items Row -->
+                    <!-- Table Occupancy MAP & Top Items Row -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Table Occupancy Visual Map -->
                         <div class="lg:col-span-2 glass-card p-6 rounded-2xl">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="font-bold text-gray-800 flex items-center gap-2">
-                                    able Occupancy
+                                    Table Occupancy
                                     <span class="text-xs px-2 py-0.5 bg-green-100 text-green-600 rounded-full" id="table-occupancy-rate">0% Full</span>
                                 </h3>
                                 <div class="flex gap-3 text-xs">
@@ -930,7 +1064,7 @@
                         
                         <!-- Hourly Performance -->
                         <div class="glass-card p-6 rounded-2xl">
-                            <h3 class="font-bold text-gray-800 mb-4">° Peak Hours Today</h3>
+                            <h3 class="font-bold text-gray-800 mb-4">Peak Hours Today</h3>
                             <div class="space-y-2" id="peak-hours-dash">
                                 <div class="flex items-center gap-2">
                                     <span class="text-xs w-16 text-gray-500">12-1 PM</span>
@@ -952,7 +1086,7 @@
                                     <span class="live-dot"></span>
                                     Recent Orders
                                 </h3>
-                                <button onclick="switchTab('orders')" class="text-xs text-orange-600 font-semibold hover:underline">View All †’</button>
+                                <button onclick="switchTab('orders')" class="text-xs text-orange-600 font-semibold hover:underline">View All₹€ ₹€™</button>
                             </div>
                             <div class="p-4 space-y-3 max-h-80 overflow-y-auto" id="recent-orders-list">
                                 <p class="text-center text-gray-400 text-sm py-6">Loading recent orders...</p>
@@ -961,7 +1095,7 @@
                         
                         <!-- Business Health -->
                         <div class="glass-card p-6 rounded-2xl">
-                            <h3 class="font-bold text-gray-800 mb-4">usiness Health</h3>
+                            <h3 class="font-bold text-gray-800 mb-4">Business Health</h3>
                             <div class="space-y-4">
                                 <div>
                                     <div class="flex justify-between text-sm mb-1">
@@ -1010,7 +1144,7 @@
                     <!-- uick EOD Summary -->
                     <div class="glass-card p-6 rounded-2xl">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-gray-800">oday's Summary</h3>
+                            <h3 class="font-bold text-gray-800">Today's Summary</h3>
                             <div class="flex gap-2">
                                 <button onclick="downloadGSTReport()" class="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg font-bold hover:bg-purple-200">
                                     <i class="fas fa-file-invoice"></i> GST Report
@@ -1113,7 +1247,7 @@
                             </table>
                             <div id="no-live-orders" class="hidden py-12 text-center text-gray-400">
                                 <i class="fas fa-check-circle text-4xl text-green-300 mb-3"></i>
-                                <p>Kitchen is Clear! p>
+                                <p>Kitchen is Clear!</p>
                             </div>
                         </div>
                     </div>
@@ -1147,7 +1281,7 @@
                             <div class="p-4 bg-gray-50 border-t border-gray-200 space-y-3 shrink-0">
                                 <div class="flex justify-between text-lg font-bold text-gray-800">
                                     <span>Total (+Fee)</span>
-                                    <span id="pos-total-price"> ₹0</span>
+                                    <span id="pos-total-price">₹0</span>
                                 </div>
                                 <hr>
                                 <div class="grid grid-cols-1 gap-2">
@@ -1184,7 +1318,7 @@
                 <div id="section-menu" class="hide-section fade-in space-y-6 w-full max-w-7xl mx-auto">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800">ynamic Menu Management</h2>
+                            <h2 class="text-2xl font-bold text-gray-800">Dynamic Menu Management</h2>
                             <p class="text-sm text-gray-500">Toggle items, set prices, manage add-ons & generate QR codes</p>
                         </div>
                         <div class="flex flex-wrap gap-2">
@@ -1214,7 +1348,7 @@
                             <p class="text-2xl font-black text-green-600" id="menu-available-items">0</p>
                         </div>
                         <div class="glass-card p-4 rounded-xl text-center border-2 border-red-200 bg-red-50">
-                            <p class="text-xs text-red-600 font-bold uppercase">Out of Stock</p>
+                            <p class="text-xs text-red-600 font-bold uppercase">Stock</p>
                             <p class="text-2xl font-black text-red-600" id="menu-outofstock-items">0</p>
                         </div>
                         <div class="glass-card p-4 rounded-xl text-center border-2 border-yellow-200 bg-yellow-50">
@@ -1427,7 +1561,7 @@
                     <!-- REVENUE CHART -->
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-gray-800"><i class="fas fa-chart-line text-green-500 mr-2"></i>Revenue Trend</h3>
+                            <h3 class="font-bold text-gray-800">Revenue Trend</h3>
                             <select id="chart-period" onchange="updateRevenueChart()" class="text-xs border rounded-lg px-3 py-2">
                                 <option value="7">Last 7 Days</option>
                                 <option value="14">Last 14 Days</option>
@@ -1467,7 +1601,7 @@
                 <div id="section-crm" class="hide-section fade-in space-y-6 w-full max-w-7xl mx-auto">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800">ustomer CRM</h2>
+                            <h2 class="text-2xl font-bold text-gray-800">Customer CRM</h2>
                             <p class="text-sm text-gray-500">Manage customers, birthdays, favorites & loyalty</p>
                         </div>
                         <div class="flex gap-2">
@@ -1491,11 +1625,11 @@
                             <p class="text-2xl font-black text-green-600" id="crm-active">0</p>
                         </div>
                         <div class="glass-card p-4 rounded-xl text-center border-2 border-yellow-200 bg-yellow-50">
-                            <p class="text-xs text-yellow-600 font-bold uppercase">irthdays This Month</p>
+                            <p class="text-xs text-yellow-600 font-bold uppercase">Birthdays This Month</p>
                             <p class="text-2xl font-black text-yellow-600" id="crm-birthdays">0</p>
                         </div>
                         <div class="glass-card p-4 rounded-xl text-center border-2 border-purple-200 bg-purple-50">
-                            <p class="text-xs text-purple-600 font-bold uppercase">­ Top Spenders</p>
+                            <p class="text-xs text-purple-600 font-bold uppercase">Top Spenders</p>
                             <p class="text-2xl font-black text-purple-600" id="crm-vip">0</p>
                         </div>
                     </div>
@@ -1551,7 +1685,7 @@
 
                 <div id="section-settings" class="hide-section fade-in space-y-6 w-full max-w-7xl mx-auto">
                     <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-gray-800">™¸ Admin Settings</h2>
+                        <h2 class="text-2xl font-bold text-gray-800">Admin Settings</h2>
                         <div class="flex gap-2">
                             <button onclick="openActivityLogsModal()" class="text-sm bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-bold hover:bg-slate-200">
                                 <i class="fas fa-history"></i> Activity Logs
@@ -1615,21 +1749,21 @@
                             <div class="space-y-3">
                                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div>
-                                        <p class="font-bold text-sm">anager</p>
+                                        <p class="font-bold text-sm">Manager</p>
                                         <p class="text-xs text-gray-500">Can edit orders, apply discounts</p>
                                     </div>
                                     <button onclick="manageRole('manager')" class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-bold">Manage</button>
                                 </div>
                                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div>
-                                        <p class="font-bold text-sm">aiter</p>
+                                        <p class="font-bold text-sm">Waiter</p>
                                         <p class="text-xs text-gray-500">Can take orders only</p>
                                     </div>
                                     <button onclick="manageRole('waiter')" class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-bold">Manage</button>
                                 </div>
                                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div>
-                                        <p class="font-bold text-sm">ashier</p>
+                                        <p class="font-bold text-sm">Cashier</p>
                                         <p class="text-xs text-gray-500">Can process payments</p>
                                     </div>
                                     <button onclick="manageRole('cashier')" class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-bold">Manage</button>
@@ -1644,7 +1778,7 @@
                             <div class="space-y-3">
                                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div>
-                                        <p class="font-bold text-sm">itchen Printer</p>
+                                        <p class="font-bold text-sm">Kitchen Printer</p>
                                         <p class="text-xs text-gray-500">Food items</p>
                                     </div>
                                     <label class="relative inline-flex items-center cursor-pointer">
@@ -1654,7 +1788,7 @@
                                 </div>
                                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div>
-                                        <p class="font-bold text-sm">ar Printer</p>
+                                        <p class="font-bold text-sm">Bar Printer</p>
                                         <p class="text-xs text-gray-500">Drinks & beverages</p>
                                     </div>
                                     <label class="relative inline-flex items-center cursor-pointer">
@@ -1690,13 +1824,35 @@
                                 </button>
                             </div>
                         </div>
+
+                        <!-- Privacy Policy -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-lg mb-4 text-gray-800"><i class="fas fa-shield-alt text-indigo-600"></i> Privacy Policy</h3>
+                            <div class="space-y-3">
+                                <p class="text-sm text-gray-600">View our comprehensive privacy policy that protects your business and customer data.</p>
+                                <button onclick="openPrivacyPolicy()" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg hover:bg-indigo-700">
+                                    <i class="fas fa-eye mr-1"></i> View Privacy Policy
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Terms & Conditions -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-lg mb-4 text-gray-800"><i class="fas fa-file-contract text-teal-600"></i> Terms & Conditions</h3>
+                            <div class="space-y-3">
+                                <p class="text-sm text-gray-600">Review the terms of service that govern your use of Orderly platform.</p>
+                                <button onclick="openTermsConditions()" class="w-full bg-teal-600 text-white font-bold py-2 rounded-lg hover:bg-teal-700">
+                                    <i class="fas fa-eye mr-1"></i> View Terms & Conditions
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- REPORTS SECTION -->
                 <div id="section-reports" class="hide-section fade-in space-y-6 w-full max-w-7xl mx-auto">
                     <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-gray-800">usiness Reports</h2>
+                        <h2 class="text-2xl font-bold text-gray-800">Business Reports</h2>
                         <div class="flex gap-2">
                             <select id="report-period" onchange="generateReport()" class="px-4 py-2 border rounded-lg text-sm font-medium">
                                 <option value="today">Today</option>
@@ -1735,13 +1891,13 @@
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="glass-card p-6 rounded-xl">
-                            <h3 class="font-bold text-lg mb-4">evenue Trend</h3>
+                            <h3 class="font-bold text-lg mb-4">Revenue Trend</h3>
                             <div class="chart-container" style="height: 250px;">
                                 <canvas id="reportRevenueChart"></canvas>
                             </div>
                         </div>
                         <div class="glass-card p-6 rounded-xl">
-                            <h3 class="font-bold text-lg mb-4"> Order Distribution</h3>
+                            <h3 class="font-bold text-lg mb-4">Order Distribution</h3>
                             <div class="chart-container" style="height: 250px;">
                                 <canvas id="reportOrdersChart"></canvas>
                             </div>
@@ -1750,13 +1906,13 @@
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="glass-card p-6 rounded-xl">
-                            <h3 class="font-bold text-lg mb-4">est Selling Items</h3>
+                            <h3 class="font-bold text-lg mb-4">Best Selling Items</h3>
                             <div id="report-top-items" class="space-y-3">
                                 <p class="text-gray-400 text-sm">Loading...</p>
                             </div>
                         </div>
                         <div class="glass-card p-6 rounded-xl">
-                            <h3 class="font-bold text-lg mb-4">° Peak Hours</h3>
+                            <h3 class="font-bold text-lg mb-4">Peak Hours</h3>
                             <div id="report-peak-hours" class="space-y-2">
                                 <p class="text-gray-400 text-sm">Loading...</p>
                             </div>
@@ -1764,7 +1920,7 @@
                     </div>
 
                     <div class="glass-card p-6 rounded-xl">
-                        <h3 class="font-bold text-lg mb-4">rder Summary</h3>
+                        <h3 class="font-bold text-lg mb-4">Order Summary</h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm">
                                 <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
@@ -1788,7 +1944,7 @@
                 <div id="section-inventory" class="hide-section fade-in space-y-6 w-full max-w-7xl mx-auto">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800">nventory Management</h2>
+                            <h2 class="text-2xl font-bold text-gray-800">Inventory Management</h2>
                             <p class="text-sm text-gray-500">Track stock levels, set alerts & manage ingredients</p>
                         </div>
                         <button onclick="openInventoryModal()" class="px-4 py-2 bg-amber-600 text-white rounded-xl font-bold hover:bg-amber-700 shadow-lg">
@@ -1803,11 +1959,11 @@
                             <h3 class="text-2xl font-black text-gray-800 mt-1" id="inv-total-items">0</h3>
                         </div>
                         <div class="glass-card p-4 rounded-xl border-l-4 border-red-500">
-                            <p class="text-xs text-gray-500 font-bold uppercase">Low Stock</p>
+                            <p class="text-xs text-gray-500 font-bold uppercase">Stock</p>
                             <h3 class="text-2xl font-black text-red-600 mt-1" id="inv-low-stock">0</h3>
                         </div>
                         <div class="glass-card p-4 rounded-xl border-l-4 border-gray-500">
-                            <p class="text-xs text-gray-500 font-bold uppercase">Out of Stock</p>
+                            <p class="text-xs text-gray-500 font-bold uppercase">Stock</p>
                             <h3 class="text-2xl font-black text-gray-600 mt-1" id="inv-out-stock">0</h3>
                         </div>
                         <div class="glass-card p-4 rounded-xl border-l-4 border-green-500">
@@ -1819,12 +1975,12 @@
                     <!-- Inventory Filters -->
                     <div class="flex flex-wrap gap-2">
                         <button onclick="filterInventory('all')" class="inv-filter-btn px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-bold">All Items</button>
-                        <button onclick="filterInventory('low')" class="inv-filter-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-bold hover:bg-red-100 hover:text-red-600">Low Stock</button>
-                        <button onclick="filterInventory('vegetables')" class="inv-filter-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-bold">egetables</button>
-                        <button onclick="filterInventory('dairy')" class="inv-filter-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-bold">airy</button>
-                        <button onclick="filterInventory('spices')" class="inv-filter-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-bold"> Spices</button>
-                        <button onclick="filterInventory('beverages')" class="inv-filter-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-bold">everages</button>
-                        <button onclick="filterInventory('packaging')" class="inv-filter-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-bold">ackaging</button>
+                        <button onclick="filterInventory('low')" class="inv-filter-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-bold hover:bg-red-100 hover:text-red-600">Stock</button>
+                        <button onclick="filterInventory('vegetables')" class="inv-filter-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-bold">Vegetables</button>
+                        <button onclick="filterInventory('dairy')" class="inv-filter-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-bold">Dairy</button>
+                        <button onclick="filterInventory('spices')" class="inv-filter-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-bold">Spices</button>
+                        <button onclick="filterInventory('beverages')" class="inv-filter-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-bold">Beverages</button>
+                        <button onclick="filterInventory('packaging')" class="inv-filter-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-bold">Packaging</button>
                     </div>
 
                     <!-- Inventory Table -->
@@ -1847,7 +2003,7 @@
                                         <th class="p-4">Quantity</th>
                                         <th class="p-4">Unit</th>
                                         <th class="p-4">Cost/Unit</th>
-                                        <th class="p-4">Min Stock</th>
+                                        <th class="p-4">Stock</th>
                                         <th class="p-4">Status</th>
                                         <th class="p-4 text-right">Actions</th>
                                     </tr>
@@ -1864,7 +2020,7 @@
                 <div id="section-tables" class="hide-section fade-in space-y-6 w-full max-w-7xl mx-auto">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800">able Management</h2>
+                            <h2 class="text-2xl font-bold text-gray-800">Table Management</h2>
                             <p class="text-sm text-gray-500">Manage dine-in tables & reservations</p>
                         </div>
                         <button onclick="openTableModal()" class="px-4 py-2 bg-cyan-600 text-white rounded-xl font-bold hover:bg-cyan-700 shadow-lg">
@@ -1922,7 +2078,7 @@
                 <div id="section-staff" class="hide-section fade-in space-y-6 w-full max-w-7xl mx-auto">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800">taff Management</h2>
+                            <h2 class="text-2xl font-bold text-gray-800">Staff Management</h2>
                             <p class="text-sm text-gray-500">Manage employees, shifts & attendance</p>
                         </div>
                         <button onclick="openStaffModal()" class="px-4 py-2 bg-teal-600 text-white rounded-xl font-bold hover:bg-teal-700 shadow-lg">
@@ -1956,11 +2112,11 @@
                             <h3 class="font-bold text-teal-800">Employee Directory</h3>
                             <select id="staff-role-filter" onchange="filterStaff()" class="px-3 py-1.5 text-sm border rounded-lg">
                                 <option value="all">All Roles</option>
-                                <option value="chef">hef</option>
-                                <option value="waiter">aiter</option>
-                                <option value="cashier">ashier</option>
-                                <option value="manager">anager</option>
-                                <option value="cleaner">leaner</option>
+                                <option value="chef">Chef</option>
+                                <option value="waiter">Waiter</option>
+                                <option value="cashier">Cashier</option>
+                                <option value="manager">Manager</option>
+                                <option value="cleaner">Cleaner</option>
                             </select>
                         </div>
                         <div class="overflow-x-auto">
@@ -1985,7 +2141,7 @@
 
                     <!-- Attendance Quick Mark -->
                     <div class="glass-card p-6 rounded-2xl">
-                        <h3 class="font-bold text-gray-800 mb-4">° Today's Attendance</h3>
+                        <h3 class="font-bold text-gray-800 mb-4">Today's Attendance</h3>
                         <div id="attendance-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
                             <p class="col-span-full text-center text-gray-400">Add staff to mark attendance</p>
                         </div>
@@ -1996,7 +2152,7 @@
                 <div id="section-expenses" class="hide-section fade-in space-y-6 w-full max-w-7xl mx-auto">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800">xpense Tracking</h2>
+                            <h2 class="text-2xl font-bold text-gray-800">Expense Tracking</h2>
                             <p class="text-sm text-gray-500">Track daily expenses & profit margins</p>
                         </div>
                         <button onclick="openExpenseModal()" class="px-4 py-2 bg-rose-600 text-white rounded-xl font-bold hover:bg-rose-700 shadow-lg">
@@ -2051,7 +2207,7 @@
                         </div>
                         
                         <div class="glass-card p-6 rounded-2xl">
-                            <h3 class="font-bold text-gray-800 mb-4">ategory Breakdown</h3>
+                            <h3 class="font-bold text-gray-800 mb-4">Category Breakdown</h3>
                             <div class="space-y-3" id="expense-breakdown">
                                 <div class="flex justify-between items-center">
                                     <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span> Ingredients</span>
@@ -2091,7 +2247,7 @@
                 <div id="section-suppliers" class="hide-section fade-in space-y-6 w-full max-w-7xl mx-auto">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800"> Supplier Management</h2>
+                            <h2 class="text-2xl font-bold text-gray-800">Supplier Management</h2>
                             <p class="text-sm text-gray-500">Manage vendors, track orders & payments</p>
                         </div>
                         <button onclick="openSupplierModal()" class="px-4 py-2 bg-lime-600 text-white rounded-xl font-bold hover:bg-lime-700 shadow-lg">
@@ -2146,9 +2302,9 @@
 
                     <!-- Quick Order from Supplier -->
                     <div class="glass-card p-6 rounded-2xl">
-                        <h3 class="font-bold text-gray-800 mb-4">urchase Orders</h3>
+                        <h3 class="font-bold text-gray-800 mb-4">Purchase Orders</h3>
                         <div id="purchase-orders-list" class="space-y-3">
-                            <p class="text-center text-gray-400">No pending purchase orders</p>
+                            <p class="text-center text-gray-400">Purchase Orders</p>
                         </div>
                     </div>
                 </div>
@@ -2231,7 +2387,7 @@
                     <div id="pos-modal-addons-list" class="space-y-2"></div>
                 </div>
                 <div class="flex justify-between items-center pt-4 border-t border-gray-100">
-                    <div class="text-lg font-bold text-gray-800">Total: <span id="pos-modal-total"> ₹0</span></div>
+                    <div class="text-lg font-bold text-gray-800">Total: <span id="pos-modal-total">₹0</span></div>
                     <button onclick="confirmPOSItemToAdd()"
                         class="bg-orange-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-orange-700">Add to
                         Order</button>
@@ -2278,7 +2434,7 @@
                     <input type="number" id="offer-disc-input" class="w-full border p-3 rounded-xl outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Minimum Order Value ( ₹)</label>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Minimum Order Value (₹)</label>
                     <input type="number" id="offer-min-input" class="w-full border p-3 rounded-xl outline-none"
                         placeholder="e.g. 199">
                 </div>
@@ -2313,15 +2469,15 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
                         <select id="inv-category" class="w-full border p-3 rounded-xl outline-none">
-                            <option value="vegetables">egetables</option>
-                            <option value="dairy">airy</option>
-                            <option value="meat">eat</option>
-                            <option value="spices"> Spices</option>
-                            <option value="grains">rains</option>
-                            <option value="beverages">everages</option>
-                            <option value="packaging">ackaging</option>
-                            <option value="cleaning">leaning</option>
-                            <option value="other">ther</option>
+                            <option value="vegetables">Vegetables</option>
+                            <option value="dairy">Dairy</option>
+                            <option value="meat">Meat</option>
+                            <option value="spices">Spices</option>
+                            <option value="grains">Grains</option>
+                            <option value="beverages">Beverages</option>
+                            <option value="packaging">Packaging</option>
+                            <option value="cleaning">Cleaning</option>
+                            <option value="other">Other</option>
                         </select>
                     </div>
                     <div>
@@ -2391,25 +2547,86 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Location/Area</label>
                     <select id="table-area" class="w-full border p-3 rounded-xl outline-none">
-                        <option value="indoor">ndoor</option>
-                        <option value="outdoor">utdoor</option>
-                        <option value="terrace">errace</option>
-                        <option value="private">ª Private Room</option>
-                        <option value="bar">ar Area</option>
+                        <option value="indoor">Indoor</option>
+                        <option value="outdoor">Outdoor</option>
+                        <option value="terrace">Terrace</option>
+                        <option value="private">Private Room</option>
+                        <option value="bar">Bar Area</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Initial Status</label>
                     <select id="table-status" class="w-full border p-3 rounded-xl outline-none">
-                        <option value="available">[OK]… Available</option>
-                        <option value="occupied">ccupied</option>
-                        <option value="reserved">eserved</option>
-                        <option value="maintenance">aintenance</option>
+                        <option value="available">Available</option>
+                        <option value="occupied">Occupied</option>
+                        <option value="reserved">Reserved</option>
+                        <option value="maintenance">Maintenance</option>
                     </select>
                 </div>
                 <button onclick="saveTable()" class="w-full bg-cyan-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-cyan-700">
                     Save Table
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLE ACTIONS MODAL -->
+    <div id="table-actions-modal" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden modal-enter">
+            <div class="p-4 border-b border-gray-100 bg-cyan-50 flex justify-between items-center">
+                <h3 class="font-bold text-lg text-cyan-800"><i class="fas fa-chair mr-2"></i>Table <span id="table-action-number">-</span></h3>
+                <button onclick="closeTableActionsModal()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-2">
+                <input type="hidden" id="table-action-id">
+                <p class="text-sm text-gray-500 px-3 py-2">Current Status: <span id="table-action-status" class="font-bold text-cyan-600">-</span></p>
+                <div class="space-y-1">
+                    <button onclick="tableActionSetStatus('available')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-green-50 flex items-center gap-3 transition">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                            <i class="fas fa-check text-green-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-gray-800">Set Available</span>
+                            <p class="text-xs text-gray-500">Mark table as free</p>
+                        </div>
+                    </button>
+                    <button onclick="tableActionSetStatus('occupied')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-red-50 flex items-center gap-3 transition">
+                        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                            <i class="fas fa-user-friends text-red-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-gray-800">Set Occupied</span>
+                            <p class="text-xs text-gray-500">Guests seated</p>
+                        </div>
+                    </button>
+                    <button onclick="tableActionReserve()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-yellow-50 flex items-center gap-3 transition">
+                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                            <i class="fas fa-calendar-alt text-yellow-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-gray-800">Make Reservation</span>
+                            <p class="text-xs text-gray-500">Book for later</p>
+                        </div>
+                    </button>
+                    <button onclick="tableActionEdit()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 flex items-center gap-3 transition">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-pen text-blue-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-gray-800">Edit Table</span>
+                            <p class="text-xs text-gray-500">Change details</p>
+                        </div>
+                    </button>
+                    <button onclick="tableActionDelete()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-red-50 flex items-center gap-3 transition">
+                        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                            <i class="fas fa-trash text-red-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-gray-800">Delete Table</span>
+                            <p class="text-xs text-gray-500">Remove permanently</p>
+                        </div>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2431,13 +2648,13 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Role *</label>
                         <select id="staff-role" class="w-full border p-3 rounded-xl outline-none">
-                            <option value="chef">hef</option>
-                            <option value="waiter">aiter</option>
-                            <option value="cashier">ashier</option>
-                            <option value="manager">anager</option>
-                            <option value="cleaner">leaner</option>
-                            <option value="delivery">´ Delivery</option>
-                            <option value="helper">elper</option>
+                            <option value="chef">Chef</option>
+                            <option value="waiter">Waiter</option>
+                            <option value="cashier">Cashier</option>
+                            <option value="manager">Manager</option>
+                            <option value="cleaner">Cleaner</option>
+                            <option value="delivery">Delivery</option>
+                            <option value="helper">Helper</option>
                         </select>
                     </div>
                     <div>
@@ -2449,10 +2666,10 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Shift</label>
                         <select id="staff-shift" class="w-full border p-3 rounded-xl outline-none">
-                            <option value="morning">orning (6AM-2PM)</option>
-                            <option value="evening">vening (2PM-10PM)</option>
-                            <option value="night">ight (10PM-6AM)</option>
-                            <option value="full">° Full Day</option>
+                            <option value="morning">Morning (6AM-2PM)</option>
+                            <option value="evening">Evening (2PM-10PM)</option>
+                            <option value="night">Night (10PM-6AM)</option>
+                            <option value="full">Full Day</option>
                         </select>
                     </div>
                     <div>
@@ -2491,17 +2708,17 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category *</label>
                     <select id="expense-category" class="w-full border p-3 rounded-xl outline-none">
-                        <option value="ingredients">ngredients/Raw Materials</option>
-                        <option value="utilities">tilities (Electricity, Gas, Water)</option>
-                        <option value="salaries">alaries & Wages</option>
-                        <option value="rent">ent</option>
-                        <option value="maintenance">aintenance & Repairs</option>
-                        <option value="marketing">arketing & Advertising</option>
-                        <option value="packaging">ackaging</option>
-                        <option value="transport"> Transport & Delivery</option>
-                        <option value="licenses">icenses & Permits</option>
-                        <option value="equipment">quipment</option>
-                        <option value="other">ther</option>
+                        <option value="ingredients">Ingredients/Raw Materials</option>
+                        <option value="utilities">Utilities (Electricity, Gas, Water)</option>
+                        <option value="salaries">Salaries & Wages</option>
+                        <option value="rent">Rent</option>
+                        <option value="maintenance">Maintenance & Repairs</option>
+                        <option value="marketing">Marketing & Advertising</option>
+                        <option value="packaging">Packaging</option>
+                        <option value="transport">Transport & Delivery</option>
+                        <option value="licenses">Licenses & Permits</option>
+                        <option value="equipment">Equipment</option>
+                        <option value="other">Other</option>
                     </select>
                 </div>
                 <div>
@@ -2525,11 +2742,11 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Payment Method</label>
                     <select id="expense-payment" class="w-full border p-3 rounded-xl outline-none">
-                        <option value="cash">ash</option>
-                        <option value="upi">PI</option>
-                        <option value="card">ard</option>
-                        <option value="bank">ank Transfer</option>
-                        <option value="credit">redit (Pending)</option>
+                        <option value="cash">Cash</option>
+                        <option value="upi">UPI</option>
+                        <option value="card">Card</option>
+                        <option value="bank">Bank Transfer</option>
+                        <option value="credit">Credit (Pending)</option>
                     </select>
                 </div>
                 <div>
@@ -2559,17 +2776,17 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
                     <select id="supplier-category" class="w-full border p-3 rounded-xl outline-none">
-                        <option value="vegetables">egetables & Fruits</option>
-                        <option value="dairy">airy Products</option>
-                        <option value="meat">eat & Poultry</option>
-                        <option value="seafood">eafood</option>
-                        <option value="grains">rains & Flour</option>
-                        <option value="spices"> Spices & Condiments</option>
-                        <option value="beverages">everages</option>
-                        <option value="packaging">ackaging</option>
-                        <option value="equipment">quipment</option>
-                        <option value="cleaning">leaning Supplies</option>
-                        <option value="general">eneral</option>
+                        <option value="vegetables">Vegetables & Fruits</option>
+                        <option value="dairy">Dairy Products</option>
+                        <option value="meat">Meat & Poultry</option>
+                        <option value="seafood">Seafood</option>
+                        <option value="grains">Grains & Flour</option>
+                        <option value="spices">Spices & Condiments</option>
+                        <option value="beverages">Beverages</option>
+                        <option value="packaging">Packaging</option>
+                        <option value="equipment">Equipment</option>
+                        <option value="cleaning">Cleaning Supplies</option>
+                        <option value="general">General</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
@@ -2665,7 +2882,7 @@
     <div id="stock-adjust-modal" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden modal-enter">
             <div class="p-4 border-b border-gray-100 bg-amber-50 flex justify-between items-center">
-                <h3 class="font-bold text-lg text-amber-800">Adjust Stock</h3>
+                <h3 class="font-bold text-lg text-amber-800">Stock</h3>
                 <button onclick="closeStockAdjustModal()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-6 space-y-4">
@@ -2673,7 +2890,7 @@
                 <p class="font-bold text-gray-800" id="stock-item-name">Item Name</p>
                 <p class="text-sm text-gray-500">Current: <span id="stock-current-qty" class="font-bold">0</span> <span id="stock-current-unit">units</span></p>
                 <div class="flex gap-2">
-                    <button onclick="setStockAction('add')" class="stock-action-btn flex-1 py-2 rounded-lg border-2 border-green-500 bg-green-50 text-green-700 font-bold text-sm">+ Add Stock</button>
+                    <button onclick="setStockAction('add')" class="stock-action-btn flex-1 py-2 rounded-lg border-2 border-green-500 bg-green-50 text-green-700 font-bold text-sm">Stock</button>
                     <button onclick="setStockAction('remove')" class="stock-action-btn flex-1 py-2 rounded-lg border-2 border-gray-200 text-gray-600 font-bold text-sm">- Remove</button>
                 </div>
                 <input type="hidden" id="stock-action" value="add">
@@ -2684,11 +2901,11 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Reason</label>
                     <select id="stock-reason" class="w-full border p-3 rounded-xl outline-none">
-                        <option value="purchase">ew Purchase</option>
-                        <option value="used">sed in Kitchen</option>
-                        <option value="waste"> Waste/Spoilage</option>
-                        <option value="return">†©¸ Return to Supplier</option>
-                        <option value="correction">[OK]¸ Correction</option>
+                        <option value="purchase">New Purchase</option>
+                        <option value="used">Used in Kitchen</option>
+                        <option value="waste">Waste/Spoilage</option>
+                        <option value="return">Return to Supplier</option>
+                        <option value="correction">Correction</option>
                     </select>
                 </div>
                 <button onclick="confirmStockAdjust()" class="w-full bg-amber-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-amber-700">
@@ -2813,7 +3030,7 @@
                     </div>
                     
                     <div class="bg-gray-50 p-4 rounded-xl">
-                        <h4 class="font-bold text-gray-800 mb-3">rder Types</h4>
+                        <h4 class="font-bold text-gray-800 mb-3">Order Types</h4>
                         <div class="grid grid-cols-2 gap-3">
                             <div class="flex justify-between items-center p-2 bg-white rounded-lg">
                                 <span class="text-sm text-gray-600">Dine-in</span>
@@ -2835,14 +3052,14 @@
                     </div>
 
                     <div class="bg-red-50 p-4 rounded-xl border border-red-200">
-                        <h4 class="font-bold text-red-800 mb-3">iscount Audit</h4>
+                        <h4 class="font-bold text-red-800 mb-3">Discount Audit</h4>
                         <div id="eod-discount-audit" class="space-y-2 text-sm">
                             <p class="text-gray-500">Loading discount data...</p>
                         </div>
                     </div>
 
                     <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
-                        <h4 class="font-bold text-yellow-800 mb-3">ash Drawer Reconciliation</h4>
+                        <h4 class="font-bold text-yellow-800 mb-3">Cash Drawer Reconciliation</h4>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="text-xs font-bold text-gray-500 uppercase">Expected Cash</label>
@@ -2882,7 +3099,7 @@
                 <div class="text-center mb-6">
                     <div class="w-20 h-20 rounded-full bg-indigo-100 mx-auto flex items-center justify-center text-3xl font-black text-indigo-600" id="customer-avatar">G</div>
                     <h4 class="text-xl font-bold mt-3" id="customer-name">Customer Name</h4>
-                    <p class="text-gray-500" id="customer-phone">hone</p>
+                    <p class="text-gray-500" id="customer-phone">Phone</p>
                 </div>
                 
                 <div class="grid grid-cols-3 gap-4 mb-6">
@@ -2910,21 +3127,21 @@
                     </div>
 
                     <div class="p-4 bg-orange-50 rounded-xl border border-orange-200">
-                        <h5 class="font-bold text-orange-800 mb-2">­ Favorite Items</h5>
+                        <h5 class="font-bold text-orange-800 mb-2">Favorite Items</h5>
                         <div id="customer-favorites" class="flex flex-wrap gap-2">
                             <span class="px-2 py-1 bg-white rounded-full text-xs font-medium">Loading...</span>
                         </div>
                     </div>
 
                     <div class="p-4 bg-gray-50 rounded-xl">
-                        <h5 class="font-bold text-gray-800 mb-2">ecent Orders</h5>
+                        <h5 class="font-bold text-gray-800 mb-2">Recent Orders</h5>
                         <div id="customer-recent-orders" class="space-y-2 max-h-40 overflow-y-auto">
                             <p class="text-gray-400 text-sm">Loading...</p>
                         </div>
                     </div>
 
                     <div class="p-4 bg-gray-50 rounded-xl">
-                        <h5 class="font-bold text-gray-800 mb-2">otes</h5>
+                        <h5 class="font-bold text-gray-800 mb-2">Notes</h5>
                         <textarea id="customer-notes" rows="2" class="w-full p-2 border rounded-lg text-sm" placeholder="Add notes about this customer..."></textarea>
                         <button onclick="saveCustomerNotes()" class="mt-2 text-xs bg-blue-600 text-white px-3 py-1 rounded font-bold">Save Notes</button>
                     </div>
@@ -2974,13 +3191,13 @@
                         <option value="kitchen_error">Kitchen Error</option>
                         <option value="quality_issue">Quality Issue</option>
                         <option value="delayed_order">Order Delayed Too Long</option>
-                        <option value="item_unavailable">Item Unavailable</option>
+                        <option value="item_unavailable">Available</option>
                         <option value="duplicate_order">Duplicate Order</option>
                         <option value="other">Other</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Additional Notes</label>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Notes</label>
                     <textarea id="refund-notes" rows="2" class="w-full border p-3 rounded-xl outline-none" placeholder="Add any additional details..."></textarea>
                 </div>
                 <div class="flex gap-3">
@@ -3024,6 +3241,452 @@
         </div>
     </div>
 
+    <!-- PRIVACY POLICY MODAL -->
+    <div id="privacy-policy-modal" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden modal-enter max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b border-gray-100 bg-indigo-50 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-lg text-indigo-800"><i class="fas fa-shield-alt mr-2"></i>Privacy Policy</h3>
+                <button onclick="closePrivacyPolicy()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4 flex-1 overflow-y-auto">
+                <p class="text-sm text-gray-500 mb-4 text-center">Last Updated: December 2025</p>
+                
+                <!-- Accordion Sections -->
+                <div class="space-y-2">
+                    <!-- Section 1 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('pp-1')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-indigo-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-info-circle text-indigo-500 mr-2"></i>1. Introduction</span>
+                            <i id="pp-1-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="pp-1" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600">Welcome to Orderly ("we," "our," or "us"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our restaurant management platform and services. Please read this privacy policy carefully. By using Orderly, you consent to the data practices described in this policy.</p>
+                        </div>
+                    </div>
+
+                    <!-- Section 2 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('pp-2')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-indigo-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-database text-indigo-500 mr-2"></i>2. Information We Collect</span>
+                            <i id="pp-2-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="pp-2" class="hidden p-4 bg-white border-t space-y-3">
+                            <p class="text-gray-600 font-semibold">Personal Information:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>Restaurant owner name, email address, and contact number</li>
+                                <li>Business name, address, GSTIN, and FSSAI license details</li>
+                                <li>Staff information including names, roles, and contact details</li>
+                                <li>Customer data including names, phone numbers, and order history</li>
+                                <li>Payment and wallet transaction information</li>
+                            </ul>
+                            <p class="text-gray-600 font-semibold mt-3">Business Data:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>Menu items, pricing, and inventory details</li>
+                                <li>Order information, sales data, and revenue analytics</li>
+                                <li>Table management and reservation data</li>
+                                <li>Supplier information and expense records</li>
+                            </ul>
+                            <p class="text-gray-600 font-semibold mt-3">Technical Data:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>Device information and browser type</li>
+                                <li>IP address and location data</li>
+                                <li>Usage patterns and activity logs</li>
+                                <li>Cookies and tracking technologies</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 3 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('pp-3')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-indigo-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-cogs text-indigo-500 mr-2"></i>3. How We Use Your Information</span>
+                            <i id="pp-3-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="pp-3" class="hidden p-4 bg-white border-t">
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>To provide and maintain our restaurant management services</li>
+                                <li>To process orders, payments, and wallet transactions</li>
+                                <li>To generate business reports and analytics</li>
+                                <li>To send important notifications about orders and updates</li>
+                                <li>To improve our platform and develop new features</li>
+                                <li>To comply with legal obligations and prevent fraud</li>
+                                <li>To provide customer support and respond to inquiries</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 4 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('pp-4')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-indigo-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-lock text-indigo-500 mr-2"></i>4. Data Storage & Security</span>
+                            <i id="pp-4-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="pp-4" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600 mb-3">Your data is stored securely on Google Firebase infrastructure with enterprise-grade security. We implement industry-standard security measures including:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>SSL/TLS encryption for all data transmission</li>
+                                <li>Firebase Authentication for secure access</li>
+                                <li>Regular security audits and vulnerability assessments</li>
+                                <li>Multi-tenant data isolation for each restaurant</li>
+                                <li>Automatic data backups and disaster recovery</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 5 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('pp-5')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-indigo-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-share-alt text-indigo-500 mr-2"></i>5. Data Sharing & Disclosure</span>
+                            <i id="pp-5-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="pp-5" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600 mb-3">We do not sell your personal information. We may share data only in these circumstances:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>With payment processors to complete transactions</li>
+                                <li>With service providers who assist in platform operations</li>
+                                <li>When required by law or legal process</li>
+                                <li>To protect our rights and prevent fraud</li>
+                                <li>With your explicit consent</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 6 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('pp-6')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-indigo-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-user-shield text-indigo-500 mr-2"></i>6. Your Rights</span>
+                            <i id="pp-6-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="pp-6" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600 mb-3">Under applicable data protection laws, you have the right to:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>Access your personal data</li>
+                                <li>Correct inaccurate data</li>
+                                <li>Request deletion of your data</li>
+                                <li>Export your data in a portable format</li>
+                                <li>Opt-out of marketing communications</li>
+                                <li>Lodge a complaint with supervisory authorities</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 7 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('pp-7')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-indigo-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-clock text-indigo-500 mr-2"></i>7. Data Retention</span>
+                            <i id="pp-7-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="pp-7" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600">We retain your data for as long as your account is active or as needed to provide services. Financial and transaction data is retained as required by tax laws (typically 7 years). You may request account deletion at any time.</p>
+                        </div>
+                    </div>
+
+                    <!-- Section 8 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('pp-8')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-indigo-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-cookie text-indigo-500 mr-2"></i>8. Cookies & Tracking</span>
+                            <i id="pp-8-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="pp-8" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600">We use essential cookies for authentication and platform functionality. Analytics cookies help us understand usage patterns and improve services. You can control cookie preferences through your browser settings.</p>
+                        </div>
+                    </div>
+
+                    <!-- Section 9 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('pp-9')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-indigo-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-child text-indigo-500 mr-2"></i>9. Children's Privacy</span>
+                            <i id="pp-9-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="pp-9" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600">Orderly is not intended for individuals under 18 years of age. We do not knowingly collect personal information from children.</p>
+                        </div>
+                    </div>
+
+                    <!-- Section 10 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('pp-10')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-indigo-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-edit text-indigo-500 mr-2"></i>10. Changes to Privacy Policy</span>
+                            <i id="pp-10-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="pp-10" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600">We may update this Privacy Policy periodically. We will notify you of significant changes through the platform or email. Continued use after changes constitutes acceptance.</p>
+                        </div>
+                    </div>
+
+                    <!-- Section 11 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('pp-11')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-indigo-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-envelope text-indigo-500 mr-2"></i>11. Contact Us</span>
+                            <i id="pp-11-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="pp-11" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600 mb-3">For privacy-related inquiries or to exercise your rights, contact us at:</p>
+                            <div class="bg-indigo-50 p-4 rounded-lg">
+                                <p class="text-gray-700"><i class="fas fa-envelope mr-2 text-indigo-500"></i><strong>Email:</strong> privacy@orderly.in</p>
+                                <p class="text-gray-700 mt-1"><i class="fas fa-map-marker-alt mr-2 text-indigo-500"></i><strong>Address:</strong> Orderly Technologies Pvt. Ltd., India</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t bg-gray-50 shrink-0">
+                <button onclick="closePrivacyPolicy()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700">
+                    I Understand
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TERMS & CONDITIONS MODAL -->
+    <div id="terms-conditions-modal" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden modal-enter max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b border-gray-100 bg-teal-50 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-lg text-teal-800"><i class="fas fa-file-contract mr-2"></i>Terms & Conditions</h3>
+                <button onclick="closeTermsConditions()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4 flex-1 overflow-y-auto">
+                <p class="text-sm text-gray-500 mb-4 text-center">Effective Date: December 2025</p>
+                
+                <!-- Accordion Sections -->
+                <div class="space-y-2">
+                    <!-- Section 1 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-1')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-handshake text-teal-500 mr-2"></i>1. Agreement to Terms</span>
+                            <i id="tc-1-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-1" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600">By accessing or using Orderly restaurant management platform, you agree to be bound by these Terms and Conditions. If you disagree with any part of these terms, you may not access the service. These terms constitute a legally binding agreement between you ("Merchant" or "User") and Orderly Technologies Pvt. Ltd. ("Company," "we," or "us").</p>
+                        </div>
+                    </div>
+
+                    <!-- Section 2 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-2')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-server text-teal-500 mr-2"></i>2. Service Description</span>
+                            <i id="tc-2-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-2" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600 mb-3">Orderly provides a comprehensive restaurant management platform including:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>Point of Sale (POS) system</li>
+                                <li>Menu and inventory management</li>
+                                <li>Order management and kitchen display</li>
+                                <li>Customer ordering application</li>
+                                <li>Staff and table management</li>
+                                <li>Business analytics and reporting</li>
+                                <li>Digital wallet for platform fees</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 3 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-3')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-user-plus text-teal-500 mr-2"></i>3. Account Registration</span>
+                            <i id="tc-3-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-3" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600 mb-3">To use Orderly, you must:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>Be at least 18 years old and have legal authority to enter contracts</li>
+                                <li>Provide accurate and complete business information</li>
+                                <li>Possess valid FSSAI license for food service operations</li>
+                                <li>Maintain the confidentiality of your account credentials</li>
+                                <li>Immediately notify us of any unauthorized access</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 4 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-4')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-wallet text-teal-500 mr-2"></i>4. Platform Fees & Wallet System</span>
+                            <i id="tc-4-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-4" class="hidden p-4 bg-white border-t space-y-3">
+                            <p class="text-gray-600 font-semibold">4.1 Fee Structure:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>Platform fee of ₹1.98 per completed customer order</li>
+                                <li>Fee is deducted from pre-loaded wallet balance</li>
+                                <li>POS orders created by staff do not incur platform fees</li>
+                                <li>Fees may be revised with 30 days prior notice</li>
+                            </ul>
+                            <p class="text-gray-600 font-semibold mt-3">4.2 Wallet Terms:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>Wallet must maintain minimum balance for order processing</li>
+                                <li>Recharge through authorized payment methods only</li>
+                                <li>Wallet balance is non-refundable except account closure</li>
+                                <li>Unused balance refundable after 30-day settlement period</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 5 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-5')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-tasks text-teal-500 mr-2"></i>5. User Responsibilities</span>
+                            <i id="tc-5-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-5" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600 mb-3">As a merchant using Orderly, you agree to:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>Maintain accurate menu pricing and item availability</li>
+                                <li>Honor all orders placed through the platform</li>
+                                <li>Provide food that meets hygiene and safety standards</li>
+                                <li>Handle customer complaints and refunds appropriately</li>
+                                <li>Comply with all applicable laws and regulations</li>
+                                <li>Not engage in fraudulent or deceptive practices</li>
+                                <li>Not use the platform for illegal activities</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 6 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-6')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-copyright text-teal-500 mr-2"></i>6. Intellectual Property</span>
+                            <i id="tc-6-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-6" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600">All content, features, and functionality of Orderly platform including software, text, graphics, logos, and trademarks are owned by Orderly Technologies and protected by intellectual property laws. You may not copy, modify, distribute, or reverse engineer any part of the platform without written permission.</p>
+                        </div>
+                    </div>
+
+                    <!-- Section 7 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-7')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-cloud text-teal-500 mr-2"></i>7. Service Availability</span>
+                            <i id="tc-7-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-7" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600 mb-3">We strive to maintain 99.9% platform uptime but do not guarantee uninterrupted access. We reserve the right to:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>Modify or discontinue features with reasonable notice</li>
+                                <li>Perform maintenance during off-peak hours</li>
+                                <li>Suspend service for security or legal compliance</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 8 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-8')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-exclamation-triangle text-teal-500 mr-2"></i>8. Limitation of Liability</span>
+                            <i id="tc-8-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-8" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600 mb-3 font-semibold">TO THE MAXIMUM EXTENT PERMITTED BY LAW:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>Orderly is provided "AS IS" without warranties of any kind</li>
+                                <li>We are not liable for indirect, incidental, or consequential damages</li>
+                                <li>Our total liability shall not exceed fees paid in last 12 months</li>
+                                <li>We are not responsible for third-party payment gateway issues</li>
+                                <li>We are not liable for data loss due to user negligence</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 9 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-9')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-shield-alt text-teal-500 mr-2"></i>9. Indemnification</span>
+                            <i id="tc-9-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-9" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600 mb-3">You agree to indemnify and hold harmless Orderly Technologies, its directors, employees, and partners from any claims, damages, or expenses arising from:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>Your use of the platform</li>
+                                <li>Violation of these terms</li>
+                                <li>Food quality or safety issues</li>
+                                <li>Customer disputes related to your restaurant</li>
+                                <li>Any third-party claims against your business</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 10 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-10')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-user-times text-teal-500 mr-2"></i>10. Account Termination</span>
+                            <i id="tc-10-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-10" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600 mb-3">Either party may terminate this agreement:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>You may close your account anytime with 7 days notice</li>
+                                <li>We may suspend/terminate for terms violation</li>
+                                <li>We may terminate for non-payment of platform fees</li>
+                                <li>Data export available for 30 days after termination</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 11 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-11')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-balance-scale text-teal-500 mr-2"></i>11. Dispute Resolution</span>
+                            <i id="tc-11-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-11" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600 mb-3">Any disputes arising from these terms shall be:</p>
+                            <ul class="list-disc pl-6 text-gray-600 text-sm space-y-1">
+                                <li>First attempted to resolve through mutual negotiation</li>
+                                <li>If unresolved, submitted to binding arbitration</li>
+                                <li>Governed by the laws of India</li>
+                                <li>Subject to exclusive jurisdiction of courts in India</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Section 12 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-12')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-edit text-teal-500 mr-2"></i>12. Modifications to Terms</span>
+                            <i id="tc-12-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-12" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600">We reserve the right to modify these terms at any time. Material changes will be notified 30 days in advance via email or platform notification. Continued use after changes indicates acceptance.</p>
+                        </div>
+                    </div>
+
+                    <!-- Section 13 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-13')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-puzzle-piece text-teal-500 mr-2"></i>13. Severability</span>
+                            <i id="tc-13-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-13" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600">If any provision of these terms is found unenforceable, the remaining provisions shall continue in full force and effect.</p>
+                        </div>
+                    </div>
+
+                    <!-- Section 14 -->
+                    <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <button onclick="toggleAccordion('tc-14')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-teal-50 transition-colors text-left">
+                            <span class="font-bold text-gray-800"><i class="fas fa-envelope text-teal-500 mr-2"></i>14. Contact Information</span>
+                            <i id="tc-14-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="tc-14" class="hidden p-4 bg-white border-t">
+                            <p class="text-gray-600 mb-3">For questions about these Terms & Conditions:</p>
+                            <div class="bg-teal-50 p-4 rounded-lg">
+                                <p class="text-gray-700"><i class="fas fa-envelope mr-2 text-teal-500"></i><strong>Email:</strong> legal@orderly.in</p>
+                                <p class="text-gray-700 mt-1"><i class="fas fa-headset mr-2 text-teal-500"></i><strong>Support:</strong> support@orderly.in</p>
+                                <p class="text-gray-700 mt-1"><i class="fas fa-map-marker-alt mr-2 text-teal-500"></i><strong>Address:</strong> Orderly Technologies Pvt. Ltd., India</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t bg-gray-50 shrink-0">
+                <button onclick="closeTermsConditions()" class="w-full bg-teal-600 text-white py-3 rounded-xl font-bold hover:bg-teal-700">
+                    I Accept
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <script type="module">
@@ -3047,7 +3710,7 @@
         const dbFirestore = getFirestore(app);
 
         // =====================================================
-        // 🛡️ SECURITY & CRASH PREVENTION SYSTEM v3.0
+        // ðŸ›¡ï¸ SECURITY & CRASH PREVENTION SYSTEM v3.0
         // Module: Anti-Hacker + Crash Protection
         // =====================================================
 
@@ -3076,7 +3739,7 @@
                 const recentHistory = history.filter(t => now - t < 60000);
                 
                 if (recentHistory.length >= limit) {
-                    console.warn('🛡️ Rate limit exceeded for:', action);
+                    console.warn('ðŸ›¡ï¸ Rate limit exceeded for:', action);
                     return false;
                 }
                 
@@ -3173,7 +3836,7 @@
 
         // --- GLOBAL ERROR BOUNDARY (Prevent Crashes) ---
         window.onerror = function(msg, url, lineNo, columnNo, error) {
-            console.error('🔴 Global Error Caught:', { msg, url, lineNo, columnNo, error });
+            console.error('ðŸ”´ Global Error Caught:', { msg, url, lineNo, columnNo, error });
             // Don't crash the whole app
             if (window.showToast) {
                 window.showToast('Something went wrong. Please refresh if issues persist.', 'error');
@@ -3182,7 +3845,7 @@
         };
 
         window.onunhandledrejection = function(event) {
-            console.error('🔴 Unhandled Promise Rejection:', event.reason);
+            console.error('ðŸ”´ Unhandled Promise Rejection:', event.reason);
             if (window.showToast) {
                 window.showToast('Operation failed. Please try again.', 'error');
             }
@@ -3194,7 +3857,7 @@
             try {
                 return await fn();
             } catch (error) {
-                console.error('🔴 Safe Execute Error:', error);
+                console.error('ðŸ”´ Safe Execute Error:', error);
                 if (window.showToast) window.showToast(errorMsg, 'error');
                 return fallbackValue;
             }
@@ -3206,7 +3869,7 @@
             
             checkArraySize: function(arr, name = 'array') {
                 if (arr && arr.length > this.maxCacheSize) {
-                    console.warn(`🛡️ Memory Guard: ${name} exceeds limit (${arr.length}), trimming...`);
+                    console.warn(`ðŸ›¡ï¸ Memory Guard: ${name} exceeds limit (${arr.length}), trimming...`);
                     return arr.slice(-this.maxCacheSize);
                 }
                 return arr;
@@ -3214,7 +3877,7 @@
             
             checkMapSize: function(map, name = 'map') {
                 if (map && map.size > this.maxCacheSize) {
-                    console.warn(`🛡️ Memory Guard: ${name} exceeds limit (${map.size}), clearing old entries...`);
+                    console.warn(`ðŸ›¡ï¸ Memory Guard: ${name} exceeds limit (${map.size}), clearing old entries...`);
                     const entries = Array.from(map.entries());
                     map.clear();
                     entries.slice(-Math.floor(this.maxCacheSize / 2)).forEach(([k, v]) => map.set(k, v));
@@ -3235,11 +3898,11 @@
                 const qs = new URLSearchParams(window.location.search);
                 let urlId = (qs.get('id') || qs.get('tenant') || qs.get('cafe') || '').trim().toLowerCase();
                 
-                // 🛡️ SECURITY: Sanitize and validate tenant ID
+                // ðŸ›¡ï¸ SECURITY: Sanitize and validate tenant ID
                 urlId = sanitizer.sanitizeInput(urlId, 50);
                 
                 if (urlId && !sanitizer.validateTenantId(urlId)) {
-                    console.error('🛡️ SECURITY: Invalid tenant ID format rejected:', urlId);
+                    console.error('ðŸ›¡ï¸ SECURITY: Invalid tenant ID format rejected:', urlId);
                     return null;
                 }
                 
@@ -3258,7 +3921,7 @@
                     return sessionId;
                 }
                 
-                console.error('Œ [ADMIN] NO TENANT FOUND!');
+                console.error('₹Å’ [ADMIN] NO TENANT FOUND!');
                 localStorage.removeItem('wowRestaurantId');
                 return null;
             } catch (e) {
@@ -3282,7 +3945,7 @@
                 
                 if (restaurantSnap.exists()) {
                     const restaurantData = restaurantSnap.data();
-                    console.log('[OK]… [ADMIN] Restaurant VERIFIED:', tenantId, restaurantData);
+                    console.log('[OK]₹€¦ [ADMIN] Restaurant VERIFIED:', tenantId, restaurantData);
                     return { valid: true, data: restaurantData, cafeName: restaurantData.name || tenantId };
                 }
                 
@@ -3293,19 +3956,19 @@
                 const menuSnap = await getDocs(menuRef);
                 
                 if (!menuSnap.empty) {
-                    console.log('[OK]… [ADMIN] Tenant verified via menu data:', tenantId, 'Items:', menuSnap.size);
+                    console.log('[OK]₹€¦ [ADMIN] Tenant verified via menu data:', tenantId, 'Items:', menuSnap.size);
                     return { valid: true, data: { id: tenantId }, cafeName: tenantId };
                 }
                 
-                console.error('Œ [ADMIN] Tenant NOT FOUND:', tenantId);
+                console.error('₹Å’ [ADMIN] Tenant NOT FOUND:', tenantId);
                 return { valid: false, reason: 'TENANT_NOT_FOUND' };
                 
             } catch (error) {
-                console.error('Œ [ADMIN] Validation error:', error);
-                console.error('Œ [ADMIN] Error details:', error.message, error.code);
+                console.error('₹Å’ [ADMIN] Validation error:', error);
+                console.error('₹Å’ [ADMIN] Error details:', error.message, error.code);
                 // On network error, allow access (fail-open for better UX)
                 if (error.code === 'unavailable' || error.message.includes('network')) {
-                    console.warn(' ¸ [ADMIN] Network error - allowing access');
+                    console.warn('₹ ₹¸₹ [ADMIN] Network error - allowing access');
                     return { valid: true, data: { id: tenantId }, cafeName: tenantId };
                 }
                 return { valid: false, reason: 'VALIDATION_ERROR', error: error.message };
@@ -3340,7 +4003,7 @@
                             justify-content: center;
                             font-size: 40px;
                             box-shadow: 0 15px 30px rgba(239, 68, 68, 0.3);
-                        ">™¸</div>
+                        ">❌</div>
                         
                         <h1 style="
                             font-size: 1.75rem;
@@ -3381,7 +4044,7 @@
                                 font-size: 0.95rem;
                                 font-weight: 600;
                                 cursor: pointer;
-                            ">etry</button>
+                            ">Retry</button>
                             <button onclick="window.history.back()" style="
                                 background: #374151;
                                 color: white;
@@ -3391,7 +4054,7 @@
                                 font-size: 0.95rem;
                                 font-weight: 600;
                                 cursor: pointer;
-                            ">† Back</button>
+                            ">Back</button>
                         </div>
                     </div>
                 </div>
@@ -3413,10 +4076,18 @@
             `;
             loader.innerHTML = `
                 <div>
-                    <div style="font-size: 56px; margin-bottom: 16px; animation: spin 2s linear infinite;">™¸</div>
-                    <p style="font-size: 1rem; color: #9ca3af;">Verifying admin access...</p>
+                    <div class="orderly-spinner" style="
+                        width: 60px; height: 60px; 
+                        border: 4px solid rgba(255,255,255,0.1);
+                        border-top: 4px solid #f97316;
+                        border-radius: 50%;
+                        animation: orderly-spin 1s linear infinite;
+                        margin: 0 auto 20px;
+                    "></div>
+                    <h2 style="font-size: 1.5rem; font-weight: 700; color: #f97316; margin-bottom: 8px;">Orderly</h2>
+                    <p style="font-size: 0.9rem; color: #9ca3af;">Loading admin dashboard...</p>
                 </div>
-                <style>@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }</style>
+                <style>@keyframes orderly-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
             `;
             document.body.appendChild(loader);
         };
@@ -3424,6 +4095,9 @@
         const hideValidationLoader = () => {
             const loader = document.getElementById('validation-loader');
             if (loader) loader.remove();
+            // Also hide the initial loader
+            const initialLoader = document.getElementById('initial-loader');
+            if (initialLoader) initialLoader.style.display = 'none';
         };
 
         // =====================================================
@@ -3436,10 +4110,10 @@
         const initializeAdminApp = async () => {
             let tenantId = resolveRestaurantId();
             
-            // Default to 'wowcafe' if no ID provided
+            // Default to 'Orderly' if no ID provided
             if (!tenantId || tenantId.trim() === '') {
-                tenantId = 'wowcafe';
-                console.log(' ¸ No tenant ID in URL, defaulting to: wowcafe');
+                tenantId = 'Orderly';
+                console.log('₹ ₹¸₹ No tenant ID in URL, defaulting to: Orderly');
             }
             
             showValidationLoader();
@@ -3450,11 +4124,11 @@
             hideValidationLoader();
             
             if (!validation.valid) {
-                console.error('Œ [ADMIN] Validation FAILED:', validation.reason);
+                console.error('₹Å’ [ADMIN] Validation FAILED:', validation.reason);
                 // Still allow access but show warning
-                console.warn(' ¸ Proceeding without validation for development');
+                console.warn('₹ ₹¸₹ Proceeding without validation for development');
                 RESTAURANT_ID = tenantId;
-                TENANT_DATA = { id: tenantId, name: 'WowCafe' };
+                TENANT_DATA = { id: tenantId, name: 'Orderly' };
                 initAdminFeatures();
                 return true;
             }
@@ -3465,7 +4139,7 @@
             window.RESTAURANT_ID = tenantId;
             window.TENANT_DATA = validation.data;
             
-            console.log('[OK]… [ADMIN] Tenant validated:', RESTAURANT_ID);
+            console.log('[OK]₹€¦ [ADMIN] Tenant validated:', RESTAURANT_ID);
             
             // NOW initialize all admin features
             initAdminFeatures();
@@ -3476,18 +4150,31 @@
         // Execute strict initialization
         initializeAdminApp().catch(err => {
             console.error('Admin initialization failed:', err);
+            // Force hide loader on error
+            const initialLoader = document.getElementById('initial-loader');
+            if (initialLoader) initialLoader.style.display = 'none';
         });
+        
+        // Safety: Force hide loader after 15 seconds if Firebase doesn't connect
+        setTimeout(() => {
+            const initialLoader = document.getElementById('initial-loader');
+            if (initialLoader && initialLoader.style.display !== 'none') {
+                console.warn('⚠️ Loader timeout - forcing hide after 15s');
+                initialLoader.style.display = 'none';
+                window.showToast && window.showToast('Connection slow. Some features may not work.', 'warning');
+            }
+        }, 15000);
         
         const getSessionKey = () => `wowAdminSession:${RESTAURANT_ID}`;
 
         // Function to initialize all admin features after validation
         const initAdminFeatures = () => {
-            console.log('€ [ADMIN] Initializing admin features for:', RESTAURANT_ID);
+            console.log('₹‚¬ [ADMIN] Initializing admin features for:', RESTAURANT_ID);
             
             // Show tenant ID in sidebar
             const tenantEl = document.getElementById('sidebar-tenant-id');
             if (tenantEl) {
-                tenantEl.innerText = RESTAURANT_ID ? `˜• ${RESTAURANT_ID}` : ' ¸ No Cafe ID';
+                tenantEl.innerText = RESTAURANT_ID ? `Ëœ₹€¢ ${RESTAURANT_ID}` : '₹ ₹¸₹ No Cafe ID';
                 tenantEl.title = RESTAURANT_ID || 'Missing tenant ID';
             }
             
@@ -3514,7 +4201,7 @@
             // Enforce subscription plan limits
             enforcePlanLimits();
             
-            console.log('[OK]… [ADMIN] All features initialized (including inventory, tables, staff, expenses, suppliers)');
+            console.log('[OK]₹€¦ [ADMIN] All features initialized (including inventory, tables, staff, expenses, suppliers)');
         };
 
         // --- FEATURE GATING / UNLOCKING ---
@@ -3524,7 +4211,7 @@
             const features = subscription.features || {};
             const planName = subscription.planName || 'Free';
 
-            console.log(`🔒 Enforcing plan: ${planName}`, features);
+            console.log(`ðŸ”’ Enforcing plan: ${planName}`, features);
 
             // 2. Hide/Show Tabs based on features
             const analyticsTab = document.getElementById('nav-reports');
@@ -3578,7 +4265,7 @@
                 sidebarTitle.appendChild(badge);
             }
 
-            console.log('🔓 Plan limits enforced:', planName);
+            console.log('ðŸ”“ Plan limits enforced:', planName);
         };
 
         // Global State
@@ -3607,7 +4294,7 @@
             const oldBalance = window.currentAdminBalance;
             const diff = newBalance - oldBalance;
 
-            console.log(`™ Safe wallet update called:`, {
+            console.log(`₹₹„¢ Safe wallet update called:`, {
                 oldBalance,
                 newBalance,
                 diff,
@@ -3616,7 +4303,34 @@
                 requirePermission
             });
 
-            // SECURITY CHECK: Detect unauthorized deductions
+            // SECURITY CHECK 1: Block unauthorized RECHARGES (positive balance increase)
+            // Only Super Admin via Firebase backend can add money to wallet
+            if (diff > 0) {
+                const errorMsg = `🚫 RECHARGE BLOCKED! Wallet recharge is only allowed via Super Admin.\nAttempted Amount: ₹${diff.toFixed(2)}\nSource: ${source}`;
+                console.error("SECURITY ALERT - Recharge Attempt Blocked:", errorMsg);
+                
+                window.showToast(`🚫 Recharge blocked! Only Super Admin can add funds.`, "error");
+                
+                // Log the attempted recharge hack
+                try {
+                    await addDoc(collection(dbFirestore, "restaurants", RESTAURANT_ID, "security_violations"), {
+                        type: "unauthorized_recharge_attempt",
+                        attemptedAmount: diff,
+                        oldBalance: oldBalance,
+                        attemptedNewBalance: newBalance,
+                        source: source,
+                        description: description,
+                        timestamp: serverTimestamp(),
+                        stackTrace: new Error().stack
+                    });
+                } catch (e) {
+                    console.error("Failed to log security violation:", e);
+                }
+                
+                throw new Error("UNAUTHORIZED_RECHARGE: Wallet recharge requires Super Admin access");
+            }
+
+            // SECURITY CHECK 2: Detect unauthorized deductions
             if (diff < 0 && requirePermission) {
                 // Check if this is a legitimate admin-approved deduction
                 const isLegitimate = source.includes("Admin Approval") ||
@@ -3624,11 +4338,11 @@
                     source === "Admin Approval";
 
                 if (!isLegitimate) {
-                    const errorMsg = `Å¡¨ UNAUTHORIZED WALLET DEDUCTION DETECTED! Å¡¨\nAmount:  ₹${Math.abs(diff).toFixed(2)}\nSource: ${source}\nDescription: ${description}`;
+                    const errorMsg = `🚨 UNAUTHORIZED WALLET DEDUCTION DETECTED! 🚨\nAmount: ₹${Math.abs(diff).toFixed(2)}\nSource: ${source}\nDescription: ${description}`;
                     console.error("CRITICAL SECURITY ALERT:", errorMsg);
                     console.trace("Stack trace:");
 
-                    window.showToast(`Å¡¨ UNAUTHORIZED DEDUCTION:  ₹${Math.abs(diff).toFixed(2)}`, "error");
+                    window.showToast(`🚨 UNAUTHORIZED DEDUCTION: ₹${Math.abs(diff).toFixed(2)}`, "error");
                     setTimeout(() => {
                         window.showToast(`Source: ${source}`, "error");
                     }, 2000);
@@ -3666,7 +4380,7 @@
                 await logTransaction(Math.abs(diff), description, diff > 0 ? "credit" : "debit", source);
             }
 
-            console.log(`Å“¦ Safe wallet update completed: ${oldBalance}  € ™ ${newBalance}(${diff > 0 ? '+' : ''}${diff.toFixed(2)})`, { source, description });
+            console.log(`Ã…₹€œ₹¦ Safe wallet update completed: ${oldBalance} ₹‚¬₹ ₹„¢ ${newBalance}(${diff > 0 ? '+' : ''}${diff.toFixed(2)})`, { source, description });
 
             // Clear flag after a short delay to allow monitoring to detect it
             setTimeout(() => {
@@ -3695,9 +4409,30 @@
 
         // --- AUTH & PERSISTENCE ---
         const initAuth = async () => {
+            const loginOverlay = document.getElementById('login-overlay');
+            const cafeIdDisplay = document.getElementById('login-cafe-id');
+            
+            // Display Cafe ID in login panel
+            if (cafeIdDisplay && RESTAURANT_ID) {
+                cafeIdDisplay.innerHTML = `
+                    <p class="text-[10px] text-gray-400 uppercase font-bold">Cafe ID</p>
+                    <p class="text-sm font-mono font-bold text-orange-600">${RESTAURANT_ID}</p>
+                `;
+            } else if (cafeIdDisplay) {
+                cafeIdDisplay.innerHTML = `
+                    <p class="text-[10px] text-red-400 uppercase font-bold">Error</p>
+                    <p class="text-sm font-bold text-red-600">No Cafe ID in URL</p>
+                `;
+            }
+            
+            // Check for existing session - if active, hide login
             const session = localStorage.getItem(getSessionKey()) || localStorage.getItem('wowAdminSession');
-            if (session === 'active') {
-                document.getElementById('login-overlay').classList.add('hidden');
+            if (session === 'active' && RESTAURANT_ID) {
+                loginOverlay.classList.add('hidden');
+                console.log('✅ Session active - auto login');
+            } else {
+                // No session - show login overlay
+                loginOverlay.classList.remove('hidden');
             }
 
             if (!RESTAURANT_ID) {
@@ -3727,7 +4462,7 @@
             const errorMsg = document.getElementById('login-error');
             const btn = document.querySelector('button[onclick="checkAdminLogin()"]');
             
-            // 🛡️ SECURITY: Sanitize input
+            // ðŸ›¡ï¸ SECURITY: Sanitize input
             const entered = sanitizer.sanitizeInput(String(enteredPin || '').trim(), 100);
             if(!entered) return;
 
@@ -3737,7 +4472,7 @@
                 return;
             }
 
-            // 🛡️ SECURITY: Rate limiting for login attempts
+            // ðŸ›¡ï¸ SECURITY: Rate limiting for login attempts
             const loginCheck = rateLimiter.checkLoginAttempt(RESTAURANT_ID);
             if (!loginCheck.allowed) {
                 errorMsg.classList.remove('hidden');
@@ -3745,7 +4480,7 @@
                 return;
             }
 
-            // 🛡️ SECURITY: General rate limiting
+            // ðŸ›¡ï¸ SECURITY: General rate limiting
             if (!rateLimiter.checkLimit('login', 10)) {
                 errorMsg.classList.remove('hidden');
                 errorMsg.innerHTML = '<i class="fas fa-shield-alt"></i> Too many requests. Please wait.';
@@ -3770,26 +4505,12 @@
                     console.warn('ailed to read RTDB PIN:', e);
                 }
 
-                // 2) Fetch restaurant doc from Firestore (fallback password)
+                // 2) Fetch restaurant doc from Firestore (Super Admin sets password here)
                 const docRef = doc(dbFirestore, 'restaurants', RESTAURANT_ID);
                 const docSnap = await getDoc(docRef);
 
-                // DEFAULT PASSWORD: "1234" always works
-                const DEFAULT_PASSWORD = "1234";
-                const matchDefault = entered === DEFAULT_PASSWORD;
-
-                // If default password entered, allow login regardless of Firestore doc
-                if (matchDefault) {
-                    rateLimiter.recordLoginAttempt(RESTAURANT_ID, true);
-                    document.getElementById('login-overlay').classList.add('hidden');
-                    errorMsg.classList.add('hidden');
-                    window.showToast('Welcome Back, Admin!', 'success');
-                    localStorage.setItem(getSessionKey(), 'active');
-                    localStorage.setItem('wowAdminSession', 'active');
-                    console.log('[OK] Login SUCCESS (default password)');
-                    if(btn) btn.innerText = 'Unlock Panel';
-                    return;
-                }
+                // SECURITY: Only Super Admin provided password works
+                // No default password - must use password set during onboarding
 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -3807,17 +4528,17 @@
                          window.showToast('Welcome Back, ' + sanitizer.escapeHtml(data.name || 'Admin'), 'success');
                          localStorage.setItem(getSessionKey(), 'active');
                          localStorage.setItem('wowAdminSession', 'active'); // legacy
-                         console.log('OK]… Login SUCCESS');
+                         rateLimiter.recordLoginAttempt(RESTAURANT_ID, true); console.log('Login SUCCESS');
                     } else {
-                        console.log('Œ Password mismatch');
+                        rateLimiter.recordLoginAttempt(RESTAURANT_ID, false); console.log('Password mismatch');
                         throw new Error('Incorrect Password');
                     }
                 } else {
-                    console.log('Œ Restaurant doc not found in Firestore');
+                    console.log('Restaurant doc not found');
                     throw new Error('Restaurant Not Found - Create it in Super Admin first');
                 }
             } catch (e) {
-                console.error('ogin Error:', e);
+                console.error('Login Error:', e);
                 errorMsg.classList.remove('hidden');
                 errorMsg.innerHTML = '<i class="fas fa-lock"></i> ' + sanitizer.escapeHtml(e.message || 'Login Failed');
                 document.getElementById('login-pin').value = '';
@@ -3827,11 +4548,25 @@
         };
 
         window.adminLogout = () => {
-            if (confirm("Are you sure you want to logout?")) {
-                localStorage.removeItem(getSessionKey());
-                localStorage.removeItem('wowAdminSession');
-                location.reload();
+            // Direct logout without popup - just clear and reload
+            localStorage.removeItem(getSessionKey());
+            localStorage.removeItem('wowAdminSession');
+            window.showToast('Logging out...', 'info');
+            setTimeout(() => location.reload(), 500);
+        };
+
+        // --- FORGOT PASSWORD FUNCTIONS ---
+        window.openForgotPassword = () => {
+            document.getElementById('forgot-password-modal').classList.remove('hidden');
+            // Update WhatsApp link with Cafe ID
+            const whatsappLink = document.getElementById('whatsapp-support-link');
+            if (whatsappLink && RESTAURANT_ID) {
+                whatsappLink.href = `https://wa.me/919999999999?text=Hi, I forgot my Orderly admin password. My Cafe ID is: ${RESTAURANT_ID}`;
             }
+        };
+
+        window.closeForgotPassword = () => {
+            document.getElementById('forgot-password-modal').classList.add('hidden');
         };
 
         document.getElementById('login-pin').addEventListener("keypress", function (event) {
@@ -3898,11 +4633,11 @@
                         const sign = isDebit ? '-' : '+';
 
                         html += `
-                < tr class= "hover:bg-gray-50 border-b border-gray-50" >
+                <tr class="hover:bg-gray-50 border-b border-gray-50">
                                 <td class="p-4 text-xs text-gray-500">${dateStr}<br>${timeStr}</td>
                                 <td class="p-4 text-sm font-medium text-gray-700">${d.description || 'Order Fee'} <span class="text-[10px] text-gray-400">(${d.source || 'System'})</span></td>
-                                <td class="p-4 text-right font-bold ${amountColor}">${sign} ₹${Number(d.amount).toFixed(2)}</td>
-                            </tr >
+                                <td class="p-4 text-right font-bold ${amountColor}">${sign}₹${Number(d.amount).toFixed(2)}</td>
+                            </tr>
                 `;
                     });
                 }
@@ -3913,9 +4648,9 @@
             });
         };
 
-        // --- SYSTEM MONITORS (UPDATED: RECHARGE DETECTION) ---
+                // --- SYSTEM MONITORS (FINAL SECURE VERSION) ---
         const initSystemMonitors = () => {
-            // Monitor Block Status
+            // 1. Monitor Block Status
             const appStatusRef = ref(dbRTDB, `restaurants/${RESTAURANT_ID}/appStatus`);
             onValue(appStatusRef, (snapshot) => {
                 const isBlocked = snapshot.val();
@@ -3929,118 +4664,89 @@
                 }
             });
 
-            // Monitor Wallet Balance (Enhanced Security Monitoring)
+            // 2. Monitor Wallet Balance
             const walletRef = ref(dbRTDB, `restaurants/${RESTAURANT_ID}/admin/walletBalance`);
             let lastKnownBalance = null;
 
             onValue(walletRef, async (snapshot) => {
                 try {
                     const balanceValue = snapshot.val();
-                    if (balanceValue === null || balanceValue === undefined) {
-                        console.warn("Å¡ ¯¸ Wallet balance is null/undefined");
+                    if (balanceValue === null || balanceValue === undefined) return;
+
+                    const newBalance = parseFloat(balanceValue) || 0;
+                    
+                    // Initialize on first load
+                    if (lastKnownBalance === null) {
+                        lastKnownBalance = newBalance;
+                        window.currentAdminBalance = newBalance;
+                        updateWalletUI(newBalance);
                         return;
                     }
 
-                    const newBalance = parseFloat(balanceValue) || 0;
-                    const oldBalance = window.currentAdminBalance || lastKnownBalance;
+                    const oldBalance = lastKnownBalance;
+                    const diff = newBalance - oldBalance;
+                    const isLegitimateUpdate = window.lastWalletUpdateSource !== null;
 
-                    // SECURITY: Detect unauthorized wallet changes
-                    if (oldBalance !== null && oldBalance !== newBalance) {
-                        const diff = newBalance - oldBalance;
+                    // CASE 1: RECHARGE DETECTED (Balance Increased)
+                    if (diff > 0) {
+                        console.log("Authorized Recharge detected (via Backend/Super Admin)");
+                        window.showToast(`Wallet Recharged: +Rs.${diff.toFixed(2)}`, "success");
+                        
+                        if(!document.getElementById('wallet-history-modal').classList.contains('hidden')){
+                            openWalletHistory(); 
+                        }
+                    }
 
-                        // Check if this is a legitimate update (from our safe function)
-                        const isLegitimateUpdate = window.lastWalletUpdateSource !== null;
-
-                        console.log(" Wallet change detected:", {
-                            oldBalance,
-                            newBalance,
-                            diff,
-                            isLegitimateUpdate,
-                            source: window.lastWalletUpdateSource
-                        });
-
-                        if (diff < 0 && !isLegitimateUpdate) {
-                            // UNAUTHORIZED DEDUCTION DETECTED!
-                            const unauthorizedAmount = Math.abs(diff);
-                            console.error("Å¡¨Å¡¨Å¡¨ UNAUTHORIZED WALLET DEDUCTION DETECTED! Å¡¨Å¡¨Å¡¨");
-                            console.error(`Amount:  ₹${unauthorizedAmount.toFixed(2)}`);
-                            console.error(`Balance changed from  ₹${oldBalance.toFixed(2)} to  ₹${newBalance.toFixed(2)}`);
-                            console.error("This deduction was NOT authorized by admin!");
-                            console.error("Expected source: 'Admin Approval' or 'POS (Pay Now)'");
-                            console.trace("Detection stack trace:");
-
-                            // Show multiple error messages
-                            window.showToast(`Å¡¨ UNAUTHORIZED DEDUCTION:  ₹${unauthorizedAmount.toFixed(2)}`, "error");
-                            setTimeout(() => {
-                                window.showToast("Å¡ ¯¸ Wallet changed without permission!", "error");
-                            }, 2000);
-                            setTimeout(() => {
-                                window.showToast("Check console for details", "error");
-                            }, 4000);
-
-                            // Log security violation
-                            try {
-                                await addDoc(collection(dbFirestore, "restaurants", RESTAURANT_ID, "security_violations"), {
-                                    type: "unauthorized_wallet_deduction_detected",
-                                    amount: unauthorizedAmount,
-                                    oldBalance: oldBalance,
-                                    newBalance: newBalance,
-                                    detectedAt: serverTimestamp(),
-                                    stackTrace: new Error().stack,
-                                    userAgent: navigator.userAgent,
-                                    timestamp: Date.now()
-                                });
-                            } catch (e) {
-                                console.error("Failed to log security violation:", e);
+                    // CASE 2: DEDUCTION DETECTED (Balance Decreased)
+                    else if (diff < 0) {
+                        if (!isLegitimateUpdate) {
+                            const feeAmount = Math.abs(diff);
+                            if (Math.abs(feeAmount - 1.98) < 0.1) {
+                                window.showToast(`Order Fee Deducted: Rs.${feeAmount.toFixed(2)}`, "info");
+                            } else {
+                                console.warn("External deduction detected!");
+                                window.showToast(`Wallet Debited: -Rs.${feeAmount.toFixed(2)}`, "info");
                             }
-                        } else if (diff > 0) {
-                            // Legitimate recharge
-                            logTransaction(diff, "Wallet Recharge", "credit", "Console/Admin");
-                            window.showToast(`Wallet Recharged: + ₹${diff.toFixed(2)}`, "success");
-                        } else if (diff < 0 && isLegitimateUpdate) {
-                            console.log("Å“¦ Legitimate deduction detected:", window.lastWalletUpdateSource);
                         }
                     }
 
-                    // Update tracking
-                    window.currentAdminBalance = newBalance;
+                    // Update State & UI
                     lastKnownBalance = newBalance;
-                    window.previousBalance = newBalance; // Keep for backward compatibility
+                    window.currentAdminBalance = newBalance;
+                    updateWalletUI(newBalance);
 
-                    const displayVal = ` ₹${newBalance.toFixed(2)}`;
-                    const walletDisplay = document.getElementById('admin-wallet-display');
-                    const walletMobile = document.getElementById('admin-wallet-mobile');
-                    const dashWallet = document.getElementById('dash-wallet-balance');
-
-                    if (walletDisplay) walletDisplay.innerText = displayVal;
-                    if (walletMobile) walletMobile.innerText = displayVal;
-                    if (dashWallet) dashWallet.innerText = displayVal;
-
-                    const alertOverlay = document.getElementById('low-balance-overlay');
-                    if (alertOverlay) {
-                        if (newBalance < 100) {
-                            alertOverlay.classList.remove('hidden');
-                            alertOverlay.classList.add('low-balance-active');
-                        } else {
-                            alertOverlay.classList.add('hidden');
-                            alertOverlay.classList.remove('low-balance-active');
-                        }
-                    }
                 } catch (error) {
-                    console.error(" Å’ Error in wallet monitoring:", error);
-                    // Don't crash - continue monitoring
-                }
-            }, (error) => {
-                console.error(" Å’ Firebase wallet listener error:", error);
-                // Show user-friendly error
-                if (window.showToast) {
-                    window.showToast("Connection issue. Retrying...", "error");
+                    console.error("Wallet Monitor Error:", error);
                 }
             });
         };
 
+        // Helper: UI Update (To keep code clean)
+        const updateWalletUI = (balance) => {
+            const displayVal = `Rs.${balance.toFixed(2)}`;
+            const els = ['admin-wallet-display', 'admin-wallet-mobile', 'dash-wallet-balance'];
+            els.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.innerText = displayVal;
+            });
+
+            // Low Balance Warning
+            const alertOverlay = document.getElementById('low-balance-overlay');
+            if (alertOverlay) {
+                if (balance < 100) {
+                    alertOverlay.classList.remove('hidden');
+                    alertOverlay.classList.add('low-balance-active');
+                } else {
+                    alertOverlay.classList.add('hidden');
+                    alertOverlay.classList.remove('low-balance-active');
+                }
+            }
+        };
+
         window.showToast = (msg, type = "success") => {
             let bg = type === "success" ? "#10B981" : "#EF4444";
+            if (type === "info") bg = "#3B82F6";
+            if (type === "warning") bg = "#F59E0B";
             Toastify({
                 text: msg, duration: 3000, close: true, gravity: "top", position: "right",
                 style: { background: bg, borderRadius: "8px", fontWeight: "bold", fontSize: "14px" }
@@ -4082,14 +4788,16 @@
         window.toggleSidebar = () => {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
-            if (sidebar.classList.contains('sidebar-open')) {
-                sidebar.classList.remove('sidebar-open');
-                sidebar.classList.add('sidebar-closed');
+            if (sidebar.classList.contains('translate-x-0')) {
+                sidebar.classList.remove('translate-x-0');
+                sidebar.classList.add('-translate-x-full');
                 overlay.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Scroll unlock
             } else {
-                sidebar.classList.remove('sidebar-closed');
-                sidebar.classList.add('sidebar-open');
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0');
                 overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Scroll lock on mobile
             }
         };
 
@@ -4120,7 +4828,7 @@
 
         // --- GLOBAL ERROR HANDLERS (CRASH PREVENTION) ---
         window.addEventListener('error', (event) => {
-            console.error("Å¡¨ Global Error Caught:", event.error);
+            console.error("Ã…₹¡₹¨ Global Error Caught:", event.error);
             console.error("Error details:", { message: event.message, filename: event.filename, lineno: event.lineno });
             // Prevent crash - show user-friendly message
             if (window.showToast) {
@@ -4130,7 +4838,7 @@
         });
 
         window.addEventListener('unhandledrejection', (event) => {
-            console.error("Å¡¨ Unhandled Promise Rejection:", event.reason);
+            console.error("Ã…₹¡₹¨ Unhandled Promise Rejection:", event.reason);
             // Prevent crash from unhandled promises
             if (window.showToast) {
                 window.showToast("Network error. Please refresh if issues persist.", "error");
@@ -4172,47 +4880,49 @@
                                 const displayId = order.orderId || order.id.substring(0, 5);
 
                                 let statusBadge = "";
-                                if (order.status === 'pending') statusBadge = `< span class= "status-badge status-pending" > <i class="fas fa-clock"></i> PENDING</span > `;
-                                else if (order.status === 'preparing') statusBadge = `< span class= "status-badge status-preparing" > <i class="fas fa-fire"></i> COOKING</span > `;
-                                else if (order.status === 'ready') statusBadge = `< span class= "status-badge status-ready" > <i class="fas fa-bell"></i> READY</span > `;
-                                else if (order.status === 'completed') statusBadge = `< span class= "status-badge status-completed" > <i class="fas fa-check-circle"></i> SERVED</span > `;
+                                if (order.status === 'pending') statusBadge = `<span class="status-badge status-pending"><i class="fas fa-clock"></i> PENDING</span>`;
+                                else if (order.status === 'preparing') statusBadge = `<span class="status-badge status-preparing"><i class="fas fa-fire"></i> COOKING</span>`;
+                                else if (order.status === 'ready') statusBadge = `<span class="status-badge status-ready"><i class="fas fa-bell"></i> READY</span>`;
+                                else if (order.status === 'completed') statusBadge = `<span class="status-badge status-completed"><i class="fas fa-check-circle"></i> SERVED</span>`;
 
                                 let payAction = "";
                                 let dueHtml = "";
                                 const amt = order.totalAmount || order.total_amount || 0;
                                 const displayAmt = Math.round(amt);
 
-                                if (order.paymentStatus === 'paid') {
-                                    if (order.isFeeDeducted === true) {
-                                        dueHtml = `< div class= "text-green-600 font-bold text-xs" > <i class="fas fa-check-circle"></i> PAID</div > `;
-                                        payAction = `< div class= "text-gray-400 font-bold text-xs italic" > Fee Deducted.</div > `;
-                                    } else {
-                                        // Fallback for visual indication if auto-deduct lags
-                                        dueHtml = `< div class= "text-green-600 font-bold text-xs" > <i class="fas fa-check-circle"></i> PAID(Processing)</div > `;
-                                        payAction = `< button onclick = "markOrderPaid('${order.id}')" class= "bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-xs font-bold shadow transition disabled:opacity-50 disabled:cursor-not-allowed" id = "btn-pay-${order.id}" > <i class="fas fa-sync"></i> Sync Fee</button > `;
-                                    }
+                                // Check payment and fee status
+                                if (order.isFeeDeducted === true && order.paymentStatus === 'paid') {
+                                    // Fee deducted and payment confirmed
+                                    dueHtml = `<div class="text-green-600 font-bold text-xs"><i class="fas fa-check-circle"></i>₹${displayAmt}</div>
+                                               <div class="text-[10px] text-green-500 mt-1">₹œ“ Fee Collected</div>`;
+                                    payAction = `<div class="text-green-500 font-bold text-xs italic"><i class="fas fa-check"></i> Done</div>`;
+                                } else if (order.paymentStatus === 'paid' && !order.isFeeDeducted) {
+                                    // Payment marked but fee not deducted - need to deduct
+                                    dueHtml = `<div class="text-blue-600 font-bold text-xs"><i class="fas fa-check-circle"></i>₹${displayAmt}</div>`;
+                                    payAction = `<button onclick="markOrderPaid('${order.id}')" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded text-xs font-bold shadow transition" id="btn-pay-${order.id}"><i class="fas fa-coins"></i> Deduct Fee</button>`;
                                 } else {
-                                    dueHtml = `< div class= "text-red-600 font-bold text-sm" > Due:  ₹${displayAmt}</div > `;
-                                    payAction = `< button onclick = "markOrderPaid('${order.id}')" class= "bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-xs font-bold shadow transition disabled:opacity-50 disabled:cursor-not-allowed" id = "btn-pay-${order.id}" > <i class="fas fa-rupee-sign"></i> Accept & Deduct Fee</button > `;
+                                    // Payment pending - show due amount and confirm button
+                                    dueHtml = `<div class="text-red-600 font-bold text-sm">Due:₹${displayAmt}</div>`;
+                                    payAction = `<button onclick="markOrderPaid('${order.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-xs font-bold shadow transition" id="btn-pay-${order.id}"><i class="fas fa-check"></i> Confirm & Deduct₹1.98</button>`;
                                 }
 
                                 const itemSummary = order.items ? order.items.map(i => {
                                     let details = "";
                                     if (i.size) details += `(${i.size})`;
                                     if (i.addons && i.addons.length > 0) details += `+ ${i.addons.length} Addons`;
-                                    return `< span class= "bg-gray-100 px-2 py-1 rounded text-xs text-gray-700 font-medium whitespace-nowrap block mb-1" > ${i.name} x${i.qty} < span class= "text-[10px] text-gray-500" > ${details}</span ></span > `;
+                                    return `<span class="bg-gray-100 px-2 py-1 rounded text-xs text-gray-700 font-medium whitespace-nowrap block mb-1">${i.name} x${i.qty} <span class="text-[10px] text-gray-500">${details}</span></span>`;
                                 }).join('') : "No items";
 
                                 const isPOS = order.orderType === 'POS/Admin';
                                 const typeBadge = isPOS
-                                    ? `< span class= "bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded" > Admin POS</span > `
-                                    : `< span class= "bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded" > ${order.orderType || 'Website'}</span > `;
+                                    ? `<span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded">Admin POS</span>`
+                                    : `<span class="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded">${order.orderType || 'Website'}</span>`;
 
                                 const cName = order.customerName || order.name || order.fullName || order.user_name || 'Guest';
                                 const cMobile = order.customerMobile || order.mobile || order.phone || order.phoneNumber || 'N/A';
 
                                 liveHtml += `
-            < tr class= "hover:bg-orange-50/50 transition border-b border-gray-50" >
+            <tr class="hover:bg-orange-50/50 transition border-b border-gray-50">
                                     <td class="p-5 font-mono font-bold text-orange-600">#${displayId}</td>
                                     <td class="p-5">${typeBadge}</td>
                                     <td class="p-5">
@@ -4222,7 +4932,7 @@
                                     <td class="p-5">${dueHtml}</td>
                                     <td class="p-5">${statusBadge}</td>
                                     <td class="p-5 text-right w-40">${payAction}</td>
-                                </tr >
+                                </tr>
             `;
                             }
                         });
@@ -4254,11 +4964,11 @@
                     if (statCompleted) statCompleted.innerText = completed;
                     if (currentDate) currentDate.innerText = new Date().toLocaleDateString();
                 } catch (error) {
-                    console.error(" Å’ Error in live dashboard update:", error);
+                    console.error("₹Ã…₹€™ Error in live dashboard update:", error);
                     // Don't crash - continue with next update
                 }
             }, (error) => {
-                console.error(" Å’ Firebase listener error:", error);
+                console.error("₹Ã…₹€™ Firebase listener error:", error);
                 // Show user-friendly error
                 if (window.showToast) {
                     window.showToast("Connection issue. Retrying...", "error");
@@ -4271,11 +4981,11 @@
         // All wallet deductions now require explicit admin approval via markOrderPaid()
         const autoDeductFee = async (order) => {
             // DISABLED: Auto-deduction is now locked
-            console.warn("Å¡ ¯¸ AUTO-DEDUCTION ATTEMPTED BUT DISABLED:", order.orderId);
-            console.warn("Å¡ ¯¸ This order requires manual admin approval");
+            console.warn("Ã…₹¡₹ ₹¯₹¸₹ AUTO-DEDUCTION ATTEMPTED BUT DISABLED:", order.orderId);
+            console.warn("Ã…₹¡₹ ₹¯₹¸₹ This order requires manual admin approval");
 
             // Show error to admin
-            window.showToast(`Å¡ ¯¸ Order #${order.orderId} requires manual verification`, "error");
+            window.showToast(`Ã…₹¡₹ ₹¯₹¸₹ Order #${order.orderId} requires manual verification`, "error");
             window.showToast("Auto-deduction is disabled for security", "error");
 
             // DO NOT DEDUCT - Return without action
@@ -4307,7 +5017,7 @@
                     });
                 }
                 window.syncedOrdersCache.add(order.orderId);
-                // 🛡️ MEMORY PROTECTION: Limit cache size
+                // ðŸ›¡ï¸ MEMORY PROTECTION: Limit cache size
                 memoryGuard.checkMapSize(window.syncedOrdersCache, 'syncedOrdersCache');
             } catch (e) { console.error("Auto Sync Error:", e); }
         };
@@ -4319,7 +5029,7 @@
         window.markOrderPaid = async (rtdbKey) => {
             // DOUBLE-CLICK PREVENTION: Check if already processing
             if (window.processingOrders.has(rtdbKey)) {
-                console.warn("Å¡ ¯¸ Payment already being processed for order:", rtdbKey);
+                console.warn("Ã…₹¡₹ ₹¯₹¸₹ Payment already being processed for order:", rtdbKey);
                 window.showToast("Payment is being processed... Please wait", "info");
                 return;
             }
@@ -4347,7 +5057,7 @@
 
                 // GATEKEEPER: CHECK FOR DOUBLE PAYMENT (STRICT) - Double check before processing
                 if (raw.isFeeDeducted === true) {
-                    console.log("Å“¦ Fee already deducted for order:", raw.orderId);
+                    console.log("Ã…₹€œ₹¦ Fee already deducted for order:", raw.orderId);
                     await update(ref(dbRTDB, `restaurants/${RESTAURANT_ID}/orders/${rtdbKey}`), { paymentStatus: 'paid' });
                     window.showToast("Status updated (Fee was already collected)", "success");
                 window.processingOrders.delete(rtdbKey);
@@ -4358,7 +5068,7 @@
                 const recheckSnapshot = await get(ref(dbRTDB, `restaurants/${RESTAURANT_ID}/orders/${rtdbKey}`));
                 const recheckData = recheckSnapshot.val();
                 if (recheckData && recheckData.isFeeDeducted === true) {
-                    console.warn("Å¡ ¯¸ Fee was deducted between checks - preventing double deduction");
+                    console.warn("Ã…₹¡₹ ₹¯₹¸₹ Fee was deducted between checks - preventing double deduction");
                     window.showToast("Payment already processed", "info");
                     window.processingOrders.delete(rtdbKey);
                     return;
@@ -4367,7 +5077,7 @@
                 // MANUAL DEDUCTION (Triggered by Admin for POS Pay Later / Unverified Website)
                 const newBalance = window.currentAdminBalance - PLATFORM_FEE;
                 
-                console.log("™° Processing payment for order:", raw.orderId, "Current balance:", window.currentAdminBalance, "New balance:", newBalance);
+                console.log("₹„¢₹° Processing payment for order:", raw.orderId, "Current balance:", window.currentAdminBalance, "New balance:", newBalance);
                 
                 // 1. Mark as deducted FIRST to prevent race condition
                 await update(ref(dbRTDB, `restaurants/${RESTAURANT_ID}/orders/${rtdbKey}`), { 
@@ -4383,14 +5093,14 @@
                     totalAmount: cleanAmount
                 });
                 
-                console.log("Å“¦ Payment processed successfully for order:", raw.orderId);
-                window.showToast(`Payment Accepted! Wallet Deducted:  ₹${ PLATFORM_FEE }`, "success");
+                console.log("Ã…₹€œ₹¦ Payment processed successfully for order:", raw.orderId);
+                window.showToast(`Payment Accepted! Wallet Deducted: ₹${ PLATFORM_FEE }`, "success");
                 
                 // Firestore Sync (Trigger status update)
                 checkAndSyncFirestore({...raw, paymentStatus: 'paid', status: currentStatus, isFeeDeducted: true});
 
             } catch (e) {
-                console.error(" Å’ Payment processing error:", e);
+                console.error("₹Ã…₹€™ Payment processing error:", e);
                 window.showToast("Sync Error. Check Console.", "error");
             } finally {
                 // Re-enable button and remove from processing set
@@ -4400,7 +5110,7 @@
                         // Button will be updated by the next render cycle
                     }
                     window.processingOrders.delete(rtdbKey);
-                    console.log("§¹ Cleaned up processing state for order:", rtdbKey);
+                    console.log("₹§₹¹ Cleaned up processing state for order:", rtdbKey);
                 }, 2000); // Remove after 2 seconds to allow UI updates
             }
         };
@@ -4414,14 +5124,14 @@
                 const badge = item.isBestSeller ? '<div class="absolute top-2 right-2 text-yellow-500 drop-shadow-md text-lg"><i class="fas fa-star"></i></div>' : '';
                 const glow = item.isBestSeller ? 'bestseller-glow border-yellow-300' : 'border-gray-200';
                 html += `
-        < div class= "bg-gray-50 border ${glow} rounded-xl p-3 cursor-pointer hover:border-orange-500 hover:shadow-md transition group relative" onclick = "openPOSItemModal('${item.id}')" >
+        <div class="bg-gray-50 border ${glow} rounded-xl p-3 cursor-pointer hover:border-orange-500 hover:shadow-md transition group relative" onclick="openPOSItemModal('${item.id}')">
         ${ badge }
-        < div class= "h-24 bg-white rounded-lg mb-2 overflow-hidden flex items-center justify-center" >
+        <div class="h-24 bg-white rounded-lg mb-2 overflow-hidden flex items-center justify-center">
                             <img src="${item.img || 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png'}" class="h-full object-cover">
                         </div>
                         <h4 class="font-bold text-gray-800 text-sm leading-tight group-hover:text-orange-600">${item.name}</h4>
-                        <p class="text-xs font-bold text-gray-500"> ₹${item.price}</p>
-                    </div >
+                        <p class="text-xs font-bold text-gray-500">₹${item.price}</p>
+                    </div>
             `;
             });
             container.innerHTML = html;
@@ -4458,9 +5168,9 @@
                 item.sizes.forEach((s, idx) => {
                     const isChecked = (idx === defaultSizeIndex) ? 'checked' : '';
                     sizeHtml += `
-            < label class= "flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50" >
+            < label class="flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50">
                             <div class="flex items-center gap-2"><input type="radio" name="pos_size" value="${idx}" ${isChecked} onchange="recalcPOSModalPrice()"><span class="text-sm font-medium">${s.name}</span></div>
-                            <span class="text-xs font-bold"> ₹${s.price}</span>
+                            <span class="text-xs font-bold">₹${s.price}</span>
                         </label >
             `;
                 });
@@ -4474,9 +5184,9 @@
                     const addon = window.universalAddons[addonId];
                     if(addon) {
                         addonHtml += `
-            < label class= "flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50" >
+            < label class="flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50">
                                 <div class="flex items-center gap-2"><input type="checkbox" class="pos-addon-check" value="${addonId}" data-price="${addon.price}" onchange="recalcPOSModalPrice()"><span class="text-sm font-medium">${addon.name}</span></div>
-                                <span class="text-xs font-bold">+ ₹${addon.price}</span>
+                                <span class="text-xs font-bold">+₹${addon.price}</span>
                             </label >
             `;
                     }
@@ -4497,7 +5207,7 @@
             }
             
             document.querySelectorAll('.pos-addon-check:checked').forEach(cb => total += parseFloat(cb.getAttribute('data-price')));
-            document.getElementById('pos-modal-total').innerText = ` ₹${ total }`;
+            document.getElementById('pos-modal-total').innerText = `₹${ total }`;
         };
 
         window.confirmPOSItemToAdd = () => {
@@ -4542,30 +5252,30 @@
             const container = document.getElementById('pos-cart-items');
             if(window.posCart.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">Cart is empty</p>';
-                document.getElementById('pos-total-price').innerText = ' ₹0';
+                document.getElementById('pos-total-price').innerText = '₹0';
                 return;
             }
             let html = "", total = 0;
             window.posCart.forEach((item, index) => {
                 total += item.price * item.qty;
                 let details = "";
-                if(item.size) details += `< span class= "bg-orange-100 text-orange-800 text-[10px] px-1 rounded" > ${ item.size }</span > `;
-                if(item.addons && item.addons.length > 0) details += `< span class= "text-xs text-gray-500" > + ${ item.addons.map(a => a.name).join(', ') }</span > `;
+                if(item.size) details += `<span class="bg-orange-100 text-orange-800 text-[10px] px-1 rounded"> ${ item.size }</span> `;
+                if(item.addons && item.addons.length > 0) details += `<span class="text-xs text-gray-500"> + ${ item.addons.map(a => a.name).join(', ') }</span> `;
                 html += `
-        < div class= "bg-gray-50 p-2 rounded-lg border border-gray-200" >
+        <div class="bg-gray-50 p-2 rounded-lg border border-gray-200">
         <div class="flex justify-between">
-            <div><p class="font-bold text-gray-800 text-sm">${item.name}</p><div class="mb-1">${details}</div><p class="text-xs text-gray-500"> ₹${item.price} x ${item.qty}</p></div>
+            <div><p class="font-bold text-gray-800 text-sm">${item.name}</p><div class="mb-1">${details}</div><p class="text-xs text-gray-500">₹${item.price} x ${item.qty}</p></div>
             <div class="flex items-center gap-2 h-fit">
                 <button onclick="posAdjustQty(${index}, -1)" class="w-6 h-6 bg-white border rounded text-xs">-</button>
                 <span class="text-sm font-bold w-4 text-center">${item.qty}</span>
                 <button onclick="posAdjustQty(${index}, 1)" class="w-6 h-6 bg-white border rounded text-xs">+</button>
             </div>
         </div>
-                    </div >
+                    </div>
             `;
             });
             container.innerHTML = html;
-            document.getElementById('pos-total-price').innerText = ` ₹${ total }`;
+            document.getElementById('pos-total-price').innerText = `₹${ total }`;
         };
         window.posAdjustQty = (index, change) => {
             if(window.posCart[index].qty + change <= 0) window.posCart.splice(index, 1);
@@ -4590,7 +5300,7 @@
             const type = document.getElementById('pos-order-type').value;
             // POS is now locked to Pay Later only - no automatic deduction
             const status = 'pending'; // Always pending - admin must verify
-            let total = parseInt(document.getElementById('pos-total-price').innerText.replace(' ₹',''));
+            let total = parseInt(document.getElementById('pos-total-price').innerText.replace('₹',''));
             
             const orderIdStr = "A-" + Math.floor(1000 + Math.random() * 9000).toString(); 
             const kitchenStatus = 'pending';
@@ -4612,7 +5322,7 @@
                 const newRef = push(ref(dbRTDB, `restaurants/${RESTAURANT_ID}/orders`));
                 await set(newRef, orderData);
 
-        console.log("Å“¦ POS Order created (Pay Later - requires admin verification):", orderIdStr);
+        console.log("Ã…₹€œ₹¦ POS Order created (Pay Later - requires admin verification):", orderIdStr);
 
         // Firestore Sync
         await addDoc(collection(dbFirestore, "restaurants", RESTAURANT_ID, "orders"), { ...orderData, createdAt: serverTimestamp() });
@@ -4629,15 +5339,15 @@
 
         // --- HISTORY & REVENUE ---
         const initFinancials = () => {
-            console.log('📊 [Financials] Initializing revenue tracking...');
-            console.log('📊 [Financials] RESTAURANT_ID:', RESTAURANT_ID);
+            console.log('ðŸ“Š [Financials] Initializing revenue tracking...');
+            console.log('ðŸ“Š [Financials] RESTAURANT_ID:', RESTAURANT_ID);
             
             // Performance Fix: Limit to 1000 recent orders to prevent browser crash on large datasets
             const q = query(collection(dbFirestore, "restaurants", RESTAURANT_ID, "orders"), orderBy("createdAt", "desc"), limit(1000));
             onSnapshot(q, (snap) => {
-                // 🛡️ CRASH PREVENTION: Wrap in try-catch
+                // ðŸ›¡ï¸ CRASH PREVENTION: Wrap in try-catch
                 try {
-                    console.log('📊 [Financials] Orders snapshot received, size:', snap.size);
+                    console.log('ðŸ“Š [Financials] Orders snapshot received, size:', snap.size);
                     
                     window.fullHistoryData = [];
                     let skipped = { notPaid: 0, notCompleted: 0 };
@@ -4662,10 +5372,10 @@
                         });
                     });
                     
-                    // 🛡️ MEMORY PROTECTION: Limit array size
+                    // ðŸ›¡ï¸ MEMORY PROTECTION: Limit array size
                     window.fullHistoryData = memoryGuard.checkArraySize(window.fullHistoryData, 'fullHistoryData');
                     
-                    console.log('📊 [Financials] Processed orders:', {
+                    console.log('ðŸ“Š [Financials] Processed orders:', {
                         total: snap.size,
                         included: window.fullHistoryData.length,
                         skipped
@@ -4679,11 +5389,11 @@
                     window.renderHistoryBatch();
                     window.renderTransBatch();
                 } catch (error) {
-                    console.error('🔴 [Financials] Processing error:', error);
+                    console.error('ðŸ”´ [Financials] Processing error:', error);
                     window.showToast('Error processing financial data', 'error');
                 }
             }, (error) => {
-                console.error('❌ [Financials] Error loading orders:', error);
+                console.error('₹Œ [Financials] Error loading orders:', error);
                 window.showToast('Error loading financial data', 'error');
             });
         };
@@ -5015,13 +5725,13 @@
                     }
                 });
                 window.crmData = Object.values(customers);
-                // 🛡️ MEMORY PROTECTION
+                // ðŸ›¡ï¸ MEMORY PROTECTION
                 window.crmData = memoryGuard.checkArraySize(window.crmData, 'crmData');
                 window.visibleCRMCount = 0;
                 document.getElementById('crm-table').innerHTML = "";
                 window.renderCRMBatch();
             } catch (error) {
-                console.error('🔴 CRM Processing error:', error);
+                console.error('ðŸ”´ CRM Processing error:', error);
                 window.showToast('Error processing customer data', 'error');
             }
         };
@@ -5057,7 +5767,7 @@
         // --- MENU/ADDONS/OFFERS INITIALIZATION ---
         const initMenuLogic = () => {
             if (!RESTAURANT_ID) {
-                console.error('Œ Cannot init menu: RESTAURANT_ID not set');
+                console.error('₹Å’ Cannot init menu: RESTAURANT_ID not set');
                 return;
             }
             console.log('nitializing menu listener for:', `restaurants/${RESTAURANT_ID}/menu`);
@@ -5075,7 +5785,7 @@
                         <div class="flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-100 mb-3 hover:border-orange-200 transition">
                             <div class="flex items-center gap-4">
                                 <img src="${item.img || 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png'}" class="w-14 h-14 rounded-lg object-cover bg-white border">
-                                <div><h4 class="font-bold text-gray-800">${item.name} ${bestSellerIcon}</h4><p class="text-xs text-gray-500">${item.category}  ‚¬¢  ₹${item.price}</p></div>
+                                <div><h4 class="font-bold text-gray-800">${item.name} ${bestSellerIcon}</h4><p class="text-xs text-gray-500">${item.category} | ₹${item.price}</p></div>
                             </div>
                             <div class="flex gap-2">
                                 <button onclick="populateMenuEdit('${docSnap.id}')" class="w-8 h-8 rounded-full bg-white border hover:text-blue-500"><i class="fas fa-pen text-xs"></i></button>
@@ -5089,7 +5799,7 @@
         };
 
         window.addSizeRow = (name = "", price = "") => {
-            document.getElementById('size-container').insertAdjacentHTML('beforeend', `<div class="flex gap-2 mt-2"><input type="text" placeholder="Size" value="${name}" class="w-2/3 p-2 text-xs border rounded size-name-input"><input type="number" placeholder=" ₹" value="${price}" class="w-1/3 p-2 text-xs border rounded size-price-input"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 px-1"><i class="fas fa-times"></i></button></div>`);
+            document.getElementById('size-container').insertAdjacentHTML('beforeend', `<div class="flex gap-2 mt-2"><input type="text" placeholder="Size" value="${name}" class="w-2/3 p-2 text-xs border rounded size-name-input"><input type="number" placeholder="₹" value="${price}" class="w-1/3 p-2 text-xs border rounded size-price-input"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 px-1"><i class="fas fa-times"></i></button></div>`);
         };
 
         window.saveMenuitem = async () => {
@@ -5103,7 +5813,7 @@
 
             // CRITICAL: Validate RESTAURANT_ID before saving
             if (!RESTAURANT_ID || RESTAURANT_ID.trim() === '') {
-                console.error('Œ BLOCKED: No RESTAURANT_ID set! Cannot save menu item.');
+                console.error('₹Å’ BLOCKED: No RESTAURANT_ID set! Cannot save menu item.');
                 window.showToast("Error: Cafe ID not set. Login with valid ?id= parameter.", "error");
                 return;
             }
@@ -5131,17 +5841,17 @@
             try {
                 const targetPath = `restaurants/${RESTAURANT_ID}/menu`;
                 if (editId) {
-                    console.log('[OK]¸ Updating menu item:', editId, 'at path:', targetPath);
+                    console.log('[OK]₹₹¸₹ Updating menu item:', editId, 'at path:', targetPath);
                     await updateDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "menu", editId), data);
                 } else {
-                    console.log('ž• Adding new menu item at path:', targetPath);
+                    console.log('Å¾₹€¢ Adding new menu item at path:', targetPath);
                     const docRef = await addDoc(collection(dbFirestore, "restaurants", RESTAURANT_ID, "menu"), data);
-                    console.log('[OK]… Menu item saved with ID:', docRef.id, 'Full path:', `${targetPath}/${docRef.id}`);
+                    console.log('[OK]₹€¦ Menu item saved with ID:', docRef.id, 'Full path:', `${targetPath}/${docRef.id}`);
                 }
                 resetMenuForm();
                 window.showToast("Item Saved Successfully", "success");
             } catch (e) { 
-                console.error('Œ Failed to save menu item:', e); 
+                console.error('₹Å’ Failed to save menu item:', e); 
                 window.showToast("Failed to save: " + e.message, "error"); 
             }
             btn.innerText = "Save Item";
@@ -5194,7 +5904,7 @@
                 return;
             }
             window.openDeleteModal(async () => {
-                console.log(' Deleting menu item:', id, 'from:', `restaurants/${RESTAURANT_ID}/menu`);
+                console.log('₹ Deleting menu item:', id, 'from:', `restaurants/${RESTAURANT_ID}/menu`);
                 await deleteDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "menu", id));
                 window.showToast("Item deleted", "success");
             });
@@ -5202,7 +5912,7 @@
 
         const initAddons = () => {
             if (!RESTAURANT_ID) {
-                console.error('Œ Cannot init addons: RESTAURANT_ID not set');
+                console.error('₹Å’ Cannot init addons: RESTAURANT_ID not set');
                 return;
             }
             console.log('nitializing addons listener for:', `restaurants/${RESTAURANT_ID}/addons`);
@@ -5213,8 +5923,8 @@
                 snap.forEach(doc => {
                     const data = doc.data();
                     window.universalAddons[doc.id] = data;
-                    html += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded mb-2 border border-gray-200"><span class="text-sm font-bold">${data.name} ( ₹${data.price})</span><button onclick="deleteAddon('${doc.id}')" class="text-red-500"><i class="fas fa-trash"></i></button></div>`;
-                    selectorHtml += `<label class="checkbox-wrapper cursor-pointer block"><input type="checkbox" class="hidden addon-checkbox" value="${doc.id}"><div class="p-2 border rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-50 transition border-gray-200">${data.name} (+ ₹${data.price})</div></label>`;
+                    html += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded mb-2 border border-gray-200"><span class="text-sm font-bold">${data.name} (₹${data.price})</span><button onclick="deleteAddon('${doc.id}')" class="text-red-500"><i class="fas fa-trash"></i></button></div>`;
+                    selectorHtml += `<label class="checkbox-wrapper cursor-pointer block"><input type="checkbox" class="hidden addon-checkbox" value="${doc.id}"><div class="p-2 border rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-50 transition border-gray-200">${data.name} (+₹${data.price})</div></label>`;
                 });
                 document.getElementById('universal-addons-list').innerHTML = html || "<p class='text-xs text-gray-400'>No addons.</p>";
                 document.getElementById('addon-selector-list').innerHTML = selectorHtml || "<p class='text-xs text-gray-400'>Create addons first.</p>";
@@ -5228,9 +5938,9 @@
             const name = document.getElementById('new-addon-name').value.trim();
             const price = document.getElementById('new-addon-price').value;
             if (name && price) {
-                console.log('ž• Creating addon at:', `restaurants/${RESTAURANT_ID}/addons`);
+                console.log('Å¾₹€¢ Creating addon at:', `restaurants/${RESTAURANT_ID}/addons`);
                 const docRef = await addDoc(collection(dbFirestore, "restaurants", RESTAURANT_ID, "addons"), { name, price: Number(price) });
-                console.log('[OK]… Addon created:', docRef.id);
+                console.log('[OK]₹€¦ Addon created:', docRef.id);
                 window.showToast("Addon created", "success");
             }
             document.getElementById('new-addon-name').value = ""; document.getElementById('new-addon-price').value = "";
@@ -5242,7 +5952,7 @@
                 return;
             }
             window.openDeleteModal(async () => {
-                console.log(' Deleting addon:', id, 'from:', `restaurants/${RESTAURANT_ID}/addons`);
+                console.log('₹ Deleting addon:', id, 'from:', `restaurants/${RESTAURANT_ID}/addons`);
                 await deleteDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "addons", id));
                 window.showToast("Addon deleted", "success");
             }, "Delete Addon?");
@@ -5250,7 +5960,7 @@
 
         const initOffers = () => {
             if (!RESTAURANT_ID) {
-                console.error('Œ Cannot init offers: RESTAURANT_ID not set');
+                console.error('₹Å’ Cannot init offers: RESTAURANT_ID not set');
                 return;
             }
             console.log('nitializing offers listener for:', `restaurants/${RESTAURANT_ID}/site_cards`);
@@ -5260,7 +5970,7 @@
                 for (let i = 1; i <= 6; i++) {
                     const d = map[`card_${i}`] || { offerText: "Slot Empty", discount: 0, minOrderValue: 0 };
                     const hasData = d.offerText !== "Slot Empty";
-                    const minOrderBadge = d.minOrderValue ? `<span class="absolute top-2 left-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">Min:  ₹${d.minOrderValue}</span>` : '';
+                    const minOrderBadge = d.minOrderValue ? `<span class="absolute top-2 left-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">Min: ₹${d.minOrderValue}</span>` : '';
 
                     html += `
                     <div class="bg-white rounded-xl shadow-sm border p-4 group">
@@ -5318,7 +6028,6 @@
         window.deleteOfferData = async () => {
             const id = document.getElementById('offer-edit-id').value;
             if (!id) return;
-            if (!confirm("Remove this offer from the website?")) return;
 
             try {
                 await deleteDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "site_cards", id));
@@ -5561,7 +6270,7 @@
                         <div class="flex items-center justify-between py-2 border-b last:border-0">
                             <div>
                                 <p class="font-medium text-sm">#${order.id}</p>
-                                <p class="text-xs text-gray-500">${order.customer} ¢ ${timeStr}</p>
+                                <p class="text-xs text-gray-500">${order.customer}₹¢ ${timeStr}</p>
                             </div>
                             <div class="text-right">
                                 <p class="font-semibold text-sm">Rs.${order.total}</p>
@@ -5830,7 +6539,7 @@
             const customers = document.getElementById('report-customers')?.textContent || '0';
             
             const reportText = `
-WowCafe Business Report - ${RESTAURANT_ID}
+Orderly Business Report - ${RESTAURANT_ID}
 Period: ${period.charAt(0).toUpperCase() + period.slice(1)}
 Generated: ${new Date().toLocaleString()}
 
@@ -5840,14 +6549,14 @@ Total Orders: ${orders}
 Average Order Value: ${avg}
 Unique Customers: ${customers}
 
-Report generated by WowCafe Admin Dashboard
+Report generated by Orderly Admin Dashboard
             `.trim();
             
             const blob = new Blob([reportText], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `wowcafe-report-${period}-${new Date().toISOString().split('T')[0]}.txt`;
+            a.download = `Orderly-report-${period}-${new Date().toISOString().split('T')[0]}.txt`;
             a.click();
             URL.revokeObjectURL(url);
             
@@ -5899,7 +6608,7 @@ Report generated by WowCafe Admin Dashboard
                 document.getElementById('inv-total-items').textContent = Object.keys(window.inventoryCache).length;
                 document.getElementById('inv-low-stock').textContent = lowStock;
                 document.getElementById('inv-out-stock').textContent = outStock;
-                document.getElementById('inv-total-value').textContent = 'Rs.' + totalValue.toLocaleString();
+                document.getElementById('inv-total-value').textContent = 'Rs.' + totalValue.toLocaleString('en-IN');
                 
                 // Update low stock badge in sidebar
                 const badge = document.getElementById('low-stock-badge');
@@ -5928,11 +6637,11 @@ Report generated by WowCafe Admin Dashboard
                 let status = '';
                 
                 if (qty === 0) {
-                    status = '<span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">Out of Stock</span>';
+                    status = '<span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">Stock</span>';
                 } else if (qty <= min) {
-                    status = '<span class="px-2 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold animate-pulse">Low Stock</span>';
+                    status = '<span class="px-2 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold animate-pulse">Stock</span>';
                 } else {
-                    status = '<span class="px-2 py-1 bg-green-100 text-green-600 rounded-full text-xs font-bold">In Stock</span>';
+                    status = '<span class="px-2 py-1 bg-green-100 text-green-600 rounded-full text-xs font-bold">Stock</span>';
                 }
                 
                 const categoryEmojis = {
@@ -5950,7 +6659,7 @@ Report generated by WowCafe Admin Dashboard
                         <td class="p-4 text-sm text-gray-500">${min}</td>
                         <td class="p-4">${status}</td>
                         <td class="p-4 text-right">
-                            <button onclick="openStockAdjust('${item.id}')" class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-bold hover:bg-amber-200 mr-1">± Stock</button>
+                            <button onclick="openStockAdjust('${item.id}')" class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-bold hover:bg-amber-200 mr-1">Stock</button>
                             <button onclick="editInventoryItem('${item.id}')" class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-bold hover:bg-blue-200 mr-1"><i class="fas fa-edit"></i></button>
                             <button onclick="deleteInventoryItem('${item.id}')" class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold hover:bg-red-200"><i class="fas fa-trash"></i></button>
                         </td>
@@ -6223,7 +6932,7 @@ Report generated by WowCafe Admin Dashboard
                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                         <div>
                             <p class="font-bold text-gray-800">${res.name}</p>
-                            <p class="text-xs text-gray-500">{res.phone} ¢ {res.guests} guests</p>
+                            <p class="text-xs text-gray-500">{res.phone}₹¢ {res.guests} guests</p>
                         </div>
                         <div class="text-right">
                             <p class="font-bold text-cyan-600">${res.time}</p>
@@ -6282,21 +6991,38 @@ Report generated by WowCafe Admin Dashboard
             const table = window.tablesCache[id];
             if (!table) return;
             
-            const actions = [
-                { label: '[OK]… Set Available', status: 'available' },
-                { label: 'et Occupied', status: 'occupied' },
-                { label: 'ake Reservation', action: 'reserve' },
-                { label: '[OK]¸ Edit Table', action: 'edit' },
-                { label: ' Delete Table', action: 'delete' }
-            ];
-            
-            const choice = prompt(`Table ${table.number}\nCurrent: ${table.status}\n\n1. Set Available\n2. Set Occupied\n3. Make Reservation\n4. Edit\n5. Delete\n\nEnter choice (1-5):`);
-            
-            if (choice === '1') updateTableStatus(id, 'available');
-            else if (choice === '2') updateTableStatus(id, 'occupied');
-            else if (choice === '3') openReservationModal(id);
-            else if (choice === '4') editTable(id);
-            else if (choice === '5') deleteTable(id);
+            document.getElementById('table-action-id').value = id;
+            document.getElementById('table-action-number').textContent = table.number || id;
+            document.getElementById('table-action-status').textContent = table.status || 'unknown';
+            document.getElementById('table-actions-modal').classList.remove('hidden');
+        };
+        
+        window.closeTableActionsModal = () => {
+            document.getElementById('table-actions-modal').classList.add('hidden');
+        };
+        
+        window.tableActionSetStatus = (status) => {
+            const id = document.getElementById('table-action-id').value;
+            updateTableStatus(id, status);
+            closeTableActionsModal();
+        };
+        
+        window.tableActionReserve = () => {
+            const id = document.getElementById('table-action-id').value;
+            closeTableActionsModal();
+            openReservationModal(id);
+        };
+        
+        window.tableActionEdit = () => {
+            const id = document.getElementById('table-action-id').value;
+            closeTableActionsModal();
+            editTable(id);
+        };
+        
+        window.tableActionDelete = () => {
+            const id = document.getElementById('table-action-id').value;
+            closeTableActionsModal();
+            deleteTable(id);
         };
         
         window.updateTableStatus = async (id, status) => {
@@ -6470,7 +7196,7 @@ Report generated by WowCafe Admin Dashboard
                         <p class="font-bold text-sm truncate">${staff.name}</p>
                         <p class="text-xs text-gray-500">${staff.role}</p>
                         <div class="flex gap-1 mt-2">
-                            <button onclick="markAttendance('${staff.id}', 'present')" class="flex-1 py-1 text-xs rounded ${isPresent ? 'bg-green-500 text-white' : 'bg-white border hover:bg-green-100'}">[OK]“</button>
+                            <button onclick="markAttendance('${staff.id}', 'present')" class="flex-1 py-1 text-xs rounded ${isPresent ? 'bg-green-500 text-white' : 'bg-white border hover:bg-green-100'}">✓</button>
                             <button onclick="markAttendance('${staff.id}', 'leave')" class="flex-1 py-1 text-xs rounded ${isLeave ? 'bg-yellow-500 text-white' : 'bg-white border hover:bg-yellow-100'}">L</button>
                         </div>
                     </div>
@@ -6696,8 +7422,8 @@ Report generated by WowCafe Admin Dashboard
             const categoryLabels = {
                 ingredients: 'ngredients', utilities: 'tilities', salaries: 'alaries',
                 rent: 'ent', maintenance: 'aintenance', marketing: 'arketing',
-                packaging: 'ackaging', transport: ' Transport', licenses: 'icenses',
-                equipment: 'quipment', other: 'ther'
+                packaging: 'Packaging', transport: ' Transport', licenses: 'icenses',
+                equipment: 'Equipment', other: 'ther'
             };
             
             expenses.slice(0, 50).forEach(exp => {
@@ -6826,14 +7552,14 @@ Report generated by WowCafe Admin Dashboard
             let html = '';
             
             const categoryLabels = {
-                vegetables: 'egetables', dairy: 'airy', meat: 'eat', seafood: 'eafood',
-                grains: 'rains', spices: ' Spices', beverages: 'everages', packaging: 'ackaging',
-                equipment: 'quipment', cleaning: 'leaning', general: 'eneral'
+                vegetables: 'Vegetables', dairy: 'Dairy', meat: 'Meat', seafood: 'Seafood',
+                grains: 'Grains', spices: '₹ Spices', beverages: 'Beverages', packaging: 'Packaging',
+                equipment: 'Equipment', cleaning: 'Cleaning', general: 'General'
             };
             
             Object.values(window.suppliersCache).forEach(sup => {
                 const rating = sup.rating || 0;
-                const stars = '­'.repeat(Math.min(5, Math.max(0, rating)));
+                const stars = '₹­₹'.repeat(Math.min(5, Math.max(0, rating)));
                 
                 html += `
                     <tr class="hover:bg-gray-50">
@@ -7152,7 +7878,7 @@ Report generated by WowCafe Admin Dashboard
         function generateMenuQRCode() {
             const canvas = document.getElementById('qr-canvas');
             const ctx = canvas.getContext('2d');
-            const menuUrl = `https://wowcafe.menu/${RESTAURANT_ID}`;
+            const menuUrl = `https://Orderly.menu/${RESTAURANT_ID}`;
             
             // Update URL display
             document.getElementById('menu-url-display').value = menuUrl;
@@ -7214,11 +7940,11 @@ Report generated by WowCafe Admin Dashboard
             const printWindow = window.open('', '_blank');
             const htmlContent = [
                 '<html>',
-                '<head><title>Menu QR Code - Wow Cafe<\/title><\/head>',
+                '<head><title>Menu QR Code - Orderly<\/title><\/head>',
                 '<body style="text-align:center; padding:50px;">',
                 '<h2>Scan to View Menu<\/h2>',
                 '<img src="' + canvas.toDataURL() + '" style="width:300px;height:300px;">',
-                '<p style="margin-top:20px;">Wow Cafe Digital Menu<\/p>',
+                '<p style="margin-top:20px;">Orderly Digital Menu<\/p>',
                 '<\/body>',
                 '<\/html>'
             ].join('');
@@ -7239,6 +7965,39 @@ Report generated by WowCafe Admin Dashboard
         
         window.closeActivityLogsModal = () => {
             document.getElementById('activity-logs-modal').classList.add('hidden');
+        };
+
+        // --- PRIVACY POLICY & TERMS FUNCTIONS ---
+        window.openPrivacyPolicy = () => {
+            document.getElementById('privacy-policy-modal').classList.remove('hidden');
+        };
+        
+        window.closePrivacyPolicy = () => {
+            document.getElementById('privacy-policy-modal').classList.add('hidden');
+        };
+        
+        window.openTermsConditions = () => {
+            document.getElementById('terms-conditions-modal').classList.remove('hidden');
+        };
+        
+        window.closeTermsConditions = () => {
+            document.getElementById('terms-conditions-modal').classList.add('hidden');
+        };
+
+        // --- ACCORDION TOGGLE FUNCTION ---
+        window.toggleAccordion = (sectionId) => {
+            const content = document.getElementById(sectionId);
+            const icon = document.getElementById(sectionId + '-icon');
+            
+            if (content.classList.contains('hidden')) {
+                // Open this section
+                content.classList.remove('hidden');
+                if (icon) icon.classList.add('rotate-180');
+            } else {
+                // Close this section
+                content.classList.add('hidden');
+                if (icon) icon.classList.remove('rotate-180');
+            }
         };
         
         async function loadActivityLogs() {
@@ -7495,7 +8254,7 @@ Report generated by WowCafe Admin Dashboard
                 '<\/head>',
                 '<body>',
                 '<div class="header">',
-                '<h1>Wow Cafe<\/h1>',
+                '<h1>Orderly<\/h1>',
                 '<h2>End of Day Report<\/h2>',
                 '<p>' + reportDate + '<\/p>',
                 '<\/div>',
@@ -7794,12 +8553,12 @@ Report generated by WowCafe Admin Dashboard
                             <select id="sms-template" class="w-full p-3 border rounded-lg" onchange="updateSMSPreview()">
                                 <option value="promo">romotional Offer</option>
                                 <option value="birthday">irthday Wish</option>
-                                <option value="custom">[OK]¸ Custom Message</option>
+                                <option value="custom">Custom Message</option>
                             </select>
                         </div>
                         <div>
                             <label class="text-sm font-bold text-gray-600 mb-1 block">Message</label>
-                            <textarea id="sms-message" class="w-full p-3 border rounded-lg h-32 text-sm" placeholder="Type your message...">Dear Customer, Exciting offers await you at Wow Cafe! Visit us today and get 20% off on all items. Use code: WOW20</textarea>
+                            <textarea id="sms-message" class="w-full p-3 border rounded-lg h-32 text-sm" placeholder="Type your message...">Dear Customer, Exciting offers await you at Orderly! Visit us today and get 20% off on all items. Use code: WOW20</textarea>
                             <p class="text-xs text-gray-400 mt-1"><span id="sms-char-count">0</span>/160 characters</p>
                         </div>
                         <div class="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
@@ -8201,7 +8960,7 @@ Report generated by WowCafe Admin Dashboard
                 statsEl.innerHTML = `
                     <span class="text-green-400">${available} Available</span>
                     <span class="mx-2">|</span>
-                    <span class="text-red-400">${outOfStock} Out of Stock</span>
+                    <span class="text-red-400">Stock</span>
                 `;
             }
         }
@@ -8248,7 +9007,7 @@ Report generated by WowCafe Admin Dashboard
                         <h4 class="font-bold text-gray-700 mb-3">Permissions:</h4>
                         <ul class="space-y-2 text-sm text-gray-600">${permList}</ul>
                         <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                            <p class="text-xs text-gray-500">To modify permissions, go to Settings †’ Staff Management and assign roles to team members.</p>
+                            <p class="text-xs text-gray-500">To modify permissions, go to Settings₹€ ₹€™ Staff Management and assign roles to team members.</p>
                         </div>
                     </div>
                     <div class="p-4 border-t bg-gray-50">
@@ -8289,6 +9048,27 @@ Report generated by WowCafe Admin Dashboard
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
