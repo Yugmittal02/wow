@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wow Kitchen | Smart KDS</title>
+    <title>Orderly Kitchen | Smart KDS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -59,13 +59,51 @@
 </head>
 <body class="theme-dark h-screen flex flex-col md:flex-row">
 
+    <!-- Kitchen Blocked Overlay -->
+    <div id="kitchen-blocked-overlay" class="fixed inset-0 hidden z-[10000] flex items-center justify-center bg-slate-900">
+        <div class="text-center p-8 max-w-md">
+            <div class="bg-red-500/10 p-6 rounded-full mb-6 animate-pulse inline-block">
+                <i class="fas fa-kitchen-set text-6xl text-red-500"></i>
+            </div>
+            <h1 class="text-3xl font-black text-white mb-2">Kitchen Offline</h1>
+            <p class="text-gray-400 mb-6">Kitchen Display System is temporarily unavailable.</p>
+            
+            <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-6 text-left">
+                <h3 class="font-bold text-red-400 mb-2 flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle"></i> Payment Issue
+                </h3>
+                <p class="text-gray-400 text-sm">Please contact the restaurant administrator to restore service.</p>
+            </div>
+            
+            <div class="bg-gray-800 rounded-xl p-4 text-left mb-6">
+                <h3 class="font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fas fa-headset text-orange-500"></i> Contact Support
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <a href="tel:+919876543210" class="flex items-center gap-3 text-gray-400 hover:text-orange-500 transition">
+                        <i class="fas fa-phone w-5"></i>
+                        <span>+91 98765 43210</span>
+                    </a>
+                    <a href="https://wa.me/919876543210" target="_blank" class="flex items-center gap-3 text-gray-400 hover:text-green-500 transition">
+                        <i class="fab fa-whatsapp w-5"></i>
+                        <span>WhatsApp Support</span>
+                    </a>
+                </div>
+            </div>
+            
+            <button onclick="location.reload()" class="px-6 py-3 bg-orange-600 text-white rounded-xl font-bold text-sm hover:bg-orange-700 transition">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
+        </div>
+    </div>
+
     <audio id="kitchen-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden relative order-1 md:order-2">
         
         <header class="h-16 md:h-20 bg-gray-900 border-b border-gray-800 flex justify-between items-center px-4 md:px-6 shrink-0 z-10">
             <div class="flex items-center gap-2">
-                <div class="md:hidden font-bold text-lg tracking-tight mr-2 text-white">WOW<span class="text-orange-500">KDS</span></div>
+                <div class="md:hidden font-bold text-lg tracking-tight mr-2 text-white">Orderly<span class="text-orange-500">KDS</span></div>
                 <div class="flex bg-gray-800 rounded-lg p-1 border border-gray-700">
                     <button onclick="filterType('all')" id="filter-all" class="px-3 py-1 rounded text-[10px] md:text-xs font-bold bg-gray-600 text-white">All</button>
                     <button onclick="filterType('Dine-in')" id="filter-Dine-in" class="px-3 py-1 rounded text-[10px] md:text-xs font-bold text-gray-400 hover:text-white">Dine</button>
@@ -158,7 +196,7 @@
                     <div class="bg-gradient-to-br from-orange-500 to-red-600 p-2 rounded-lg">
                         <i class="fas fa-fire text-xl text-white"></i>
                     </div>
-                    <span class="text-xl font-bold tracking-tight text-white">WOW<span class="text-orange-500">KDS</span></span>
+                    <span class="text-xl font-bold tracking-tight text-white">Orderly<span class="text-orange-500">KDS</span></span>
                 </div>
             </div>
         </div>
@@ -214,7 +252,15 @@
         const RESTAURANT_ID = urlParams.get('id');
 
         if (!RESTAURANT_ID) {
-            alert("Error: Missing Restaurant ID in URL! Use ?id=YOUR_CAFE_ID");
+            document.body.innerHTML = `
+                <div class="flex items-center justify-center h-screen bg-slate-900 text-white">
+                    <div class="text-center p-8">
+                        <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-4"></i>
+                        <h1 class="text-2xl font-bold mb-2">Missing Restaurant ID</h1>
+                        <p class="text-gray-400">Please use URL with ?id=YOUR_CAFE_ID</p>
+                    </div>
+                </div>
+            `;
             throw new Error("Missing Restaurant ID");
         }
         console.log("Kitchen connected to Restaurant:", RESTAURANT_ID);
@@ -254,15 +300,138 @@
             }
         }, { once: true }); // Only runs once
 
-        function speakHindi(text) {
-            if(!soundEnabled) return;
-            window.speechSynthesis.cancel();
+        // --- ADVANCED VOICE SYSTEM ---
+        let maleVoice = null;
+        let voicesLoaded = false;
+        
+        // Load and cache male Hindi voice
+        function loadMaleVoice() {
+            const voices = window.speechSynthesis.getVoices();
+            if (!voices.length) return;
+            
+            // Priority order for male Hindi voices
+            const maleVoicePatterns = [
+                'Microsoft Madhur',      // Windows Hindi Male
+                'Google हिन्दी Male',    // Chrome Male
+                'hi-IN-MadhurNeural',    // Azure Neural Male
+                'hi-IN-Male',            // Generic Male
+                'Ravi',                  // Alternate Male
+            ];
+            
+            // Try to find a male voice by pattern
+            for (const pattern of maleVoicePatterns) {
+                const found = voices.find(v => 
+                    v.name.toLowerCase().includes(pattern.toLowerCase()) ||
+                    v.voiceURI.toLowerCase().includes(pattern.toLowerCase())
+                );
+                if (found) {
+                    maleVoice = found;
+                    console.log('🔊 Male Voice Found:', found.name);
+                    break;
+                }
+            }
+            
+            // Fallback: Find any Hindi voice (prefer non-female)
+            if (!maleVoice) {
+                const hindiVoices = voices.filter(v => v.lang === 'hi-IN' || v.lang.startsWith('hi'));
+                // Try to avoid female voices
+                maleVoice = hindiVoices.find(v => 
+                    !v.name.toLowerCase().includes('female') && 
+                    !v.name.toLowerCase().includes('swara') &&
+                    !v.name.toLowerCase().includes('woman')
+                ) || hindiVoices[0] || voices.find(v => v.lang.startsWith('hi'));
+                
+                if (maleVoice) console.log('🔊 Hindi Voice Selected:', maleVoice.name);
+            }
+            
+            // Final fallback: English Male
+            if (!maleVoice) {
+                maleVoice = voices.find(v => 
+                    v.name.toLowerCase().includes('david') || 
+                    v.name.toLowerCase().includes('male')
+                ) || voices[0];
+                console.log('🔊 Fallback Voice:', maleVoice?.name || 'Default');
+            }
+            
+            voicesLoaded = true;
+        }
+        
+        // Load voices on page load and when voices change
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = loadMaleVoice;
+        }
+        loadMaleVoice(); // Initial load
+        setTimeout(loadMaleVoice, 500); // Retry after short delay
+        
+        // Speech queue to prevent overlap
+        let speechQueue = [];
+        let isSpeaking = false;
+        
+        function processQueue() {
+            if (isSpeaking || speechQueue.length === 0) return;
+            
+            const text = speechQueue.shift();
+            isSpeaking = true;
             
             const utter = new SpeechSynthesisUtterance(text);
-            utter.lang = 'hi-IN'; 
-            utter.rate = 1.0; 
-            utter.pitch = 1.1;
+            
+            // Apply male voice if available
+            if (maleVoice) {
+                utter.voice = maleVoice;
+            }
+            
+            utter.lang = 'hi-IN';
+            utter.rate = 0.85;    // Slower for clarity
+            utter.pitch = 0.9;    // Slightly lower pitch (more masculine)
+            utter.volume = 1.0;   // Full volume
+            
+            utter.onend = () => {
+                isSpeaking = false;
+                setTimeout(processQueue, 300); // Small gap between speeches
+            };
+            
+            utter.onerror = () => {
+                isSpeaking = false;
+                processQueue();
+            };
+            
+            window.speechSynthesis.speak(utter);
+        }
+        
+        function speakHindi(text) {
+            if (!soundEnabled) return;
+            
+            // Cancel any ongoing speech
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            
+            // Add to queue
+            speechQueue.push(text);
+            processQueue();
+        }
+        
+        // Speak with emphasis (for important alerts)
+        function speakAlert(text) {
+            if (!soundEnabled) return;
+            
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            speechQueue = []; // Clear queue for urgent alert
+            
+            const utter = new SpeechSynthesisUtterance(text);
+            
+            if (maleVoice) {
+                utter.voice = maleVoice;
+            }
+            
+            utter.lang = 'hi-IN';
+            utter.rate = 0.75;    // Even slower for important alerts
+            utter.pitch = 0.85;   // Deeper tone for urgency
             utter.volume = 1.0;
+            
+            utter.onend = () => { isSpeaking = false; };
+            utter.onerror = () => { isSpeaking = false; };
+            
             window.speechSynthesis.speak(utter);
         }
 
@@ -609,7 +778,7 @@
                     // Check if we already alerted for this Order ID in this session
                     if(!announcedOrders.has(oid + '_10min')) {
                         announcedOrders.add(oid + '_10min');
-                        speakHindi(`Order number ${oid} bahut der se pending hai, isko pura karo`);
+                        speakAlert(`Order number ${oid} bahut der se pending hai, jaldi pura karo`);
                         
                         Toastify({ text: `⚠️ Order #${oid} is Late!`, style: { background: "#ef4444" } }).showToast();
                     }
@@ -617,8 +786,25 @@
             });
         }, 1000);
 
+        // --- MONITOR APP STATUS (BLOCKED/UNBLOCKED) ---
+        function initAppStatusMonitor() {
+            const appStatusRef = ref(db, `restaurants/${RESTAURANT_ID}/appStatus`);
+            onValue(appStatusRef, (snapshot) => {
+                const isBlocked = snapshot.val();
+                const overlay = document.getElementById('kitchen-blocked-overlay');
+                if (isBlocked === true) {
+                    overlay.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    overlay.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        }
+
         // START APP
         initRealtimeListener();
+        initAppStatusMonitor();
 
     </script>
 </body>
