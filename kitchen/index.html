@@ -209,6 +209,16 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // --- RESTAURANT ID EXTRACTION ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const RESTAURANT_ID = urlParams.get('id');
+
+        if (!RESTAURANT_ID) {
+            alert("Error: Missing Restaurant ID in URL! Use ?id=YOUR_CAFE_ID");
+            throw new Error("Missing Restaurant ID");
+        }
+        console.log("Kitchen connected to Restaurant:", RESTAURANT_ID);
+
         // --- 2. DATA STATE & VARS ---
         let orders = []; 
         let soundEnabled = false; 
@@ -258,7 +268,7 @@
 
         // --- 4. REALTIME LISTENER ---
         function initRealtimeListener() {
-            const ordersRef = ref(db, 'orders');
+            const ordersRef = ref(db, `restaurants/${RESTAURANT_ID}/orders`);
             
             onValue(ordersRef, (snapshot) => {
                 const data = snapshot.val();
@@ -310,11 +320,11 @@
             else if (action === 'mark_ready') updateData = { status: 'ready' };
             else if (action === 'complete') updateData = { status: 'completed', completedAt: Date.now() };
 
-            update(ref(db, 'orders/' + docId), updateData);
+            update(ref(db, `restaurants/${RESTAURANT_ID}/orders/${docId}`), updateData);
         }
 
         window.recallOrder = (docId) => {
-            update(ref(db, 'orders/' + docId), {
+            update(ref(db, `restaurants/${RESTAURANT_ID}/orders/${docId}`), {
                 status: 'preparing',
                 completedAt: null
             });
