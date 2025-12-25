@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Wow Cafe | Premium App</title>
+    <title>Orderly | Premium App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -205,12 +205,22 @@
 <body>
 
 <div id="app-blocked-overlay" class="fixed inset-0 hidden flex items-center justify-center flex-col text-center p-8 absolute top-0 left-0 w-full h-full">
-    <div class="bg-red-50 p-6 rounded-full mb-6 animate-pulse">
-        <i class="fas fa-store-slash text-6xl text-red-500"></i>
+    <div class="max-w-sm">
+        <div class="bg-orange-50 p-6 rounded-full mb-6 animate-pulse inline-block">
+            <i class="fas fa-store-slash text-6xl text-orange-500"></i>
+        </div>
+        <h1 class="text-3xl font-black text-gray-800 mb-2">Shop Temporarily Closed</h1>
+        <p class="text-gray-500 mt-2 mb-6 max-w-xs mx-auto">We are currently not accepting orders. We'll be back soon!</p>
+        
+        <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6 text-sm text-orange-700">
+            <i class="fas fa-info-circle mr-2"></i>
+            Please check back later or contact the restaurant directly.
+        </div>
+        
+        <button onclick="location.reload()" class="px-6 py-3 bg-orange-600 text-white rounded-xl font-bold text-sm hover:bg-orange-700 transition">
+            <i class="fas fa-sync-alt mr-2"></i>Try Again
+        </button>
     </div>
-    <h1 class="text-3xl font-black text-gray-800 mb-2">We are Closed Temporarily</h1>
-    <p class="text-gray-500 mt-2 mb-8 max-w-xs mx-auto">We are currently not accepting orders. Please try again later or contact the restaurant.</p>
-    <button onclick="location.reload()" class="px-6 py-3 bg-gray-800 text-white rounded-xl font-bold text-sm">Refresh Page</button>
 </div>
 
 <div class="mobile-frame bg-orange-50 emoji-bg" id="app-frame">
@@ -540,7 +550,18 @@
                         <i class="fas fa-star" onclick="submitRating(4)" onmouseenter="highlightStars(4)" onmouseleave="resetStars()"></i>
                         <i class="fas fa-star" onclick="submitRating(5)" onmouseenter="highlightStars(5)" onmouseleave="resetStars()"></i>
                     </div>
-                    <p class="text-center text-sm text-gray-500 mt-4">Tap a star to rate</p>
+                    <p class="text-center text-sm text-gray-500 mt-2">Tap a star to rate</p>
+                    
+                    <!-- Promotional Ad Section (loaded from Firebase) -->
+                    <div id="promo-ad-section" class="hidden mt-6 pt-4 border-t border-gray-200">
+                        <div id="promo-ad-card" class="rounded-2xl p-4 text-center" style="background: #7c3aed;">
+                            <h4 id="promo-ad-title" class="font-bold text-lg mb-2" style="color: #fff;">Special Offer!</h4>
+                            <p id="promo-ad-desc" class="text-sm mb-3 opacity-90" style="color: #fff;">Check out our amazing deals</p>
+                            <button id="promo-ad-btn" onclick="handlePromoClick()" class="bg-white/20 hover:bg-white/30 px-6 py-2 rounded-full font-bold text-sm transition" style="color: #fff;">
+                                View Offer
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -621,9 +642,15 @@ if (!RESTAURANT_ID) {
 }
 console.log("Connected to Restaurant:", RESTAURANT_ID);
 
+    // --- PLATFORM FEE CONFIG ---
+    const PLATFORM_FEE = 1.98;
+
     window.rawMenuDocs = [];
     window.allAddons = {}; 
     window.currentDocId = null;
+
+    // NOTE: Wallet deduction is handled by ADMIN only when they confirm payment
+    // Customer website does NOT deduct wallet - admin must approve each order
 
     // --- 1. APP BLOCKING LISTENER ---
     const initSecurity = () => {
@@ -885,6 +912,71 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
         } catch(e) {}
     };
     
+    // --- PROMO AD SYSTEM ---
+    let promoAdData = null;
+    let promoAdLinkUrl = '';
+    
+    window.loadPromoAd = async () => {
+        console.log("📢 Loading promo ad from Firebase...");
+        try {
+            const promoRef = doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'promoAd');
+            const promoSnap = await getDoc(promoRef);
+            
+            if (promoSnap.exists()) {
+                promoAdData = promoSnap.data();
+                console.log("✅ Promo ad loaded:", promoAdData);
+                
+                if (promoAdData.enabled) {
+                    const promoSection = document.getElementById('promo-ad-section');
+                    const promoCard = document.getElementById('promo-ad-card');
+                    const promoTitle = document.getElementById('promo-ad-title');
+                    const promoDesc = document.getElementById('promo-ad-desc');
+                    const promoBtn = document.getElementById('promo-ad-btn');
+                    
+                    if (promoSection && promoCard) {
+                        // Apply colors
+                        promoCard.style.background = promoAdData.bgColor || '#7c3aed';
+                        promoTitle.style.color = promoAdData.textColor || '#ffffff';
+                        promoDesc.style.color = promoAdData.textColor || '#ffffff';
+                        promoBtn.style.color = promoAdData.textColor || '#ffffff';
+                        
+                        // Set content
+                        promoTitle.textContent = promoAdData.title || 'Special Offer!';
+                        promoDesc.textContent = promoAdData.description || 'Check out our amazing deals';
+                        promoBtn.textContent = promoAdData.buttonText || 'View Offer';
+                        promoAdLinkUrl = promoAdData.linkUrl || '';
+                        
+                        // Show promo section
+                        promoSection.classList.remove('hidden');
+                        console.log("✅ Promo ad displayed");
+                    }
+                } else {
+                    console.log("ℹ️ Promo ad is disabled");
+                }
+            } else {
+                console.log("ℹ️ No promo ad configured");
+            }
+        } catch (e) {
+            console.error("❌ Error loading promo ad:", e);
+        }
+    };
+    
+    window.handlePromoClick = () => {
+        console.log("📢 Promo button clicked, URL:", promoAdLinkUrl);
+        if (promoAdLinkUrl && promoAdLinkUrl.trim() !== '') {
+            window.open(promoAdLinkUrl, '_blank');
+        } else {
+            if (typeof Toastify !== 'undefined') {
+                Toastify({ 
+                    text: "Check out our offers!", 
+                    className: "toast-center", 
+                    style: { background: "#7c3aed" },
+                    duration: 2000
+                }).showToast();
+            }
+        }
+    };
+    
     // --- SHOW RATING WIDGET WITH ANIMATION AFTER PAYMENT (CENTER MODAL) ---
     window.showRatingWidgetAnimated = () => {
         console.log("⭐ Showing rating widget with animation (center modal)...");
@@ -894,6 +986,9 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             console.warn("⚠️ Rating widget not found");
             return;
         }
+        
+        // Load promo ad first
+        loadPromoAd();
         
         // Show rating widget as center modal
         setTimeout(() => {
@@ -1047,15 +1142,12 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
                 timestamp: serverTimestamp(),
                 createdAt: new Date(),
                 platformFee: 1.98, // Log Fee
-                isFeeDeducted: false // CRITICAL: Flag to prevent auto-deduction - admin must verify
+                isFeeDeducted: false // Admin will deduct when they confirm payment
             };
 
-            // SECURITY: Wallet deduction removed from customer website
-            // Customer website can NO LONGER deduct wallet balance
-            // All wallet deductions must be done manually by admin in admin panel
-            // Admin must verify order and click "Accept & Deduct Fee" button
-            
-            console.log("✅ Order placed from customer website - Admin verification required for wallet deduction");
+            // NOTE: NO auto wallet deduction here
+            // Admin must click "Accept & Deduct Fee" button to deduct ₹1.98
+            console.log("📦 Order placed - Admin will confirm and deduct fee");
             
             // PLACE ORDER (No wallet deduction - admin will verify and deduct manually)
             const rtdbRef = push(ref(db, `restaurants/${RESTAURANT_ID}/orders`));
@@ -1140,6 +1232,14 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     };
 
     // --- DYNAMIC BRANDING & THEME ---
+    // Store brand config globally for feature access
+    window.brandConfig = {
+        enableDonations: true,
+        enableOffers: true,
+        enableRatings: true,
+        enableTakeaway: true
+    };
+
     async function applyBranding() {
         try {
             // 1. Fetch Brand Config from Firebase
@@ -1148,6 +1248,17 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
 
             if (snapshot.exists()) {
                 const data = snapshot.data();
+                
+                // Store feature toggles globally
+                window.brandConfig = {
+                    enableDonations: data.enableDonations !== false,
+                    enableOffers: data.enableOffers !== false,
+                    enableRatings: data.enableRatings !== false,
+                    enableTakeaway: data.enableTakeaway !== false,
+                    cafeName: data.cafeName || '',
+                    primaryColor: data.primaryColor || '#ea580c',
+                    secondaryColor: data.secondaryColor || '#dc2626'
+                };
 
                 // 2. Set Colors (CSS Variables)
                 const root = document.documentElement;
@@ -1181,13 +1292,48 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
                     }
                 });
 
-                console.log("🎨 Branding Applied:", data.cafeName);
+                // 6. Hide disabled features
+                applyFeatureToggles();
+
+                console.log("🎨 Branding Applied:", data.cafeName, "Features:", window.brandConfig);
             } else {
                 console.log("📝 Using default branding (no config found)");
             }
         } catch (e) {
             console.warn("Using default branding (Network error or no config):", e.message);
         }
+    }
+
+    // Hide/Show features based on brandConfig
+    function applyFeatureToggles() {
+        // Hide Offers section if disabled
+        if (!window.brandConfig.enableOffers) {
+            const offersSection = document.getElementById('offers-section');
+            if (offersSection) offersSection.style.display = 'none';
+            
+            const offersTab = document.querySelector('[onclick*="offers"]');
+            if (offersTab) offersTab.style.display = 'none';
+        }
+        
+        // Hide Takeaway option if disabled
+        if (!window.brandConfig.enableTakeaway) {
+            const takeawayBtns = document.querySelectorAll('[data-type="Takeaway"], [onclick*="Takeaway"]');
+            takeawayBtns.forEach(btn => btn.style.display = 'none');
+        }
+        
+        // Hide Ratings if disabled
+        if (!window.brandConfig.enableRatings) {
+            const ratingElements = document.querySelectorAll('.star-rating, [data-rating], .rating-section');
+            ratingElements.forEach(el => el.style.display = 'none');
+        }
+        
+        // Hide Donations if disabled
+        if (!window.brandConfig.enableDonations) {
+            const donationElements = document.querySelectorAll('.donation-section, [data-donation], #donation-toggle');
+            donationElements.forEach(el => el.style.display = 'none');
+        }
+        
+        console.log("🔒 Feature toggles applied");
     }
 
     async function initUI() {
@@ -1219,7 +1365,7 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     window.currentCategory = 'All';
     window.currentCustomItem = null; 
     window.donationAmt = 0;
-    const PLATFORM_FEE = 1.98; // UPDATED FEE
+    // PLATFORM_FEE already defined above at line 625
 
     window.initBanners = () => {
         const container = document.getElementById('banner-container');
@@ -1240,7 +1386,7 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             
             return `
             <div class="flex-shrink-0 w-64 h-32 rounded-2xl p-0 relative overflow-hidden shadow-lg snap-center" style="${bgStyle}">
-                <div class="absolute top-2 right-3 z-20 opacity-60 font-black text-[10px] tracking-widest text-white uppercase pointer-events-none drop-shadow-sm">WowCafe</div>
+                <div class="absolute top-2 right-3 z-20 opacity-60 font-black text-[10px] tracking-widest text-white uppercase pointer-events-none drop-shadow-sm">Orderly</div>
                 
                 <div class="relative z-10 h-full flex flex-col justify-end p-4 ${overlayClass}">
                     <div class="bg-white/20 text-white px-2 py-0.5 rounded w-fit text-[10px] font-bold mb-2 uppercase tracking-wider backdrop-blur-sm">
@@ -1253,9 +1399,8 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     };
 
     window.handleBrandingClick = () => {
-        if(confirm("Open AutomationX website?")) {
-            window.open("https://automation-x-rp3z.vercel.app/", "_blank");
-        }
+        // Direct link without popup
+        window.open("https://automation-x-rp3z.vercel.app/", "_blank");
     };
 
     window.saveCartToStorage = () => {
@@ -2018,11 +2163,11 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             <p><strong>1. Payments:</strong> Currently accepting Cash on Counter only.</p>
             <p><strong>2. Refunds:</strong> Orders once prepared cannot be cancelled or refunded.</p>
             <p><strong>3. Outside Food:</strong> Consumption of outside food is strictly prohibited.</p>
-            <p><strong>4. Rights:</strong> WowCafe reserves the right to admission.</p>
+            <p><strong>4. Rights:</strong> Orderly reserves the right to admission.</p>
         `,
         'Contact': `
             <p><i class="fas fa-phone mr-2 text-orange-500"></i> +91 98765 43210</p>
-            <p><i class="fas fa-envelope mr-2 text-orange-500"></i> help@wowcafe.in</p>
+            <p><i class="fas fa-envelope mr-2 text-orange-500"></i> help@orderly.in</p>
             <p><i class="fas fa-map-marker-alt mr-2 text-orange-500"></i> Shop 12, Food Court, City Mall.</p>
         `,
         'Help': `
