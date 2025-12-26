@@ -458,7 +458,7 @@
                 </div>
                 
                 <h2 class="text-xl font-bold text-gray-800" id="success-title">Order Placed!</h2>
-                <div class="mt-2 px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold border border-red-200 animate-pulse">
+                <div id="payment-status-badge" class="mt-2 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold border border-yellow-200 animate-pulse">
                     <i class="fas fa-clock mr-1"></i> Payment Pending
                 </div>
             </div>
@@ -469,7 +469,7 @@
 
                 <div class="text-center mb-6">
                     <h1 class="text-4xl font-extrabold text-gray-900">₹<span id="final-amt">0.00</span></h1>
-                    <p class="text-xs text-gray-400 uppercase tracking-wider font-bold mt-1">Cash to be paid</p>
+                    <p class="text-xs text-gray-400 uppercase tracking-wider font-bold mt-1" id="amount-label">To Pay at Counter</p>
                 </div>
 
                 <div class="space-y-3 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-100">
@@ -501,14 +501,22 @@
             
             <div class="zigzag absolute bottom-0 left-0 w-full"></div>
             
-            <div id="rating-widget" class="absolute bottom-0 left-0 right-0 bg-white p-6 rounded-t-[2rem] shadow-[0_-10px_40px_rgba(0,0,0,0.2)] transform translate-y-full transition-transform duration-500 z-50 flex flex-col items-center justify-center pb-10">
-                <h3 class="font-bold text-gray-800 text-lg mb-2">Rate your experience 🌟</h3>
-                <div class="star-rating text-3xl text-gray-300 py-4">
-                    <i class="fas fa-star" onclick="submitRating(1)"></i>
-                    <i class="fas fa-star" onclick="submitRating(2)"></i>
-                    <i class="fas fa-star" onclick="submitRating(3)"></i>
-                    <i class="fas fa-star" onclick="submitRating(4)"></i>
-                    <i class="fas fa-star" onclick="submitRating(5)"></i>
+            <!-- Rating Widget - Centered Modal -->
+            <div id="rating-widget" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+                <div class="bg-white rounded-3xl p-8 shadow-2xl text-center max-w-xs w-full pop-in">
+                    <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <i class="fas fa-star text-3xl text-white"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-xl mb-2">Rate Your Experience 🌟</h3>
+                    <p class="text-sm text-gray-500 mb-4">How was your ordering experience?</p>
+                    <div class="star-rating text-4xl text-gray-300 py-4">
+                        <i class="fas fa-star" onclick="submitRating(1)"></i>
+                        <i class="fas fa-star" onclick="submitRating(2)"></i>
+                        <i class="fas fa-star" onclick="submitRating(3)"></i>
+                        <i class="fas fa-star" onclick="submitRating(4)"></i>
+                        <i class="fas fa-star" onclick="submitRating(5)"></i>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Tap a star to rate</p>
                 </div>
             </div>
 
@@ -528,20 +536,49 @@
     </div>
 
     <div id="bill-detail-modal" class="absolute inset-0 z-[90] bg-black/70 hidden items-center justify-center backdrop-blur-sm p-4">
-        <div class="bg-white w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl relative slide-up">
-            <div class="bg-orange-50 p-6 border-b border-orange-100 text-center relative">
-                 <button onclick="closeBillDetail()" class="absolute top-4 right-4 w-8 h-8 bg-white/50 rounded-full flex items-center justify-center"><i class="fas fa-times text-gray-600"></i></button>
+        <div class="bg-white w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl relative slide-up max-h-[85vh] flex flex-col">
+            <!-- Header -->
+            <div class="bg-orange-50 p-6 border-b border-orange-100 text-center relative flex-shrink-0">
+                <button onclick="closeBillDetail()" class="absolute top-4 right-4 w-8 h-8 bg-white/50 rounded-full flex items-center justify-center"><i class="fas fa-times text-gray-600"></i></button>
                 <div class="zigzag-orange absolute bottom-0 left-0 w-full opacity-50"></div>
-                <h2 class="text-xl font-black text-gray-800">Bill Receipt</h2>
-                <div class="font-mono text-orange-600 font-bold bg-white inline-block px-2 py-0.5 rounded mt-2 text-sm" id="hist-id">#ID</div>
-            </div>
-            <div class="p-6">
-                <div class="space-y-3 mb-4" id="hist-items"></div>
-                <div class="border-t border-dashed border-gray-300 pt-4 flex justify-between items-center">
-                    <span class="text-gray-500 font-bold text-sm">Total Paid</span>
-                    <span class="text-xl font-extrabold text-gray-900">₹<span id="hist-total">0</span></span>
+                <h1 class="text-2xl font-black text-gray-800">Wow<span class="text-orange-600">Cafe</span></h1>
+                <div class="font-mono text-orange-600 font-bold bg-white inline-block px-3 py-1 rounded-lg mt-2 text-sm shadow-sm" id="hist-id">#ID</div>
+                <div id="hist-payment-badge" class="mt-2 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold border border-yellow-200 inline-block">
+                    <i class="fas fa-clock mr-1"></i> Payment Pending
                 </div>
-                 <div class="mt-2 text-center text-xs text-gray-400" id="hist-date"></div>
+            </div>
+            
+            <!-- Content -->
+            <div class="p-5 overflow-y-auto flex-1 hide-scrollbar">
+                <!-- Customer Info -->
+                <div class="space-y-2 mb-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">Customer</span>
+                        <span class="font-bold text-gray-800" id="hist-customer">--</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">Order Type</span>
+                        <span class="font-bold text-gray-800" id="hist-order-type">--</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">Date & Time</span>
+                        <span class="font-bold text-gray-800 text-xs" id="hist-date">--</span>
+                    </div>
+                </div>
+                
+                <!-- Items -->
+                <div class="mb-4">
+                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Order Items</h4>
+                    <div class="space-y-2 bg-white border border-gray-100 rounded-xl p-3" id="hist-items"></div>
+                </div>
+                
+                <!-- Total -->
+                <div class="bg-gradient-to-r from-orange-50 to-amber-50 p-4 rounded-xl border border-orange-100">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 font-bold">Total Amount</span>
+                        <span class="text-2xl font-black text-orange-600">₹<span id="hist-total">0</span></span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -580,6 +617,33 @@
         </div>
     </div>
 
+    <!-- Spin Wheel Modal -->
+    <div id="spin-wheel-modal" class="absolute inset-0 z-[115] bg-black/80 hidden items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative pop-in text-center">
+            <button onclick="closeWheelModal()" class="absolute top-3 right-3 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/40 transition z-10"><i class="fas fa-times"></i></button>
+            
+            <h2 class="text-2xl font-black text-white mb-1 drop-shadow">🎡 Lucky Spin!</h2>
+            <p class="text-sm text-white/80 mb-4">Try your luck and win exciting prizes!</p>
+            
+            <div class="relative mx-auto" style="width: 280px; height: 280px;">
+                <!-- Pointer Arrow -->
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-20">
+                    <div class="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[20px] border-l-transparent border-r-transparent border-t-yellow-400 drop-shadow-lg"></div>
+                </div>
+                
+                <!-- Wheel Canvas -->
+                <canvas id="spin-wheel-canvas" width="280" height="280" class="rounded-full shadow-2xl border-4 border-yellow-400"></canvas>
+                
+                <!-- Center Button -->
+                <button onclick="spinTheWheel()" id="spin-btn" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full text-white font-black text-sm shadow-xl hover:scale-110 transition-transform border-4 border-white">
+                    SPIN
+                </button>
+            </div>
+            
+            <p class="text-xs text-white/70 mt-4">Tap SPIN to win!</p>
+        </div>
+    </div>
+
 </div>
 
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -603,6 +667,11 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);        
     const dbFirestore = getFirestore(app);
+    
+    // Restaurant ID - Get from URL or default to 'Orderly'
+    const urlParams = new URLSearchParams(window.location.search);
+    const RESTAURANT_ID = urlParams.get('r') || urlParams.get('restaurant') || 'Orderly';
+    console.log('🏪 Restaurant ID:', RESTAURANT_ID);
 
     window.rawMenuDocs = [];
     window.allAddons = {}; 
@@ -635,7 +704,7 @@
     }
 
     function initAddonsSync() {
-        const addonRef = collection(dbFirestore, "addons");
+        const addonRef = collection(dbFirestore, "restaurants", RESTAURANT_ID, "addons");
         onSnapshot(addonRef, (snapshot) => {
             window.allAddons = {};
             snapshot.forEach(doc => {
@@ -647,7 +716,7 @@
     }
 
     function initMenuSync() {
-        const menuRef = collection(dbFirestore, "menu");
+        const menuRef = collection(dbFirestore, "restaurants", RESTAURANT_ID, "menu");
         onSnapshot(menuRef, (snapshot) => {
             window.rawMenuDocs = [];
             snapshot.forEach(doc => {
@@ -685,7 +754,7 @@
     }
 
     function initOffersSync() {
-        const cardsRef = collection(dbFirestore, "site_cards");
+        const cardsRef = collection(dbFirestore, "restaurants", RESTAURANT_ID, "site_cards");
         onSnapshot(cardsRef, (snapshot) => {
             window.offerList = [];
             snapshot.forEach(docSnap => {
@@ -709,7 +778,7 @@
             // 2. Ab Personal Won Coupons load karo (User ke phone number se)
             if (window.wowUser && window.wowUser.phone) {
                 const couponQuery = query(
-                    collection(dbFirestore, "coupons"), 
+                    collection(dbFirestore, "restaurants", RESTAURANT_ID, "coupons"), 
                     where("userPhone", "==", window.wowUser.phone),
                     where("status", "==", "active") // Sirf active coupons dikhao
                 );
@@ -790,7 +859,7 @@
 
         // 3. DATABASE MEIN SAVE KARO (Admin ke liye & Next Order ke liye)
         try {
-            await addDoc(collection(dbFirestore, "coupons"), {
+            await addDoc(collection(dbFirestore, "restaurants", RESTAURANT_ID, "coupons"), {
                 code: uniqueCode,
                 discountValue: prize.value,
                 isFlat: prize.isFlat || false,
@@ -827,30 +896,279 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }
+        // Reset app after prize shown
+        window.resetApp();
     };
     
     // Rating logic specifically for Firestore
     window.submitRating = async (star) => {
+        // Highlight selected stars
+        const stars = document.querySelectorAll('.star-rating i');
+        stars.forEach((s, idx) => {
+            if(idx < star) {
+                s.classList.add('text-yellow-400');
+                s.classList.remove('text-gray-300');
+            }
+        });
+
         if(typeof Toastify !== 'undefined') {
             Toastify({ 
                 text: "Thanks for rating! ⭐", 
                 className: "toast-center", 
                 style: { background: "#10B981" },
-                duration: 2000
+                duration: 1500
             }).showToast();
         }
 
         // Add to Database
         if(window.currentDocId) {
              try {
-                const orderRef = doc(dbFirestore, "orders", window.currentDocId);
+                const orderRef = doc(dbFirestore, "restaurants", RESTAURANT_ID, "orders", window.currentDocId);
                 await updateDoc(orderRef, { rating: star });
              } catch(e) { console.log("Rating save error", e); }
         }
 
-        // Animate stars away
-        document.getElementById('rating-widget').classList.add('translate-y-full');
+        // Close rating and open spin wheel after a short delay
+        setTimeout(() => {
+            document.getElementById('rating-widget').classList.add('hidden');
+            document.getElementById('rating-widget').classList.remove('flex');
+            
+            // Open Spin Wheel
+            openWheelModal();
+        }, 1000);
     }
+    
+    // --- Spin Wheel Functions ---
+    window.wheelPrizes = []; // Will be loaded from Firebase
+    window.defaultWheelPrizes = [
+        { text: "10% OFF", value: 10, isFlat: false, color: "#ef4444" },
+        { text: "Try Again", value: 0, color: "#6b7280" },
+        { text: "₹20 OFF", value: 20, isFlat: true, color: "#10b981" },
+        { text: "15% OFF", value: 15, isFlat: false, color: "#f59e0b" },
+        { text: "Try Again", value: 0, color: "#8b5cf6" },
+        { text: "₹50 OFF", value: 50, isFlat: true, color: "#ec4899" },
+        { text: "5% OFF", value: 5, isFlat: false, color: "#3b82f6" },
+        { text: "FREE Drink", value: 100, isFree: true, color: "#14b8a6" }
+    ];
+    
+    // Load wheel prizes from Firebase
+    function initWheelPrizesSync() {
+        const prizesRef = collection(dbFirestore, "restaurants", RESTAURANT_ID, "wheel_prizes");
+        onSnapshot(prizesRef, (snapshot) => {
+            const prizes = [];
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                prizes.push({
+                    text: data.text,
+                    value: data.value || 0,
+                    isFlat: data.isFlat || data.type === 'flat',
+                    isFree: data.isFree || data.type === 'free',
+                    color: data.color || '#6b7280'
+                });
+            });
+            
+            // Use loaded prizes or default if empty
+            window.wheelPrizes = prizes.length > 0 ? prizes : window.defaultWheelPrizes;
+            console.log("🎡 Wheel Prizes loaded:", window.wheelPrizes.length);
+        });
+    }
+    
+    // Listen for payment status update from admin
+    function listenForPaymentUpdate(docId, orderId) {
+        const orderRef = doc(dbFirestore, "restaurants", RESTAURANT_ID, "orders", docId);
+        const unsubscribe = onSnapshot(orderRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.paymentStatus === 'paid' || data.paymentStatus === 'collected') {
+                    console.log("💰 Payment collected for order:", orderId);
+                    
+                    // Update local storage
+                    const history = JSON.parse(localStorage.getItem('wowRecentOrders') || '[]');
+                    const orderIndex = history.findIndex(o => o.id === orderId);
+                    if (orderIndex !== -1) {
+                        history[orderIndex].paymentStatus = 'paid';
+                        localStorage.setItem('wowRecentOrders', JSON.stringify(history));
+                        if(window.loadRecentOrders) window.loadRecentOrders();
+                    }
+                    
+                    // Update success screen if visible
+                    const successScreen = document.getElementById('success-screen');
+                    if (successScreen && !successScreen.classList.contains('hidden')) {
+                        const badge = document.getElementById('payment-status-badge');
+                        const icon = document.getElementById('success-icon');
+                        const amtLabel = document.getElementById('amount-label');
+                        
+                        if (badge) {
+                            badge.className = 'mt-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold border border-green-200';
+                            badge.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Payment Collected';
+                        }
+                        if (icon) {
+                            icon.className = 'w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-2 mt-4 text-white text-2xl shadow-xl shadow-green-200';
+                            icon.innerHTML = '<i class="fas fa-check"></i>';
+                        }
+                        if (amtLabel) {
+                            amtLabel.innerText = 'Payment Successful';
+                        }
+                        
+                        // Show toast
+                        if(typeof Toastify !== 'undefined') {
+                            Toastify({ 
+                                text: "✅ Payment Collected!", 
+                                className: "toast-center", 
+                                style: { background: "#10B981" },
+                                duration: 3000
+                            }).showToast();
+                        }
+                    }
+                    
+                    // Unsubscribe after payment collected
+                    unsubscribe();
+                }
+            }
+        });
+    }
+    
+    window.wheelAngle = 0;
+    window.isSpinning = false;
+    
+    window.drawWheel = () => {
+        const canvas = document.getElementById('spin-wheel-canvas');
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = Math.min(centerX, centerY) - 5;
+        
+        const numSegments = window.wheelPrizes.length;
+        const segmentAngle = (2 * Math.PI) / numSegments;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        for(let i = 0; i < numSegments; i++) {
+            const startAngle = window.wheelAngle + (i * segmentAngle);
+            const endAngle = startAngle + segmentAngle;
+            
+            // Draw segment
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+            ctx.closePath();
+            ctx.fillStyle = window.wheelPrizes[i].color;
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw text
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(startAngle + segmentAngle / 2);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText(window.wheelPrizes[i].text, radius - 15, 4);
+            ctx.restore();
+        }
+        
+        // Draw center circle
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 25, 0, 2 * Math.PI);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+    };
+    
+    window.openWheelModal = () => {
+        const modal = document.getElementById('spin-wheel-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        window.drawWheel();
+    };
+    
+    window.closeWheelModal = () => {
+        const modal = document.getElementById('spin-wheel-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        window.resetApp();
+    };
+    
+    window.spinTheWheel = () => {
+        if(window.isSpinning) return;
+        window.isSpinning = true;
+        
+        const btn = document.getElementById('spin-btn');
+        btn.disabled = true;
+        btn.innerText = '...';
+        
+        // Random prize index
+        const prizeIndex = Math.floor(Math.random() * window.wheelPrizes.length);
+        const segmentAngle = (2 * Math.PI) / window.wheelPrizes.length;
+        
+        // Calculate target angle (prize should be at top/pointer)
+        // Pointer is at top (3π/2 or -π/2), so we need prize center there
+        const targetAngle = (3 * Math.PI / 2) - (prizeIndex * segmentAngle) - (segmentAngle / 2);
+        const spins = 5; // Number of full rotations
+        const totalRotation = (spins * 2 * Math.PI) + targetAngle - window.wheelAngle;
+        
+        let startTime = null;
+        const duration = 4000; // 4 seconds
+        
+        const animate = (timestamp) => {
+            if(!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Ease out cubic
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            
+            window.wheelAngle = window.wheelAngle + (totalRotation * easeOut / 100);
+            
+            if(progress < 1) {
+                window.wheelAngle += totalRotation * (easeOut - (elapsed > 0 ? (elapsed - 16) / duration : 0));
+            }
+            
+            // Simple animation
+            window.wheelAngle = (window.wheelAngle % (2 * Math.PI)) + (totalRotation * easeOut / 50);
+            
+            window.drawWheel();
+            
+            if(progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                window.isSpinning = false;
+                btn.disabled = false;
+                btn.innerText = 'SPIN';
+                
+                // Close wheel modal and show result
+                setTimeout(() => {
+                    document.getElementById('spin-wheel-modal').classList.add('hidden');
+                    document.getElementById('spin-wheel-modal').classList.remove('flex');
+                    window.showSpinResult(window.wheelPrizes[prizeIndex]);
+                }, 500);
+            }
+        };
+        
+        // Simple spin animation
+        let currentRotation = 0;
+        const targetRotation = (spins * 360) + (prizeIndex * (360 / window.wheelPrizes.length)) + (180 / window.wheelPrizes.length);
+        const spinInterval = setInterval(() => {
+            currentRotation += (targetRotation - currentRotation) * 0.05;
+            window.wheelAngle = (currentRotation * Math.PI) / 180;
+            window.drawWheel();
+            
+            if(Math.abs(targetRotation - currentRotation) < 1) {
+                clearInterval(spinInterval);
+                window.isSpinning = false;
+                btn.disabled = false;
+                btn.innerText = 'SPIN';
+                
+                setTimeout(() => {
+                    document.getElementById('spin-wheel-modal').classList.add('hidden');
+                    document.getElementById('spin-wheel-modal').classList.remove('flex');
+                    window.showSpinResult(window.wheelPrizes[prizeIndex]);
+                }, 500);
+            }
+        }, 16);
+    };
 
     const timeout = (ms) => new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), ms));
 
@@ -894,9 +1212,9 @@
                 createdAt: new Date()
             };
 
-            const rtdbPromise = push(ref(db, 'orders'), orderData);
+            const rtdbPromise = push(ref(db, `restaurants/${RESTAURANT_ID}/orders`), orderData);
             // We need to await addDoc to get the reference ID for updating rating later
-            const docRef = await addDoc(collection(dbFirestore, "orders"), orderData);
+            const docRef = await addDoc(collection(dbFirestore, "restaurants", RESTAURANT_ID, "orders"), orderData);
             window.currentDocId = docRef.id;
 
             await Promise.race([rtdbPromise, timeout(8000)]);
@@ -904,14 +1222,20 @@
             const savedHistory = JSON.parse(localStorage.getItem('wowRecentOrders') || '[]');
             savedHistory.unshift({
                 id: orderID,
+                docId: docRef.id, // Store Firestore doc ID for payment tracking
                 amount: grandTotal,
                 date: new Date().toLocaleDateString(),
                 time: new Date().toLocaleTimeString(),
-                items: [...window.wowCart]
+                items: [...window.wowCart],
+                orderType: window.orderType,
+                paymentStatus: 'pending' // Initially pending
             });
             if(savedHistory.length > 10) savedHistory.pop();
             localStorage.setItem('wowRecentOrders', JSON.stringify(savedHistory));
             if(window.loadRecentOrders) window.loadRecentOrders();
+            
+            // Listen for payment status update from admin
+            listenForPaymentUpdate(docRef.id, orderID);
 
             window.wowCart = [];
             
@@ -922,7 +1246,7 @@
                 if (usedOffer && usedOffer.isPersonal && usedOffer.id) {
                     // Firestore mein status update karo -> 'used'
                     try {
-                        await updateDoc(doc(dbFirestore, "coupons", usedOffer.id), {
+                        await updateDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "coupons", usedOffer.id), {
                             status: 'used',
                             usedAt: firestoreTimestamp(),
                             usedOnOrder: orderID
@@ -951,17 +1275,22 @@
             document.getElementById('success-screen').classList.remove('hidden');
             document.getElementById('success-screen').classList.add('flex');
             
-            // Trigger Rating Animation with staggered effect
+            // Trigger Rating Modal after delay (centered)
             setTimeout(() => {
-                document.getElementById('rating-widget').classList.remove('translate-y-full');
+                const ratingWidget = document.getElementById('rating-widget');
+                ratingWidget.classList.remove('hidden');
+                ratingWidget.classList.add('flex');
+                
+                // Animate stars with staggered effect
                 const stars = document.querySelectorAll('.star-rating i');
                 stars.forEach((star, index) => {
-                    star.classList.remove('visible'); // reset
+                    star.classList.remove('visible', 'text-yellow-400');
+                    star.classList.add('text-gray-300');
                     setTimeout(() => {
                          star.classList.add('visible');
-                    }, index * 100); // 0.1s delay per star
+                    }, index * 100);
                 });
-            }, 800);
+            }, 1500);
 
             if(window.closePaymentModal) window.closePaymentModal();
             if(window.closeCheckout) window.closeCheckout();
@@ -1000,6 +1329,7 @@
         initAddonsSync(); 
         initMenuSync();
         initOffersSync();
+        initWheelPrizesSync();
         
         if(window.updateCartBar) window.updateCartBar(); 
         if(window.loadRecentOrders) window.loadRecentOrders(); 
@@ -1088,18 +1418,27 @@
         }
 
         document.getElementById('notif-dot').classList.remove('hidden');
-        container.innerHTML = history.map((order, idx) => `
+        container.innerHTML = history.map((order, idx) => {
+            const isPaid = order.paymentStatus === 'paid' || order.paymentStatus === 'collected';
+            const statusBadge = isPaid 
+                ? `<span class="text-[9px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-bold"><i class="fas fa-check-circle"></i> Paid</span>`
+                : `<span class="text-[9px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded-full font-bold animate-pulse"><i class="fas fa-clock"></i> Pending</span>`;
+            
+            return `
             <div onclick="openBillDetail(${idx})" class="flex justify-between items-center p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-orange-50 transition-colors border border-gray-100">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs"><i class="fas fa-receipt"></i></div>
+                    <div class="w-8 h-8 rounded-full ${isPaid ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'} flex items-center justify-center font-bold text-xs">
+                        <i class="fas fa-receipt"></i>
+                    </div>
                     <div>
                         <div class="font-bold text-gray-800 text-sm">Order #${order.id.split('-')[1]}...</div>
                         <div class="text-[10px] text-gray-400">${order.date}, ${order.time}</div>
+                        ${statusBadge}
                     </div>
                 </div>
-                <div class="font-bold text-orange-600 text-sm">₹${order.amount}</div>
+                <div class="font-bold ${isPaid ? 'text-green-600' : 'text-orange-600'} text-sm">₹${order.amount}</div>
             </div>
-        `).join('');
+        `}).join('');
     }
 
     window.filterByExplore = (cat) => {
@@ -1528,15 +1867,29 @@
         document.getElementById('hist-id').innerText = order.id;
         document.getElementById('hist-total').innerText = order.amount;
         document.getElementById('hist-date').innerText = `${order.date} at ${order.time}`;
+        document.getElementById('hist-customer').innerText = window.wowUser?.name || 'Guest';
+        document.getElementById('hist-order-type').innerText = order.orderType || 'Dine-in';
+        
+        // Payment Status Badge
+        const isPaid = order.paymentStatus === 'paid' || order.paymentStatus === 'collected';
+        const badge = document.getElementById('hist-payment-badge');
+        if (isPaid) {
+            badge.className = 'mt-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold border border-green-200 inline-block';
+            badge.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Payment Collected';
+        } else {
+            badge.className = 'mt-2 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold border border-yellow-200 inline-block animate-pulse';
+            badge.innerHTML = '<i class="fas fa-clock mr-1"></i> Payment Pending';
+        }
         
         const container = document.getElementById('hist-items');
         container.innerHTML = order.items.map(i => `
-            <div class="flex justify-between text-sm">
-                <div>
+            <div class="flex justify-between items-start text-sm py-2 border-b border-gray-50 last:border-0">
+                <div class="flex-1">
                     <span class="text-gray-800 font-bold block">${i.name}</span>
-                    <span class="text-[10px] text-gray-500">[${i.variantDetails}]</span>
+                    <span class="text-[10px] text-blue-600 bg-blue-50 px-1 rounded">[${i.variantDetails}]</span>
+                    <span class="text-[10px] text-gray-400 block mt-1">₹${i.price} × ${i.qty}</span>
                 </div>
-                <span class="text-gray-500">x${i.qty}</span>
+                <span class="text-gray-800 font-bold">₹${i.price * i.qty}</span>
             </div>
         `).join('');
 
