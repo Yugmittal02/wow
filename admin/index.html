@@ -28,6 +28,14 @@
         #initial-loader .brand { color: #f97316; font-size: 1.75rem; font-weight: 800; text-align: center; }
         #initial-loader .sub { color: #9ca3af; font-size: 0.9rem; margin-top: 10px; text-align: center; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Graph ko bada hone se rokne ke liye */
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 300px !important; /* Fixed Height */
+            width: 100%;
+            overflow: hidden;
+        }
     </style>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1616,7 +1624,9 @@
                                 <option value="30" selected>Last 30 Days</option>
                             </select>
                         </div>
-                        <canvas id="revenue-chart" height="200"></canvas>
+                        <div class="chart-container">
+                            <canvas id="revenue-chart"></canvas>
+                        </div>
                     </div>
 
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -5120,6 +5130,11 @@
                     let pending = 0, prep = 0, ready = 0, completed = 0;
                     let activeCount = 0;
 
+                    // Real-time update for dashboard stats
+                    if (typeof window.updateDashboardStats === 'function') {
+                        window.updateDashboardStats();
+                    }
+
                     if (data) {
                         const ordersArr = Object.keys(data).map(key => ({ id: key, ...data[key] }));
                         ordersArr.sort((a, b) => b.timestamp - a.timestamp);
@@ -6277,78 +6292,78 @@
 
         window.saveOfferData = async () => {
             const id = document.getElementById('offer-edit-id').value;
-            const txt = document.getElementById('offer-text-input').value;
-            const disc = document.getElementById('offer-disc-input').value;
-            const minVal = document.getElementById('offer-min-input').value;
-            const img = document.getElementById('offer-img-input').value;
+            const canvas = document.getElementById('revenue-chart');
+            if (!canvas || !window.fullHistoryData || window.fullHistoryData.length === 0) return;
 
-            if (!id) return;
+            const period = parseInt(document.getElementById('chart-period')?.value || 30);
+            const now = new Date();
+            const startDate = new Date(); startDate.setDate(startDate.getDate() - period);
 
-            try {
-                await setDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "site_cards", id), {
-                    offerText: txt,
-                    discount: Number(disc),
-                    minOrderValue: Number(minVal),
-                    img
-                }, { merge: true });
-                window.showToast("Offer Updated", "success");
-                window.closeOfferModal();
-            } catch (e) {
-                window.showToast("Update Failed", "error");
+            // Group by date
+            const dailyRevenue = {};
+            for (let i = 0; i < period; i++) {
+                const d = new Date(now);
+                d.setDate(d.getDate() - i);
+                dailyRevenue[d.toDateString()] = 0;
             }
-        };
 
-        window.deleteOfferData = async () => {
-            const id = document.getElementById('offer-edit-id').value;
-            if (!id) return;
-
-            try {
-                await deleteDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "site_cards", id));
-                window.showToast("Offer Removed", "success");
-                window.closeOfferModal();
-            } catch (e) {
-                window.showToast("Delete Failed", "error");
-            }
-        };
-
-        // ========== SPIN WHEEL PRIZES MANAGEMENT ==========
-        const initWheelPrizes = () => {
-            if (!RESTAURANT_ID) return;
-            
-            onSnapshot(collection(dbFirestore, "restaurants", RESTAURANT_ID, "wheel_prizes"), (snap) => {
-                const prizes = [];
-                snap.forEach(d => prizes.push({ id: d.id, ...d.data() }));
-                
-                // Sort by order if exists
-                prizes.sort((a, b) => (a.order || 0) - (b.order || 0));
-                
-                let html = "";
-                if (prizes.length === 0) {
-                    html = `<p class="col-span-full text-center text-gray-400 py-8">No prizes configured. Add prizes to enable spin wheel for customers.</p>`;
-                } else {
-                    prizes.forEach((prize, idx) => {
-                        const typeLabel = prize.type === 'percent' ? '%' : prize.type === 'flat' ? '₹' : prize.type === 'free' ? '🎁' : '🔄';
-                        html += `
-                        <div onclick="editWheelPrize('${prize.id}')" class="cursor-pointer bg-white rounded-xl p-3 border-2 hover:border-purple-400 transition-all group shadow-sm">
-                            <div class="w-full h-16 rounded-lg mb-2 flex items-center justify-center text-white font-bold text-xs" style="background-color: ${prize.color || '#6b7280'}">
-                                ${prize.text}
-                            </div>
-                            <p class="text-xs text-gray-500 text-center">${typeLabel} ${prize.value || 0}</p>
-                        </div>`;
-                    });
+            window.fullHistoryData.forEach(o => {
+                if (o.jsDate && o.jsDate > startDate) {
+                    const key = o.jsDate.toDateString();
+                    if (dailyRevenue.hasOwnProperty(key)) {
+                        dailyRevenue[key] += Number(o.totalAmount) || Number(o.total) || 0;
+                    }
                 }
-                document.getElementById('wheel-prizes-container').innerHTML = html;
             });
-        };
 
-        window.openWheelPrizeModal = (prizeId = null) => {
-            document.getElementById('wheel-prize-id').value = '';
-            document.getElementById('wheel-prize-text').value = '';
-            document.getElementById('wheel-prize-value').value = '';
-            document.getElementById('wheel-prize-type').value = 'percent';
-            document.querySelector('input[name="wheel-color"][value="#ef4444"]').checked = true;
-            document.getElementById('btn-delete-wheel-prize').classList.add('hidden');
-            document.getElementById('wheel-prize-modal').classList.remove('hidden');
+            // Prepare chart data
+            const labels = Object.keys(dailyRevenue).reverse().map(d => {
+                const date = new Date(d);
+                return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+            });
+            const data = Object.values(dailyRevenue).reverse();
+
+            // Destroy existing chart instance if exists
+            if (window.revenueChartInstance) {
+                window.revenueChartInstance.destroy();
+            }
+
+            // Create new chart
+            const ctx = canvas.getContext('2d');
+            window.revenueChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: data,
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#22c55e',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Graph ko failne se rokta hai
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => String.fromCharCode(0x20B9) + ctx.raw.toLocaleString('en-IN')
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
         };
 
         window.editWheelPrize = async (prizeId) => {
@@ -6508,12 +6523,15 @@
         };
 
         window.initSalesChart = () => {
-            const ctx = document.getElementById('salesChart');
-            if (!ctx) return;
-            
-            if (salesChart) salesChart.destroy();
-            
-            salesChart = new Chart(ctx, {
+            const canvas = document.getElementById('salesChart');
+            if (!canvas) return;
+
+            // Destroy previous chart instance if exists
+            if (window.salesChartInstance) {
+                window.salesChartInstance.destroy();
+            }
+
+            window.salesChartInstance = new Chart(canvas, {
                 type: 'line',
                 data: {
                     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -6532,7 +6550,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: false, // Graph ko failne se rokta hai
                     plugins: {
                         legend: { display: false }
                     },
@@ -6575,8 +6593,9 @@
             today.setHours(0, 0, 0, 0);
             
             try {
-                // Get today's orders
-                const ordersRef = ref(dbRTDB, `restaurants/${RESTAURANT_ID}/orders`);
+                // Get only last 500 orders for performance
+                const { query, limitToLast } = await import('https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js');
+                const ordersRef = query(ref(dbRTDB, `restaurants/${RESTAURANT_ID}/orders`), limitToLast(500));
                 const snapshot = await get(ordersRef);
                 
                 if (snapshot.exists()) {
@@ -6799,7 +6818,8 @@
             }
             
             try {
-                const ordersRef = ref(dbRTDB, `restaurants/${RESTAURANT_ID}/orders`);
+                const { query, limitToLast } = await import('https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js');
+                const ordersRef = query(ref(dbRTDB, `restaurants/${RESTAURANT_ID}/orders`), limitToLast(500));
                 const snapshot = await get(ordersRef);
                 
                 if (!snapshot.exists()) {
@@ -7024,14 +7044,7 @@ Report generated by Orderly Admin Dashboard
         window.initDashboard = () => {
             initSalesChart();
             updateDashboardStats();
-            
-            // Auto-refresh dashboard every 30 seconds
-            setInterval(() => {
-                const dashSection = document.getElementById('section-dashboard');
-                if (dashSection && !dashSection.classList.contains('hide-section')) {
-                    updateDashboardStats();
-                }
-            }, 30000);
+            // setInterval removed to avoid repeated full data fetches
         };
 
         // Init - only focus on login pin, rest is handled by initAdminFeatures after validation
