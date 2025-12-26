@@ -669,8 +669,9 @@
     const dbFirestore = getFirestore(app);
     
     // Restaurant ID - Get from URL or default to 'Orderly'
+    // Added 'id' parameter so Admin and Customer use the same ID
     const urlParams = new URLSearchParams(window.location.search);
-    const RESTAURANT_ID = urlParams.get('r') || urlParams.get('restaurant') || 'Orderly';
+    const RESTAURANT_ID = urlParams.get('id') || urlParams.get('r') || urlParams.get('restaurant') || 'Orderly';
     console.log('🏪 Restaurant ID:', RESTAURANT_ID);
 
     window.rawMenuDocs = [];
@@ -721,6 +722,13 @@
             window.rawMenuDocs = [];
             snapshot.forEach(doc => {
                 const item = doc.data();
+                
+                // Only show items that are available (available !== false)
+                // If available is undefined or true, show the item
+                if (item.available === false) {
+                    console.log("🚫 Item hidden (unavailable):", item.name);
+                    return; // Skip this item
+                }
                 
                 let safeSizes = [];
                 if (item.sizes) {
