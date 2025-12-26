@@ -928,18 +928,26 @@
              } catch(e) { console.log("Rating save error", e); }
         }
 
-        // Close rating and open spin wheel after a short delay
+        // Close rating and open spin wheel if enabled
         setTimeout(() => {
             document.getElementById('rating-widget').classList.add('hidden');
             document.getElementById('rating-widget').classList.remove('flex');
             
-            // Open Spin Wheel
-            openWheelModal();
+            // Open Spin Wheel only if enabled by admin
+            if (window.wheelEnabled && window.wheelPrizes.length > 0) {
+                openWheelModal();
+            } else {
+                // If wheel is disabled, reset app after a short delay
+                setTimeout(() => {
+                    window.resetApp();
+                }, 1000);
+            }
         }, 1000);
     }
     
     // --- Spin Wheel Functions ---
     window.wheelPrizes = []; // Will be loaded from Firebase
+    window.wheelEnabled = false; // Will be loaded from Firebase settings
     window.defaultWheelPrizes = [
         { text: "10% OFF", value: 10, isFlat: false, color: "#ef4444" },
         { text: "Try Again", value: 0, color: "#6b7280" },
@@ -970,6 +978,17 @@
             // Use loaded prizes or default if empty
             window.wheelPrizes = prizes.length > 0 ? prizes : window.defaultWheelPrizes;
             console.log("🎡 Wheel Prizes loaded:", window.wheelPrizes.length);
+        });
+        
+        // Load wheel enabled status
+        const wheelSettingsRef = doc(dbFirestore, "restaurants", RESTAURANT_ID, "settings", "wheel");
+        onSnapshot(wheelSettingsRef, (docSnap) => {
+            if (docSnap.exists()) {
+                window.wheelEnabled = docSnap.data().enabled || false;
+            } else {
+                window.wheelEnabled = false;
+            }
+            console.log("🎡 Wheel Enabled:", window.wheelEnabled);
         });
     }
     
@@ -1019,6 +1038,11 @@
                                 duration: 3000
                             }).showToast();
                         }
+                        
+                        // Show rating widget after payment is collected
+                        setTimeout(() => {
+                            showRatingWidget();
+                        }, 1500);
                     }
                     
                     // Unsubscribe after payment collected
@@ -1027,6 +1051,29 @@
             }
         });
     }
+    
+    // Show rating widget and then wheel if enabled
+    function showRatingWidget() {
+        const ratingWidget = document.getElementById('rating-widget');
+        if (ratingWidget) {
+            ratingWidget.classList.remove('hidden');
+            ratingWidget.classList.add('flex');
+        }
+    }
+    
+    // Function to show wheel after rating (called from submitRating)
+    window.showWheelAfterRating = () => {
+        if (window.wheelEnabled && window.wheelPrizes.length > 0) {
+            setTimeout(() => {
+                window.openWheelModal();
+            }, 500);
+        } else {
+            // If wheel is disabled, just reset the app
+            setTimeout(() => {
+                window.resetApp();
+            }, 1500);
+        }
+    };
     
     window.wheelAngle = 0;
     window.isSpinning = false;
@@ -1275,22 +1322,8 @@
             document.getElementById('success-screen').classList.remove('hidden');
             document.getElementById('success-screen').classList.add('flex');
             
-            // Trigger Rating Modal after delay (centered)
-            setTimeout(() => {
-                const ratingWidget = document.getElementById('rating-widget');
-                ratingWidget.classList.remove('hidden');
-                ratingWidget.classList.add('flex');
-                
-                // Animate stars with staggered effect
-                const stars = document.querySelectorAll('.star-rating i');
-                stars.forEach((star, index) => {
-                    star.classList.remove('visible', 'text-yellow-400');
-                    star.classList.add('text-gray-300');
-                    setTimeout(() => {
-                         star.classList.add('visible');
-                    }, index * 100);
-                });
-            }, 1500);
+            // Rating widget will be triggered automatically after payment is collected
+            // via the listenForPaymentUpdate function
 
             if(window.closePaymentModal) window.closePaymentModal();
             if(window.closeCheckout) window.closeCheckout();
@@ -1910,7 +1943,7 @@
             <p><strong>4. Rights:</strong> WowCafe reserves the right to admission.</p>
         `,
         'Contact': `
-            <p><i class="fas fa-phone mr-2 text-orange-500"></i> +91 98765 43210</p>
+            <p><i class="fas fa-phone mr-2 text-orange-500"></i> +91 86191 52422</p>
             <p><i class="fas fa-envelope mr-2 text-orange-500"></i> help@wowcafe.in</p>
             <p><i class="fas fa-map-marker-alt mr-2 text-orange-500"></i> Shop 12, Food Court, City Mall.</p>
         `,
