@@ -3962,6 +3962,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <script type="module">
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getDatabase, ref, onValue, update, push, set, get, orderByChild } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
         import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, getDoc, onSnapshot, query, orderBy, limit, serverTimestamp, setDoc, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
@@ -3980,6 +3981,30 @@
         const app = initializeApp(firebaseConfig);
         const dbRTDB = getDatabase(app);
         const dbFirestore = getFirestore(app);
+
+        // Expose Firestore and helpers to window for use in non-module scripts
+        window.dbFirestore = dbFirestore;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.updateDoc = updateDoc;
+        window.deleteDoc = deleteDoc;
+        window.doc = doc;
+        window.serverTimestamp = serverTimestamp;
+        window.onSnapshot = onSnapshot;
+        window.getDocs = getDocs;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.limit = limit;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+        window.where = where;
+
+        // Expose save functions to window (if not already)
+        if (typeof window.saveInventoryItem !== 'function') window.saveInventoryItem = async () => {};
+        if (typeof window.saveTable !== 'function') window.saveTable = async () => {};
+        if (typeof window.saveStaff !== 'function') window.saveStaff = async () => {};
+        if (typeof window.saveExpense !== 'function') window.saveExpense = async () => {};
+        if (typeof window.saveSupplier !== 'function') window.saveSupplier = async () => {};
 
         // =====================================================
         // ðŸ›¡ï¸ SECURITY & CRASH PREVENTION SYSTEM v3.0
@@ -4997,7 +5022,8 @@
 
         // Helper: UI Update (To keep code clean)
         const updateWalletUI = (balance) => {
-            const displayVal = `Rs.${balance.toFixed(2)}`;
+            const safeBalance = (typeof balance === 'number' && !isNaN(balance)) ? balance : 0;
+            const displayVal = `₹${safeBalance.toFixed(2)}`;
             const els = ['admin-wallet-display', 'admin-wallet-mobile', 'dash-wallet-balance'];
             els.forEach(id => {
                 const el = document.getElementById(id);
@@ -5018,6 +5044,15 @@
         };
 
         window.showToast = (msg, type = "success") => {
+
+            // Ensure wallet UI updates after DOM is loaded (in case listener is late)
+            document.addEventListener('DOMContentLoaded', () => {
+                if (typeof window.currentAdminBalance !== 'undefined') {
+                    updateWalletUI(window.currentAdminBalance);
+                } else {
+                    updateWalletUI(0);
+                }
+            });
             let bg = type === "success" ? "#10B981" : "#EF4444";
             if (type === "info") bg = "#3B82F6";
             if (type === "warning") bg = "#F59E0B";
@@ -5447,11 +5482,11 @@
                 item.sizes.forEach((s, idx) => {
                     const isChecked = (idx === defaultSizeIndex) ? 'checked' : '';
                     sizeHtml += `
-            < label class="flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50">
-                            <div class="flex items-center gap-2"><input type="radio" name="pos_size" value="${idx}" ${isChecked} onchange="recalcPOSModalPrice()"><span class="text-sm font-medium">${s.name}</span></div>
-                            <span class="text-xs font-bold">₹${s.price}</span>
-                        </label >
-            `;
+<label class="flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50">
+    <div class="flex items-center gap-2"><input type="radio" name="pos_size" value="${idx}" ${isChecked} onchange="recalcPOSModalPrice()"><span class="text-sm font-medium">${s.name}</span></div>
+    <span class="text-xs font-bold">₹${s.price}</span>
+</label>
+`;
                 });
                 sizeList.innerHTML = sizeHtml;
             } else { sizeDiv.classList.add('hidden'); sizeList.innerHTML = ""; }
@@ -5463,11 +5498,11 @@
                     const addon = window.universalAddons[addonId];
                     if(addon) {
                         addonHtml += `
-            < label class="flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50">
-                                <div class="flex items-center gap-2"><input type="checkbox" class="pos-addon-check" value="${addonId}" data-price="${addon.price}" onchange="recalcPOSModalPrice()"><span class="text-sm font-medium">${addon.name}</span></div>
-                                <span class="text-xs font-bold">+₹${addon.price}</span>
-                            </label >
-            `;
+<label class="flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50">
+    <div class="flex items-center gap-2"><input type="checkbox" class="pos-addon-check" value="${addonId}" data-price="${addon.price}" onchange="recalcPOSModalPrice()"><span class="text-sm font-medium">${addon.name}</span></div>
+    <span class="text-xs font-bold">+₹${addon.price}</span>
+</label>
+`;
                     }
                 });
                 addonList.innerHTML = addonHtml;
@@ -5984,6 +6019,7 @@
         }
 
         // --- CRM LOGIC ---
+
         window.processCRMData = () => {
             try {
                 const customers = {};
@@ -5996,24 +6032,62 @@
                                 name: sanitizer.escapeHtml(order.customerName || order.name || "Unknown"),
                                 mobile: sanitizer.escapeHtml(key),
                                 visits: 0,
-                                lastVisit: order.jsDate
+                                lastVisit: order.jsDate,
+                                birthday: order.birthday || '',
+                                spent: 0
                             };
                         }
                         customers[key].visits++;
                         if (order.jsDate > customers[key].lastVisit) customers[key].lastVisit = order.jsDate;
+                        customers[key].spent += Number(order.totalAmount) || Number(order.total) || 0;
                     }
                 });
                 window.crmData = Object.values(customers);
-                // ðŸ›¡ï¸ MEMORY PROTECTION
+                // MEMORY PROTECTION
                 window.crmData = memoryGuard.checkArraySize(window.crmData, 'crmData');
                 window.visibleCRMCount = 0;
                 document.getElementById('crm-table').innerHTML = "";
                 window.renderCRMBatch();
+                updateCRMStats();
             } catch (error) {
-                console.error('ðŸ”´ CRM Processing error:', error);
+                console.error('CRM Processing error:', error);
                 window.showToast('Error processing customer data', 'error');
             }
         };
+
+        // Update CRM summary cards (customer tab)
+        function updateCRMStats() {
+            const total = window.crmData.length;
+            // Active = customers with visits in last 30 days
+            const now = new Date();
+            const active = window.crmData.filter(c => {
+                const last = c.lastVisit;
+                if (!last) return false;
+                const diff = (now - last) / (1000 * 60 * 60 * 24);
+                return diff <= 30;
+            }).length;
+            // Birthdays this month
+            const month = now.getMonth();
+            const birthdays = window.crmData.filter(c => {
+                if (!c.birthday) return false;
+                const bday = new Date(c.birthday);
+                return bday.getMonth() === month;
+            }).length;
+            // Top spenders (at least 1 order, sorted by spent)
+            const topSpenders = window.crmData
+                .filter(c => c.spent > 0)
+                .sort((a, b) => b.spent - a.spent)
+                .slice(0, 1);
+
+            const totalEl = document.getElementById('crm-total');
+            const activeEl = document.getElementById('crm-active');
+            const bdayEl = document.getElementById('crm-birthdays');
+            const vipEl = document.getElementById('crm-vip');
+            if (totalEl) totalEl.textContent = total;
+            if (activeEl) activeEl.textContent = active;
+            if (bdayEl) bdayEl.textContent = birthdays;
+            if (vipEl) vipEl.textContent = topSpenders.length > 0 ? topSpenders[0].name : '0';
+        }
 
         window.renderCRMBatch = () => {
             const table = document.getElementById('crm-table');
