@@ -1061,11 +1061,29 @@
     }
     
     // Show rating widget and then wheel if enabled
+    // --- FIX: Stars animation logic added ---
     function showRatingWidget() {
         const ratingWidget = document.getElementById('rating-widget');
         if (ratingWidget) {
+            // 1. Modal open karo (z-index 110 already set hai HTML mein)
             ratingWidget.classList.remove('hidden');
             ratingWidget.classList.add('flex');
+
+            // 2. FIX: Stars ko visible banane ke liye animation trigger karo
+            const stars = document.querySelectorAll('.star-rating i');
+            
+            // Reset stars pehle (agar dobara open ho raha ho)
+            stars.forEach(star => {
+                star.classList.remove('visible', 'text-yellow-400');
+                star.classList.add('text-gray-300');
+            });
+
+            // Ek-ek karke stars ko pop-up karo
+            stars.forEach((star, index) => {
+                setTimeout(() => {
+                    star.classList.add('visible');
+                }, index * 100); // 100ms ka delay har star ke beech
+            });
         }
     }
     
