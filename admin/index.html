@@ -5024,13 +5024,16 @@
         const updateWalletUI = (balance) => {
             const safeBalance = (typeof balance === 'number' && !isNaN(balance)) ? balance : 0;
             const displayVal = `₹${safeBalance.toFixed(2)}`;
-            const els = ['admin-wallet-display', 'admin-wallet-mobile', 'dash-wallet-balance'];
-            els.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.innerText = displayVal;
-            });
-
-            // Low Balance Warning
+            // Sidebar wallet
+            const elSidebar = document.getElementById('admin-wallet-display');
+            if(elSidebar) elSidebar.innerText = displayVal;
+            // Mobile Header wallet
+            const elMobile = document.getElementById('admin-wallet-mobile');
+            if(elMobile) elMobile.innerText = displayVal;
+            // *** FIX: Dashboard Card Wallet ***
+            const elDash = document.getElementById('dash-wallet-balance');
+            if(elDash) elDash.innerText = displayVal;
+            // Low Balance Warning Logic
             const alertOverlay = document.getElementById('low-balance-overlay');
             if (alertOverlay) {
                 if (balance < 100) {
@@ -5064,34 +5067,48 @@
 
         // --- NAVIGATION - STRICT VISIBILITY CONTROL ---
         window.switchTab = (tabName) => {
-            const tabs = ['dashboard', 'live', 'menu', 'orders', 'offers', 'transactions', 'pos', 'crm', 'settings', 'reports'];
-
-            tabs.forEach(id => {
+            // *** FIX: Yahan saare tabs ke ID hone chahiye ***
+            const allTabs = [
+                'dashboard', 'live', 'pos', 'menu', 'inventory', 
+                'tables', 'staff', 'expenses', 'suppliers', 
+                'orders', 'transactions', 'crm', 'reports', 'offers', 'settings'
+            ];
+            allTabs.forEach(id => {
                 const section = document.getElementById(`section-${id}`);
                 const nav = document.getElementById(`nav-${id}`);
-
+                // Sabko chupao
                 if (section) {
-                    section.classList.add('hide-section'); // Force hide
-                    if (id === tabName) {
-                        section.classList.remove('hide-section'); // Show target
-                    }
+                    section.classList.add('hide-section');
+                    section.classList.remove('fade-in'); // Animation reset
                 }
-
                 if (nav) {
                     nav.classList.remove('active');
-                    if (id === tabName) nav.classList.add('active');
+                }
+                // Jo chahiye use dikhao
+                if (id === tabName) {
+                    if (section) {
+                        section.classList.remove('hide-section');
+                        section.classList.add('fade-in'); // Animation add
+                    }
+                    if (nav) {
+                        nav.classList.add('active');
+                    }
                 }
             });
-
+            // Mobile sidebar auto-close
             if (window.innerWidth < 768) {
                 const sidebar = document.getElementById('sidebar');
-                if (sidebar.classList.contains('sidebar-open')) window.toggleSidebar();
+                if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+                    window.toggleSidebar();
+                }
             }
-            
-            // Update dashboard when switching to it
-            if (tabName === 'dashboard') {
-                updateDashboardStats();
-            }
+            // Data refresh on tab switch (Performance ke liye)
+            if (tabName === 'dashboard') window.updateDashboardStats();
+            if (tabName === 'inventory') window.renderInventoryTable();
+            if (tabName === 'expenses') window.calculateExpenseStats();
+            if (tabName === 'suppliers') window.renderSuppliersTable();
+            if (tabName === 'staff') window.renderStaffTable();
+            if (tabName === 'crm') window.processCRMData(); // CRM tab khulte hi data refresh
         };
 
         window.toggleSidebar = () => {
@@ -5573,23 +5590,35 @@
             window.posCart.forEach((item, index) => {
                 total += item.price * item.qty;
                 let details = "";
-                if(item.size) details += `<span class="bg-orange-100 text-orange-800 text-[10px] px-1 rounded"> ${ item.size }</span> `;
-                if(item.addons && item.addons.length > 0) details += `<span class="text-xs text-gray-500"> + ${ item.addons.map(a => a.name).join(', ') }</span> `;
+                // Size ka display fix
+                if(item.size) {
+                    details += `<span class="bg-orange-100 text-orange-800 text-[10px] px-1 rounded mr-1">${item.size}</span>`;
+                }
+                // *** FIX: Add-ons ka display clean kiya ***
+                if(item.addons && item.addons.length > 0) {
+                    // Sirf naam dikhayenge comma laga ke
+                    const addonNames = item.addons.map(a => a.name).join(', ');
+                    details += `<span class="text-xs text-gray-500 block mt-0.5"><i class="fas fa-plus-circle text-[10px]"></i> ${addonNames}</span>`;
+                }
                 html += `
-        <div class="bg-gray-50 p-2 rounded-lg border border-gray-200">
-        <div class="flex justify-between">
-            <div><p class="font-bold text-gray-800 text-sm">${item.name}</p><div class="mb-1">${details}</div><p class="text-xs text-gray-500">₹${item.price} x ${item.qty}</p></div>
-            <div class="flex items-center gap-2 h-fit">
-                <button onclick="posAdjustQty(${index}, -1)" class="w-6 h-6 bg-white border rounded text-xs">-</button>
-                <span class="text-sm font-bold w-4 text-center">${item.qty}</span>
-                <button onclick="posAdjustQty(${index}, 1)" class="w-6 h-6 bg-white border rounded text-xs">+</button>
-            </div>
-        </div>
+                <div class="bg-gray-50 p-2 rounded-lg border border-gray-200 mb-2">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-bold text-gray-800 text-sm">${item.name}</p>
+                            <div class="mb-1">${details}</div>
+                            <p class="text-xs text-gray-500">₹${item.price} x ${item.qty}</p>
+                        </div>
+                        <div class="flex items-center gap-2 h-fit mt-1">
+                            <button onclick="posAdjustQty(${index}, -1)" class="w-6 h-6 bg-white border rounded text-xs hover:bg-gray-100">-</button>
+                            <span class="text-sm font-bold w-4 text-center">${item.qty}</span>
+                            <button onclick="posAdjustQty(${index}, 1)" class="w-6 h-6 bg-white border rounded text-xs hover:bg-gray-100">+</button>
+                        </div>
                     </div>
-            `;
+                </div>
+                `;
             });
             container.innerHTML = html;
-            document.getElementById('pos-total-price').innerText = `₹${ total }`;
+            document.getElementById('pos-total-price').innerText = `₹${total}`;
         };
         window.posAdjustQty = (index, change) => {
             if(window.posCart[index].qty + change <= 0) window.posCart.splice(index, 1);
@@ -6022,36 +6051,57 @@
 
         window.processCRMData = () => {
             try {
-                const customers = {};
-                window.fullHistoryData.forEach(order => {
-                    const mob = order.customerMobile || order.mobile;
-                    if (mob && String(mob).trim().length > 5) {
-                        const key = String(mob).trim();
-                        if (!customers[key]) {
-                            customers[key] = {
-                                name: sanitizer.escapeHtml(order.customerName || order.name || "Unknown"),
-                                mobile: sanitizer.escapeHtml(key),
-                                visits: 0,
-                                lastVisit: order.jsDate,
-                                birthday: order.birthday || '',
-                                spent: 0
-                            };
+                const customersMap = {};
+                // Orders history se customer data nikal rahe hain
+                if(window.fullHistoryData && window.fullHistoryData.length > 0){
+                    window.fullHistoryData.forEach(order => {
+                        // Mobile number clean kar rahe hain (spaces hata ke)
+                        const rawMob = order.customerMobile || order.mobile || order.phone;
+                        if (rawMob && String(rawMob).trim().length > 5) {
+                            const key = String(rawMob).trim();
+                            if (!customersMap[key]) {
+                                customersMap[key] = {
+                                    id: order.orderId, // Temp ID
+                                    name: order.customerName || order.name || "Unknown",
+                                    mobile: key,
+                                    visits: 0,
+                                    lastVisit: new Date(0), // Old date init
+                                    spent: 0
+                                };
+                            }
+                            // Stats calculation
+                            customersMap[key].visits++;
+                            customersMap[key].spent += Number(order.totalAmount || order.total || 0);
+                            // Check date validity
+                            const oDate = order.jsDate || new Date(order.timestamp);
+                            if (oDate > customersMap[key].lastVisit) {
+                                customersMap[key].lastVisit = oDate;
+                            }
                         }
-                        customers[key].visits++;
-                        if (order.jsDate > customers[key].lastVisit) customers[key].lastVisit = order.jsDate;
-                        customers[key].spent += Number(order.totalAmount) || Number(order.total) || 0;
-                    }
-                });
-                window.crmData = Object.values(customers);
-                // MEMORY PROTECTION
-                window.crmData = memoryGuard.checkArraySize(window.crmData, 'crmData');
+                    });
+                }
+                // Object ko Array mein convert karo
+                window.crmData = Object.values(customersMap);
+                // *** FIX: UI Update Turant Karo ***
+                // Count update
+                const totalCustomers = window.crmData.length;
+                const crmTotalEl = document.getElementById('crm-total');
+                if(crmTotalEl) crmTotalEl.innerText = totalCustomers; // Yahan count update hoga
+                // Active customers (Last 30 days)
+                const now = new Date();
+                const activeCount = window.crmData.filter(c => {
+                    const diffTime = Math.abs(now - c.lastVisit);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                    return diffDays <= 30;
+                }).length;
+                const crmActiveEl = document.getElementById('crm-active');
+                if(crmActiveEl) crmActiveEl.innerText = activeCount;
+                // Table render karo
                 window.visibleCRMCount = 0;
                 document.getElementById('crm-table').innerHTML = "";
                 window.renderCRMBatch();
-                updateCRMStats();
             } catch (error) {
                 console.error('CRM Processing error:', error);
-                window.showToast('Error processing customer data', 'error');
             }
         };
 
