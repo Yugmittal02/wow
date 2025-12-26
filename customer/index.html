@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Orderly | Premium App</title>
+    <title>Wow Cafe | Premium App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -72,30 +72,6 @@
             0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
             70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); }
             100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
-        }
-        
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        .animate-shimmer {
-            animation: shimmer 2s infinite;
-        }
-        
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        
-        @keyframes bounceIn {
-            0% { transform: scale(0); opacity: 0; }
-            50% { transform: scale(1.1); }
-            70% { transform: scale(0.95); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        
-        .animate-bounce-in {
-            animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
         }
 
         .slide-up { animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
@@ -205,47 +181,9 @@
             transform: scale(1.3) !important;
             color: #fbbf24;
         }
-
-        /* App Blocked Overlay */
-        #app-blocked-overlay {
-            z-index: 100000;
-            background: #fff;
-        }
     </style>
-    <link rel="manifest" href="manifest.json">
-
-<link rel="apple-touch-icon" href="icon-512.png">
-<meta name="apple-mobile-web-app-status-bar" content="#ea580c">
-<meta name="theme-color" content="#ea580c">
-
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('Service Worker Registered'))
-      .catch((error) => console.log('SW Registration Failed:', error));
-  }
-</script>
 </head>
 <body>
-
-<div id="app-blocked-overlay" class="fixed inset-0 hidden flex items-center justify-center flex-col text-center p-8 absolute top-0 left-0 w-full h-full">
-    <div class="max-w-sm">
-        <div class="bg-orange-50 p-6 rounded-full mb-6 animate-pulse inline-block">
-            <i class="fas fa-store-slash text-6xl text-orange-500"></i>
-        </div>
-        <h1 class="text-3xl font-black text-gray-800 mb-2">Shop Temporarily Closed</h1>
-        <p class="text-gray-500 mt-2 mb-6 max-w-xs mx-auto">We are currently not accepting orders. We'll be back soon!</p>
-        
-        <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6 text-sm text-orange-700">
-            <i class="fas fa-info-circle mr-2"></i>
-            Please check back later or contact the restaurant directly.
-        </div>
-        
-        <button onclick="location.reload()" class="px-6 py-3 bg-orange-600 text-white rounded-xl font-bold text-sm hover:bg-orange-700 transition">
-            <i class="fas fa-sync-alt mr-2"></i>Try Again
-        </button>
-    </div>
-</div>
 
 <div class="mobile-frame bg-orange-50 emoji-bg" id="app-frame">
 
@@ -318,6 +256,9 @@
         <div class="px-5 mt-0">
             <h3 class="font-bold text-gray-800 text-lg mb-3">Explore Menu</h3>
             <div class="flex overflow-x-auto gap-3 hide-scrollbar pb-2">
+                <div onclick="filterByExplore('All')" class="explore-btn active flex-shrink-0 w-20 h-24 bg-gray-800 rounded-xl flex flex-col items-center justify-center gap-1 border border-gray-600 cursor-pointer transition-all active:scale-95 shadow-sm" id="exp-all">
+                    <span class="text-2xl">🍽️</span><span class="text-[10px] font-bold text-white">All Menu</span>
+                </div>
                 <div onclick="filterByExplore('Pizza')" class="explore-btn flex-shrink-0 w-20 h-24 bg-red-50 rounded-xl flex flex-col items-center justify-center gap-1 border border-red-100 cursor-pointer transition-all active:scale-95 hover:bg-red-100" id="exp-pizza">
                     <span class="text-2xl">🍕</span><span class="text-[10px] font-bold text-red-800">Pizza</span>
                 </div>
@@ -420,16 +361,6 @@
                     <div id="bill-items" class="space-y-4 pl-6"></div>
                 </div>
 
-                <div id="recommended-products-section" class="mx-5 mb-4 hidden">
-                    <div class="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-2xl border border-orange-200 shadow-sm">
-                        <h4 class="text-sm font-bold text-orange-900 mb-3 flex items-center gap-2">
-                            <i class="fas fa-star text-yellow-500"></i> Recommended for You
-                        </h4>
-                        <div id="recommended-products-list" class="grid grid-cols-2 gap-3">
-                            </div>
-                    </div>
-                </div>
-
                 <div class="mx-5 mb-4 donation-section p-4 rounded-2xl shadow-sm">
                     <h4 class="text-xs font-bold text-red-500 uppercase tracking-wide mb-2 flex items-center gap-2"><i class="fas fa-hand-holding-heart"></i> Support & Donate ❤️</h4>
                     <div class="flex gap-2 mb-3">
@@ -444,8 +375,17 @@
                 </div>
 
                 <div class="mx-5 mb-2">
+                    <div class="bg-white border border-gray-200 rounded-xl p-2 flex gap-2 mb-3 shadow-sm">
+                        <input type="text" id="manual-coupon-code" placeholder="Enter Coupon Code" 
+                               class="flex-1 bg-transparent outline-none text-sm font-bold text-gray-700 px-2 uppercase">
+                        <button onclick="applyManualCoupon()" 
+                                class="bg-orange-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-orange-700 transition">
+                            APPLY
+                        </button>
+                    </div>
+
                     <button onclick="toggleOffers()" class="w-full bg-amber-50 border border-amber-200 border-dashed rounded-xl p-3 flex justify-between items-center text-sm font-bold text-amber-800 hover:bg-amber-100 transition-colors">
-                        <span class="flex items-center gap-2"><i class="fas fa-ticket-alt text-amber-600"></i> Apply Coupon / Offers</span>
+                        <span class="flex items-center gap-2"><i class="fas fa-ticket-alt text-amber-600"></i> View Available Offers</span>
                         <i class="fas fa-chevron-down text-amber-400 transition-transform" id="offer-arrow"></i>
                     </button>
                     <div id="offers-dropdown" class="hidden mt-3 space-y-3 transition-all"></div>
@@ -456,8 +396,8 @@
                     <h3 class="font-bold text-gray-800 mb-3 pt-2">Bill Details</h3>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between text-gray-600"><span>Item Total</span><span>₹<span id="summary-total">0.00</span></span></div>
-                        <div id="tax-row" class="flex justify-between text-gray-500 text-[11px]"><span>Tax (<span id="tax-percent">5</span>%)</span><span>₹<span id="summary-tax">0.00</span></span></div>
-                        <div class="flex justify-between text-gray-500 text-[11px]"><span>Convenience Fee</span><span>₹<span id="summary-convenience">1.98</span></span></div>
+                        <div class="flex justify-between text-gray-500 text-[11px]"><span>Tax (5%)</span><span>₹<span id="summary-tax">0.00</span></span></div>
+                        <div class="flex justify-between text-gray-500 text-[11px]"><span>Platform Fee</span><span>₹0.98</span></div>
                         <div class="flex justify-between text-red-500 text-[11px] font-bold"><span>Donation</span><span>₹<span id="summary-donation">0</span></span></div>
                         <div id="discount-row" class="flex justify-between text-green-600 font-medium hidden"><span>Discount</span><span>- ₹<span id="summary-discount">0</span></span></div>
                         <div class="flex justify-between text-xl font-extrabold text-gray-900 mt-3 pt-3 border-t border-dashed border-gray-300">
@@ -518,7 +458,7 @@
                 </div>
                 
                 <h2 class="text-xl font-bold text-gray-800" id="success-title">Order Placed!</h2>
-                <div id="payment-status-badge" class="mt-2 px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold border border-red-200 animate-pulse">
+                <div class="mt-2 px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold border border-red-200 animate-pulse">
                     <i class="fas fa-clock mr-1"></i> Payment Pending
                 </div>
             </div>
@@ -554,110 +494,24 @@
                     </div>
                 </div>
 
-                <button id="btn-home" class="w-full bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-200 hover:bg-orange-700 transition-colors">
+                <button onclick="resetApp()" id="btn-home" class="w-full bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-200 hover:bg-orange-700 transition-colors">
                     Back to Home
                 </button>
             </div>
             
             <div class="zigzag absolute bottom-0 left-0 w-full"></div>
             
-            <div id="rating-widget" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-                <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full mx-4 transform scale-0 transition-transform duration-300">
-                    <h3 class="font-bold text-gray-800 text-xl mb-4 text-center">Rate your experience 🌟</h3>
-                    <div class="star-rating text-4xl text-gray-300 py-6 flex justify-center gap-3">
-                        <i class="fas fa-star" onclick="submitRating(1)" onmouseenter="highlightStars(1)" onmouseleave="resetStars()"></i>
-                        <i class="fas fa-star" onclick="submitRating(2)" onmouseenter="highlightStars(2)" onmouseleave="resetStars()"></i>
-                        <i class="fas fa-star" onclick="submitRating(3)" onmouseenter="highlightStars(3)" onmouseleave="resetStars()"></i>
-                        <i class="fas fa-star" onclick="submitRating(4)" onmouseenter="highlightStars(4)" onmouseleave="resetStars()"></i>
-                        <i class="fas fa-star" onclick="submitRating(5)" onmouseenter="highlightStars(5)" onmouseleave="resetStars()"></i>
-                    </div>
-                    <p class="text-center text-sm text-gray-500 mt-2">Tap a star to rate</p>
-                    
-                    <!-- Promotional Ad Section (loaded from Firebase) -->
-                    <div id="promo-ad-section" class="hidden mt-6 pt-4 border-t border-gray-200 animate-fade-in">
-                        <div class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-2 flex items-center justify-center gap-2">
-                            <span class="relative flex h-3 w-3">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                            </span>
-                            <span class="text-red-500 font-bold">LIVE</span> Sponsored
-                        </div>
-                        <div id="promo-ad-card" class="rounded-2xl p-4 text-center relative overflow-hidden shadow-lg transform hover:scale-[1.02] transition-all cursor-pointer" style="background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);" onclick="handlePromoClick()">
-                            <!-- Animated background shimmer -->
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
-                            <!-- Live badge -->
-                            <div class="absolute top-2 right-2 bg-red-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 z-20">
-                                <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> LIVE
-                            </div>
-                            <h4 id="promo-ad-title" class="font-bold text-lg mb-2 relative z-10" style="color: #fff;">Special Offer!</h4>
-                            <p id="promo-ad-desc" class="text-sm mb-3 opacity-90 relative z-10" style="color: #fff;">Check out our amazing deals</p>
-                            <button id="promo-ad-btn" class="bg-white/20 hover:bg-white/30 px-6 py-2 rounded-full font-bold text-sm transition relative z-10 border border-white/30" style="color: #fff;">
-                                <i class="fas fa-arrow-right mr-2"></i> View Offer
-                            </button>
-                        </div>
-                    </div>
+            <div id="rating-widget" class="absolute bottom-0 left-0 right-0 bg-white p-6 rounded-t-[2rem] shadow-[0_-10px_40px_rgba(0,0,0,0.2)] transform translate-y-full transition-transform duration-500 z-50 flex flex-col items-center justify-center pb-10">
+                <h3 class="font-bold text-gray-800 text-lg mb-2">Rate your experience 🌟</h3>
+                <div class="star-rating text-3xl text-gray-300 py-4">
+                    <i class="fas fa-star" onclick="submitRating(1)"></i>
+                    <i class="fas fa-star" onclick="submitRating(2)"></i>
+                    <i class="fas fa-star" onclick="submitRating(3)"></i>
+                    <i class="fas fa-star" onclick="submitRating(4)"></i>
+                    <i class="fas fa-star" onclick="submitRating(5)"></i>
                 </div>
             </div>
 
-        </div>
-    </div>
-    
-    <!-- SPIN WHEEL MODAL -->
-    <div id="spin-wheel-modal" class="fixed inset-0 z-[150] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-1 rounded-3xl max-w-sm w-full mx-4 shadow-2xl">
-            <div class="bg-white rounded-3xl p-6 text-center">
-                <div class="mb-4">
-                    <span class="bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs font-bold px-4 py-1 rounded-full">🎰 LUCKY SPIN</span>
-                </div>
-                <h2 class="text-2xl font-black text-gray-800 mb-2">Spin & Win!</h2>
-                <p class="text-sm text-gray-500 mb-6">Spin the wheel to win exclusive offers</p>
-                
-                <!-- Wheel Container -->
-                <div class="relative w-64 h-64 mx-auto mb-6">
-                    <!-- Pointer Arrow -->
-                    <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-20">
-                        <div class="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[25px] border-l-transparent border-r-transparent border-t-red-600 drop-shadow-lg"></div>
-                    </div>
-                    
-                    <!-- The Wheel -->
-                    <div id="spin-wheel" class="w-full h-full rounded-full relative overflow-hidden border-8 border-yellow-400 shadow-xl transition-transform duration-[4000ms] ease-out" style="transform: rotate(0deg);">
-                        <div class="absolute inset-0" id="wheel-segments">
-                            <!-- Segments will be generated by JS -->
-                        </div>
-                    </div>
-                    
-                    <!-- Center Circle -->
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-lg flex items-center justify-center z-10 border-4 border-white">
-                        <span class="text-white font-black text-xl">GO</span>
-                    </div>
-                </div>
-                
-                <button id="spin-btn" onclick="spinWheel()" class="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all active:scale-95">
-                    <i class="fas fa-sync-alt mr-2"></i> SPIN NOW!
-                </button>
-                
-                <p class="text-[10px] text-gray-400 mt-4">*Offer valid for your next order</p>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Spin Wheel Result Modal -->
-    <div id="spin-result-modal" class="fixed inset-0 z-[160] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
-            <div class="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full mx-auto flex items-center justify-center mb-4 animate-bounce">
-                <i class="fas fa-gift text-white text-4xl"></i>
-            </div>
-            <h2 class="text-2xl font-black text-gray-800 mb-2">🎉 You Won!</h2>
-            <div id="spin-prize" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500 mb-2">10% OFF</div>
-            <p class="text-gray-500 text-sm mb-4">on your next order!</p>
-            <div class="bg-gray-100 rounded-xl p-3 mb-4">
-                <p class="text-xs text-gray-500">Your code:</p>
-                <p id="spin-code" class="text-xl font-black text-orange-600">LUCKY10</p>
-            </div>
-            <p class="text-[10px] text-green-600 font-bold mb-4"><i class="fas fa-check-circle mr-1"></i> Saved to your phone!</p>
-            <button onclick="closeSpinResult()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl">
-                Awesome! <i class="fas fa-arrow-right ml-2"></i>
-            </button>
         </div>
     </div>
     
@@ -674,54 +528,20 @@
     </div>
 
     <div id="bill-detail-modal" class="absolute inset-0 z-[90] bg-black/70 hidden items-center justify-center backdrop-blur-sm p-4">
-        <div class="bg-white w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl relative slide-up max-h-[85vh] flex flex-col">
-            <div class="bg-orange-50 p-6 border-b border-orange-100 text-center relative flex-shrink-0">
+        <div class="bg-white w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl relative slide-up">
+            <div class="bg-orange-50 p-6 border-b border-orange-100 text-center relative">
                  <button onclick="closeBillDetail()" class="absolute top-4 right-4 w-8 h-8 bg-white/50 rounded-full flex items-center justify-center"><i class="fas fa-times text-gray-600"></i></button>
                 <div class="zigzag-orange absolute bottom-0 left-0 w-full opacity-50"></div>
                 <h2 class="text-xl font-black text-gray-800">Bill Receipt</h2>
                 <div class="font-mono text-orange-600 font-bold bg-white inline-block px-2 py-0.5 rounded mt-2 text-sm" id="hist-id">#ID</div>
-                <div id="hist-payment-badge" class="mt-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold inline-block">
-                    <i class="fas fa-check-circle mr-1"></i> Paid
-                </div>
             </div>
-            <div class="p-6 overflow-y-auto flex-1">
+            <div class="p-6">
                 <div class="space-y-3 mb-4" id="hist-items"></div>
-                
-                <!-- Bill Breakdown -->
-                <div class="bg-gray-50 rounded-xl p-4 space-y-2 mb-4">
-                    <div class="flex justify-between text-sm text-gray-600">
-                        <span>Item Total</span>
-                        <span>₹<span id="hist-subtotal">0</span></span>
-                    </div>
-                    <div id="hist-discount-row" class="flex justify-between text-sm text-green-600 hidden">
-                        <span><i class="fas fa-tag mr-1"></i>Discount</span>
-                        <span>-₹<span id="hist-discount">0</span></span>
-                    </div>
-                    <div class="flex justify-between text-sm text-gray-500">
-                        <span>Tax (<span id="hist-tax-percent">5</span>%)</span>
-                        <span>₹<span id="hist-tax">0</span></span>
-                    </div>
-                    <div class="flex justify-between text-sm text-gray-500">
-                        <span>Convenience Fee</span>
-                        <span>₹<span id="hist-fee">0</span></span>
-                    </div>
-                    <div id="hist-donation-row" class="flex justify-between text-sm text-pink-500 hidden">
-                        <span><i class="fas fa-heart mr-1"></i>Donation</span>
-                        <span>₹<span id="hist-donation">0</span></span>
-                    </div>
-                </div>
-                
                 <div class="border-t border-dashed border-gray-300 pt-4 flex justify-between items-center">
                     <span class="text-gray-500 font-bold text-sm">Total Paid</span>
                     <span class="text-xl font-extrabold text-gray-900">₹<span id="hist-total">0</span></span>
                 </div>
-                <div class="mt-2 text-center text-xs text-gray-400" id="hist-date"></div>
-                
-                <!-- Order Info -->
-                <div class="mt-4 p-3 bg-blue-50 rounded-xl text-center">
-                    <p class="text-xs text-blue-600 font-bold" id="hist-method">Cash Payment</p>
-                    <p class="text-[10px] text-blue-400 mt-1" id="hist-table">Table: --</p>
-                </div>
+                 <div class="mt-2 text-center text-xs text-gray-400" id="hist-date"></div>
             </div>
         </div>
     </div>
@@ -735,14 +555,39 @@
         </div>
     </div>
 
+    <!-- Spin Result Modal -->
+    <div id="spin-result-modal" class="absolute inset-0 z-[120] bg-black/70 hidden items-center justify-center backdrop-blur-sm p-5">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl relative pop-in text-center">
+            <button onclick="closeSpinResult()" class="absolute top-4 right-4 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+            
+            <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-green-200">
+                <i class="fas fa-gift text-4xl text-white"></i>
+            </div>
+            
+            <h2 class="text-2xl font-black text-gray-800 mb-2">🎉 You Won!</h2>
+            <p class="text-3xl font-black text-green-600 mb-4" id="spin-prize">10% OFF</p>
+            
+            <div class="bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-dashed border-purple-300 rounded-xl p-4 mb-6">
+                <p class="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Your Coupon Code</p>
+                <p class="text-2xl font-mono font-black text-purple-700 tracking-wider" id="spin-code">WIN-XXXX</p>
+            </div>
+            
+            <p class="text-sm text-gray-500 mb-4">Use this code on your next order!</p>
+            
+            <button onclick="closeSpinResult()" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95">
+                <i class="fas fa-check mr-2"></i> Got It!
+            </button>
+        </div>
+    </div>
+
 </div>
 
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getDatabase, ref, push, set, serverTimestamp, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+    import { getDatabase, ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, where, serverTimestamp as firestoreTimestamp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDSl6L3ym7G9wXJjZoCYGtU6oBuMyswMBA",
@@ -759,63 +604,9 @@
     const db = getDatabase(app);        
     const dbFirestore = getFirestore(app);
 
-    // --- 1. GET RESTAURANT ID FROM URL ---
-const urlParams = new URLSearchParams(window.location.search);
-const RESTAURANT_ID = urlParams.get('id');
-
-if (!RESTAURANT_ID) {
-    document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px;'>⚠️ Error: No Cafe ID Found! <br> Use link like: customer.html?id=cafe-name</h1>";
-    throw new Error("Missing Restaurant ID");
-}
-console.log("Connected to Restaurant:", RESTAURANT_ID);
-
-    // --- FEE & TAX CONFIG (loaded from Firebase) ---
-    // Using window. to make accessible in non-module scripts
-    window.CONVENIENCE_FEE = 1.98;
-    window.TAX_ENABLED = true;
-    window.TAX_PERCENT = 5; // Default 5%
-
     window.rawMenuDocs = [];
     window.allAddons = {}; 
-    window.currentDocId = null;
-
-    // NOTE: Wallet deduction is handled by ADMIN only when they confirm payment
-    // Customer website does NOT deduct wallet - admin must approve each order
-
-    // --- 1. APP BLOCKING LISTENER ---
-    const initSecurity = () => {
-        const statusRef = ref(db, `restaurants/${RESTAURANT_ID}/appStatus`);
-        onValue(statusRef, (snapshot) => {
-            const isBlocked = snapshot.val();
-            const overlay = document.getElementById('app-blocked-overlay');
-            if (isBlocked === true) {
-                overlay.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            } else {
-                overlay.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
-        });
-    };
-
-    // --- LOAD TAX & FEE SETTINGS FROM FIREBASE ---
-    const loadTaxSettings = async () => {
-        try {
-            const settingsRef = doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'tax');
-            const settingsSnap = await getDoc(settingsRef);
-            
-            if (settingsSnap.exists()) {
-                const data = settingsSnap.data();
-                window.TAX_ENABLED = data.taxEnabled !== false; // Default true
-                window.TAX_PERCENT = data.taxPercent || 5;
-                window.CONVENIENCE_FEE = data.convenienceFee || 1.98;
-                console.log('✅ Tax settings loaded:', { TAX_ENABLED: window.TAX_ENABLED, TAX_PERCENT: window.TAX_PERCENT, CONVENIENCE_FEE: window.CONVENIENCE_FEE });
-            }
-            if (window.calculateTotals) window.calculateTotals();
-        } catch (e) {
-            console.log('ℹ️ Using default tax settings:', e.message);
-        }
-    };
+    window.currentDocId = null; // Store Firestore Document ID for rating
 
     function processMenuData() {
         window.menuData = window.rawMenuDocs.map(item => {
@@ -844,7 +635,7 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     }
 
     function initAddonsSync() {
-        const addonRef = collection(dbFirestore, "restaurants", RESTAURANT_ID, "addons");
+        const addonRef = collection(dbFirestore, "addons");
         onSnapshot(addonRef, (snapshot) => {
             window.allAddons = {};
             snapshot.forEach(doc => {
@@ -856,7 +647,7 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     }
 
     function initMenuSync() {
-        const menuRef = collection(dbFirestore, "restaurants", RESTAURANT_ID, "menu");
+        const menuRef = collection(dbFirestore, "menu");
         onSnapshot(menuRef, (snapshot) => {
             window.rawMenuDocs = [];
             snapshot.forEach(doc => {
@@ -894,361 +685,98 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     }
 
     function initOffersSync() {
-        const cardsRef = collection(dbFirestore, "restaurants", RESTAURANT_ID, "site_cards");
+        const cardsRef = collection(dbFirestore, "site_cards");
         onSnapshot(cardsRef, (snapshot) => {
             window.offerList = [];
-            let offerIndex = 1;
-            snapshot.forEach(doc => {
-                const data = doc.data();
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
                 if(data.offerText && data.offerText !== "No Offer") {
                     window.offerList.push({
-                        id: doc.id,
+                        id: docSnap.id,
                         title: data.discount > 0 ? `${data.discount}% OFF` : 'SPECIAL',
-                        desc: data.offerText || 'Special Offer',
-                        code: data.code || `OFFER${offerIndex}`,
-                        minAmt: data.minAmt || 100,
+                        desc: data.offerText,
+                        code: 'OFFER' + data.slotId,
+                        minAmt: 100,
                         discountPercent: data.discount || 0,
                         discountFlat: data.discountFlat || 0,
                         color: 'from-orange-500 to-red-600',
-                        img: data.img
+                        img: data.img,
+                        isPersonal: false
                     });
-                    offerIndex++;
                 }
             });
+            
+            // 2. Ab Personal Won Coupons load karo (User ke phone number se)
+            if (window.wowUser && window.wowUser.phone) {
+                const couponQuery = query(
+                    collection(dbFirestore, "coupons"), 
+                    where("userPhone", "==", window.wowUser.phone),
+                    where("status", "==", "active") // Sirf active coupons dikhao
+                );
+
+                onSnapshot(couponQuery, (couponSnap) => {
+                    // Remove old personal coupons from list
+                    window.offerList = window.offerList.filter(o => !o.isPersonal);
+                    
+                    // Add personal won coupons
+                    couponSnap.forEach(couponDoc => {
+                        const data = couponDoc.data();
+                        window.offerList.push({
+                            id: couponDoc.id, // Doc ID zaroori hai status update ke liye
+                            title: "🎉 YOU WON!",
+                            desc: data.desc, // "10% OFF"
+                            code: data.code,
+                            minAmt: 0, // Jeete hue coupon pe min amount 0 rakho
+                            discountPercent: data.isFlat ? 0 : data.discountValue,
+                            discountFlat: data.isFlat ? data.discountValue : 0,
+                            color: 'from-purple-600 to-pink-600', // Alag color
+                            isPersonal: true // Flag taaki humein pata chale ye DB wala coupon hai
+                        });
+                    });
+                    
+                    if(window.renderOffers) window.renderOffers();
+                });
+            }
+            
+            // Ensure UI updates whenever data changes
             if(window.initBanners) window.initBanners();
             if(window.renderOffers) window.renderOffers();
         });
     }
     
-    // --- REAL-TIME PAYMENT STATUS MONITORING ---
-    window.paymentStatusListener = null; // Store listener reference
-    
-    // --- FIXED PAYMENT LISTENER ---
-    window.initPaymentStatusListener = (rtdbKey, orderId) => {
-        console.log("🔍 Listening for Payment Confirmation on Path:", `restaurants/${RESTAURANT_ID}/orders/${rtdbKey}`);
-        
-        // Purana listener band karein agar chal raha hai
-        if (window.paymentStatusListener) {
-            try { window.paymentStatusListener(); } catch(e){}
-        }
-        
-        // 🔴 MAIN FIX: Path mein 'restaurants/' + RESTAURANT_ID add kiya hai
-        const orderRef = ref(db, `restaurants/${RESTAURANT_ID}/orders/${rtdbKey}`);
-        
-        window.paymentStatusListener = onValue(orderRef, (snapshot) => {
-            const data = snapshot.val();
-            if (!data) return;
+    // --- Manual Coupon Apply Function ---
+    window.applyManualCoupon = async () => {
+        const codeInput = document.getElementById('manual-coupon-code');
+        const code = codeInput.value.trim().toUpperCase();
 
-            // Check karo agar Admin ne status change kiya
-            const status = String(data.paymentStatus || data.status || '').toLowerCase();
-            const isPaid = data.paid === true || data.isPaid === true || status.includes('paid') || status.includes('success');
-
-            console.log(`📡 Payment Update: ${status} | Paid: ${isPaid}`);
-
-            // Agar Payment Done hai aur pehle se update nahi hua
-            if (isPaid && !window.currentOrderPaid) {
-                console.log("✅ Admin Accepted Payment!");
-                window.currentOrderPaid = true;
-                
-                // Screen Update Karo
-                if (typeof updateReceiptForPaidPayment === 'function') {
-                    updateReceiptForPaidPayment(orderId);
-                }
-                
-                // Rating Widget Dikhao
-                if (typeof showRatingWidgetAnimated === 'function') {
-                    setTimeout(() => showRatingWidgetAnimated(), 1000);
-                }
-
-                // Listener Band Karo (Taaki baar baar run na ho)
-                if (window.paymentStatusListener) window.paymentStatusListener();
-            }
-        });
-    };
-    
-    // --- UPDATE RECEIPT UI WHEN PAYMENT IS DONE ---
-    window.updateReceiptForPaidPayment = (orderId) => {
-        console.log("🎨 Updating receipt UI for paid payment:", orderId);
-        
-        // Update payment status badge
-        const paymentBadge = document.getElementById('payment-status-badge');
-        if (paymentBadge) {
-            paymentBadge.className = "mt-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold border border-green-200 animate-pulse";
-            paymentBadge.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Payment Done';
-            paymentBadge.classList.remove('animate-pulse');
-            paymentBadge.classList.add('animate-bounce');
-            
-            // Remove bounce after 2 seconds
-            setTimeout(() => {
-                paymentBadge.classList.remove('animate-bounce');
-            }, 2000);
-        }
-        
-        // Update success title
-        const successTitle = document.getElementById('success-title');
-        if (successTitle) {
-            successTitle.innerText = "Payment Confirmed! 🎉";
-            successTitle.classList.add('text-green-600');
-        }
-        
-        // Update success icon
-        const successIcon = document.getElementById('success-icon');
-        if (successIcon) {
-            successIcon.className = "w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-2 mt-4 text-white text-2xl shadow-xl shadow-green-200 animate-bounce";
-            successIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
-        }
-        
-        // Update amount display - Don't show ₹0.00, just show Payment Confirmed
-        const finalAmt = document.getElementById('final-amt');
-        if (finalAmt) {
-            finalAmt.innerHTML = `<span class="text-green-600 text-3xl font-bold">Payment Confirmed ✓</span>`;
-        }
-        
-        // Update the label
-        const cashLabel = document.querySelector('#final-amt').parentElement.querySelector('p');
-        if (cashLabel) {
-            cashLabel.innerText = "Payment completed successfully";
-            cashLabel.classList.add('text-green-600');
-        }
-        
-        // Show success notification
-        if(typeof Toastify !== 'undefined') {
-            Toastify({ 
-                text: "🎉 Payment Confirmed! Thank you!", 
-                className: "toast-center", 
-                style: { background: "#10B981" },
-                duration: 3000
-            }).showToast();
-        }
-        
-        // Celebration confetti
-        if (typeof confetti === 'function') {
-            // Initial burst
-            confetti({
-                particleCount: 150,
-                spread: 100,
-                origin: { y: 0.6 },
-                colors: ['#10B981', '#34D399', '#6EE7B7', '#FBBF24', '#F59E0B']
-            });
-            
-            // Delayed side bursts
-            setTimeout(() => {
-                confetti({
-                    particleCount: 50,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                    colors: ['#10B981', '#34D399', '#6EE7B7']
-                });
-                confetti({
-                    particleCount: 50,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    colors: ['#FBBF24', '#F59E0B', '#FCD34D']
-                });
-            }, 200);
-        }
-        
-        console.log("✅ Receipt UI updated successfully");
-        // mark local flag so other logic can use it
-        try { window.currentOrderPaid = true; } catch(e){}
-
-        // ensure success screen is visible and main app hidden
-        try {
-            const successScreenEl = document.getElementById('success-screen');
-            const mainAppEl = document.getElementById('main-app');
-            if (mainAppEl) mainAppEl.classList.add('hidden');
-            if (successScreenEl) {
-                successScreenEl.classList.remove('hidden');
-                successScreenEl.classList.add('flex');
-            }
-        } catch(e) {}
-    };
-    
-    // --- PROMO AD SYSTEM ---
-    let promoAdData = null;
-    let promoAdLinkUrl = '';
-    
-    // --- LIVE PROMO AD SYSTEM (BROADCAST) ---
-    window.loadPromoAd = () => {
-        console.log("📡 Connecting to Live Promo Broadcast...");
-        // Real-time listener on 'settings/promoAd'
-        const promoRef = doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'promoAd');
-        
-        onSnapshot(promoRef, (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                const promoSection = document.getElementById('promo-ad-section');
-                
-                if (data.enabled) {
-                    const promoCard = document.getElementById('promo-ad-card');
-                    const promoTitle = document.getElementById('promo-ad-title');
-                    const promoDesc = document.getElementById('promo-ad-desc');
-                    const promoBtn = document.getElementById('promo-ad-btn');
-
-                    if (promoSection && promoCard) {
-                        // Dynamic Colors from Admin
-                        const bgColor = data.bgColor || '#7c3aed';
-                        promoCard.style.background = `linear-gradient(135deg, ${bgColor} 0%, ${adjustColor(bgColor, -30)} 100%)`;
-                        promoTitle.style.color = data.textColor || '#ffffff';
-                        promoDesc.style.color = data.textColor || '#ffffff';
-                        promoBtn.style.color = data.textColor || '#ffffff';
-                        
-                        // Dynamic Text
-                        promoTitle.textContent = data.title || 'Special Offer!';
-                        promoDesc.textContent = data.description || 'Check out our amazing deals';
-                        promoBtn.innerHTML = `<i class="fas fa-arrow-right mr-2"></i> ${data.buttonText || 'View Offer'}`;
-                        window.promoAdLinkUrl = data.linkUrl || '';
-
-                        // Show with animation
-                        promoSection.classList.remove('hidden');
-                        promoSection.classList.add('animate-fade-in');
-                        console.log("✅ Live Promo Ad displayed");
-                    }
-                } else {
-                    // Hide immediately if Admin disables it
-                    if(promoSection) promoSection.classList.add('hidden');
-                    console.log("❌ Promo Ad disabled by Admin");
-                }
-            }
-        });
-    };
-    
-    // Helper to darken/lighten color for gradient
-    function adjustColor(color, amount) {
-        const hex = color.replace('#', '');
-        const num = parseInt(hex, 16);
-        const r = Math.min(255, Math.max(0, (num >> 16) + amount));
-        const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
-        const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
-        return '#' + (b | (g << 8) | (r << 16)).toString(16).padStart(6, '0');
-    }
-    
-    window.handlePromoClick = () => {
-        console.log("📢 Promo button clicked, URL:", promoAdLinkUrl);
-        if (promoAdLinkUrl && promoAdLinkUrl.trim() !== '') {
-            window.open(promoAdLinkUrl, '_blank');
-        } else {
-            if (typeof Toastify !== 'undefined') {
-                Toastify({ 
-                    text: "Check out our offers!", 
-                    className: "toast-center", 
-                    style: { background: "#7c3aed" },
-                    duration: 2000
-                }).showToast();
-            }
-        }
-    };
-    
-    // --- SPIN WHEEL SYSTEM ---
-    let spinWheelEnabled = false;
-    const WHEEL_PRIZES = [
-        { text: '5% OFF', code: 'LUCKY5', value: 5 },
-        { text: '10% OFF', code: 'LUCKY10', value: 10 },
-        { text: '₹20 OFF', code: 'FLAT20', value: 20, isFlat: true },
-        { text: '15% OFF', code: 'LUCKY15', value: 15 },
-        { text: 'FREE ITEM', code: 'FREEBIE', value: 100, isFree: true },
-        { text: '₹50 OFF', code: 'FLAT50', value: 50, isFlat: true },
-        { text: '20% OFF', code: 'LUCKY20', value: 20 },
-        { text: 'TRY AGAIN', code: '', value: 0 }
-    ];
-    const WHEEL_COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
-    
-    // --- CHECK IF WHEEL IS ENABLED (REAL-TIME) ---
-    window.loadSpinWheelSettings = () => {
-        const featuresRef = doc(dbFirestore, `restaurants/${RESTAURANT_ID}/settings`, 'features');
-        onSnapshot(featuresRef, (snap) => {
-            if (snap.exists()) {
-                const data = snap.data();
-                window.spinWheelEnabled = data.spinWheel === true;
-                spinWheelEnabled = window.spinWheelEnabled; // Also update local var
-                console.log('🎰 Spin Wheel Feature is:', window.spinWheelEnabled ? "ON ✅" : "OFF ❌");
-            } else {
-                window.spinWheelEnabled = false; // Default OFF if doc missing
-                spinWheelEnabled = false;
-            }
-        });
-    };
-    
-    // Initialize wheel segments
-    window.initSpinWheel = () => {
-        const container = document.getElementById('wheel-segments');
-        if (!container) return;
-        
-        const segmentAngle = 360 / WHEEL_PRIZES.length;
-        container.innerHTML = WHEEL_PRIZES.map((prize, i) => {
-            const rotation = i * segmentAngle;
-            return `
-                <div class="absolute w-full h-full" style="transform: rotate(${rotation}deg);">
-                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0"
-                         style="border-left: 100px solid transparent; border-right: 100px solid transparent; border-bottom: 128px solid ${WHEEL_COLORS[i]};">
-                    </div>
-                    <span class="absolute top-8 left-1/2 -translate-x-1/2 text-[10px] font-bold text-white whitespace-nowrap" 
-                          style="transform: rotate(${segmentAngle/2}deg); text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
-                        ${prize.text}
-                    </span>
-                </div>
-            `;
-        }).join('');
-    };
-    
-    // Show spin wheel after rating
-    window.showSpinWheel = () => {
-        if (!spinWheelEnabled) {
-            console.log('🎰 Spin wheel disabled');
+        if(!code) {
+            if(typeof Toastify !== 'undefined') Toastify({ text: "Enter a code", style: { background: "#EF4444" }, duration: 2000 }).showToast();
             return;
         }
-        
-        initSpinWheel();
-        const modal = document.getElementById('spin-wheel-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    };
-    
-    // Spin the wheel
-    window.spinWheel = () => {
-        const wheel = document.getElementById('spin-wheel');
-        const btn = document.getElementById('spin-btn');
-        
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Spinning...';
-        
-        // Random result (weighted - less chance for big prizes)
-        const weights = [15, 20, 15, 15, 5, 10, 10, 10]; // 100 total
-        let random = Math.random() * 100;
-        let prizeIndex = 0;
-        for (let i = 0; i < weights.length; i++) {
-            random -= weights[i];
-            if (random <= 0) {
-                prizeIndex = i;
-                break;
+
+        // 1. Offer List mein check karo (Jo abhi load hui hai DB se)
+        const foundIndex = window.offerList.findIndex(o => o.code === code);
+
+        if (foundIndex !== -1) {
+            // Coupon Mil Gaya!
+            window.applyOffer(foundIndex); // Existing logic use karo
+            
+            // Input clear karo
+            codeInput.value = "";
+            
+            // BLAST EFFECT 🎉
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 }, colors: ['#10B981', '#F59E0B'] });
             }
+            
+        } else {
+            if(typeof Toastify !== 'undefined') Toastify({ text: "Invalid or Expired Code", style: { background: "#EF4444" }, duration: 2000 }).showToast();
         }
-        
-        const segmentAngle = 360 / WHEEL_PRIZES.length;
-        const targetAngle = (360 - (prizeIndex * segmentAngle)) - (segmentAngle / 2);
-        const spins = 5; // Number of full rotations
-        const finalRotation = (spins * 360) + targetAngle;
-        
-        wheel.style.transform = `rotate(${finalRotation}deg)`;
-        
-        // Show result after spin
-        setTimeout(() => {
-            const prize = WHEEL_PRIZES[prizeIndex];
-            showSpinResult(prize);
-            
-            // Close spin modal
-            document.getElementById('spin-wheel-modal').classList.add('hidden');
-            document.getElementById('spin-wheel-modal').classList.remove('flex');
-            
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> SPIN NOW!';
-        }, 4500);
     };
     
-    // --- SAVE PRIZE TO PHONE (LOCAL STORAGE) ---
-    window.showSpinResult = (prize) => {
+    // --- SAVE PRIZE TO DATABASE (Updated for Unique Code & Admin Access) ---
+    window.showSpinResult = async (prize) => {
+        // 1. Agar "Try Again" aaya toh wapas bhej do
         if (prize.value === 0) {
             if (typeof Toastify !== 'undefined') {
                 Toastify({ text: "Better luck next time! 🍀", className: "toast-center", style: { background: "#6B7280" }, duration: 3000 }).showToast();
@@ -1256,179 +784,76 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             setTimeout(() => { closeSpinResult(); window.resetApp(); }, 3000);
             return;
         }
-        
-        // 💾 SAVE TO LOCAL STORAGE
-        const savedCoupons = JSON.parse(localStorage.getItem('wowSpinCoupons') || '[]');
-        
-        // Check duplication (don't save same code twice if unused)
-        const alreadyHas = savedCoupons.some(c => c.code === prize.code && !c.used);
-        
-        if(!alreadyHas) {
-            savedCoupons.push({
-                code: prize.code,
-                value: prize.value,
+
+        // 2. Generate Unique Code (e.g., WIN-X7Z9)
+        const uniqueCode = 'WIN-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+
+        // 3. DATABASE MEIN SAVE KARO (Admin ke liye & Next Order ke liye)
+        try {
+            await addDoc(collection(dbFirestore, "coupons"), {
+                code: uniqueCode,
+                discountValue: prize.value,
                 isFlat: prize.isFlat || false,
                 isFree: prize.isFree || false,
-                text: prize.text,
-                wonAt: Date.now(),
-                used: false // Next order mein check karne ke liye
+                desc: prize.text, // e.g. "10% OFF"
+                userPhone: window.wowUser.phone, // Customer tracking
+                userName: window.wowUser.name,
+                status: 'active', // Active hai, taaki next order mein dikhe
+                createdAt: firestoreTimestamp()
             });
-            localStorage.setItem('wowSpinCoupons', JSON.stringify(savedCoupons));
-            console.log("🎁 Coupon Saved to Phone:", prize.code);
+            console.log("🎁 Coupon Saved to DB:", uniqueCode);
+        } catch (e) {
+            console.error("Error saving coupon to DB", e);
         }
-        
-        // Show result modal
+
+        // 4. UI Update (User ko NAYA Unique code dikhao)
         document.getElementById('spin-prize').innerText = prize.text;
-        document.getElementById('spin-code').innerText = prize.code;
-        
+        document.getElementById('spin-code').innerText = uniqueCode;
+
         const modal = document.getElementById('spin-result-modal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-        
-        // Confetti!
+
+        // Confetti Blast
         if (typeof confetti === 'function') {
             confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 } });
         }
     };
     
-    // Update close button to reset app
+    // --- Close Spin Result Modal ---
     window.closeSpinResult = () => {
-        document.getElementById('spin-result-modal').classList.add('hidden');
-        document.getElementById('spin-result-modal').classList.remove('flex');
-        window.resetApp(); // Game over, go home
-    };
-    
-    // Load settings on init
-    loadSpinWheelSettings();
-    
-    // --- SHOW RATING WIDGET WITH ANIMATION AFTER PAYMENT (CENTER MODAL) ---
-    window.showRatingWidgetAnimated = () => {
-        console.log("⭐ Showing rating widget with animation (center modal)...");
-        
-        const ratingWidget = document.getElementById('rating-widget');
-        if (!ratingWidget) {
-            console.warn("⚠️ Rating widget not found");
-            return;
+        const modal = document.getElementById('spin-result-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
-        
-        // Load promo ad first
-        loadPromoAd();
-        
-        // Show rating widget as center modal
-        setTimeout(() => {
-            ratingWidget.classList.remove('hidden');
-            ratingWidget.classList.add('flex');
-            console.log("✅ Rating widget container shown");
-            
-            // Animate the inner card with scale animation
-            const ratingCard = ratingWidget.querySelector('.bg-white');
-            if (ratingCard) {
-                setTimeout(() => {
-                    ratingCard.classList.remove('scale-0');
-                    ratingCard.classList.add('scale-100');
-                }, 100);
-            }
-            
-            // Animate stars one by one
-            setTimeout(() => {
-                const stars = document.querySelectorAll('.star-rating i');
-                stars.forEach((star, index) => {
-                    star.classList.remove('visible'); 
-                    setTimeout(() => {
-                        star.classList.add('visible');
-                        star.style.transform = 'scale(1.2)';
-                        setTimeout(() => {
-                            star.style.transform = 'scale(1)';
-                        }, 200);
-                    }, index * 150); 
-                });
-            }, 300);
-        }, 1000); // Wait 1 second after payment confirmation
     };
     
-    // --- STAR HOVER EFFECTS ---
-    window.highlightStars = (count) => {
-        const stars = document.querySelectorAll('.star-rating i');
-        stars.forEach((star, index) => {
-            if (index < count) {
-                star.classList.add('hovered');
-                star.style.color = '#fbbf24';
-            } else {
-                star.style.color = '#d1d5db';
-            }
-        });
-    };
-    
-    window.resetStars = () => {
-        const stars = document.querySelectorAll('.star-rating i');
-        stars.forEach(star => {
-            star.classList.remove('hovered');
-            star.style.color = '#d1d5db';
-        });
-    };
-    
-    // --- SUBMIT RATING & TRIGGER WHEEL ---
+    // Rating logic specifically for Firestore
     window.submitRating = async (star) => {
-        console.log("⭐ Rating submitted:", star);
-        
-        // Stars animation logic
-        const stars = document.querySelectorAll('.star-rating i');
-        stars.forEach((s, i) => {
-            if (i < star) {
-                s.style.color = '#fbbf24';
-                s.style.transform = 'scale(1.3)';
-                setTimeout(() => { s.style.transform = 'scale(1)'; }, 200);
-            }
-        });
-        
-        // Save Rating to DB
-        if(window.currentDocId) {
-             try { await updateDoc(doc(dbFirestore, "orders", window.currentDocId), { rating: star }); } catch(e) {}
-        }
-        if(window.currentRTDBKey) {
-            try { await update(ref(db, `restaurants/${RESTAURANT_ID}/orders/${window.currentRTDBKey}`), { rating: star }); } catch(e) {}
-        }
-        
         if(typeof Toastify !== 'undefined') {
-            Toastify({ text: `Thanks for ${star} star rating! ⭐`, className: "toast-center", style: { background: "#10B981" }, duration: 2000 }).showToast();
+            Toastify({ 
+                text: "Thanks for rating! ⭐", 
+                className: "toast-center", 
+                style: { background: "#10B981" },
+                duration: 2000
+            }).showToast();
         }
 
-        // 🟢 MAIN LOGIC CHANGE HERE 🟢
-        setTimeout(() => {
-            const ratingWidget = document.getElementById('rating-widget');
-            
-            // Hide Rating Widget
-            if(ratingWidget) {
-                const card = ratingWidget.querySelector('.bg-white');
-                if(card) {
-                    card.classList.remove('scale-100');
-                    card.classList.add('scale-0');
-                }
-                
-                setTimeout(() => {
-                    ratingWidget.classList.add('hidden');
-                    ratingWidget.classList.remove('flex');
-                    
-                    // IF ADMIN ENABLED WHEEL -> SHOW WHEEL
-                    if (window.spinWheelEnabled || spinWheelEnabled) {
-                        setTimeout(() => showSpinWheel(), 300);
-                    } else {
-                        // ELSE -> RESET APP
-                        window.resetApp();
-                    }
-                }, 300);
-            }
-        }, 1500);
-        
-        console.log("✅ Rating process completed");
-    };
-    
-    // --- CLEANUP: (moved) remove payment listener when navigating away ---
-    // Note: Detailed `resetApp` implementation exists later; this placeholder was removed to avoid duplicate definitions.
+        // Add to Database
+        if(window.currentDocId) {
+             try {
+                const orderRef = doc(dbFirestore, "orders", window.currentDocId);
+                await updateDoc(orderRef, { rating: star });
+             } catch(e) { console.log("Rating save error", e); }
+        }
+
+        // Animate stars away
+        document.getElementById('rating-widget').classList.add('translate-y-full');
+    }
 
     const timeout = (ms) => new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), ms));
 
-    // --- UPDATED PROCESS ORDER FUNCTION WITH WALLET DEDUCTION ---
     window.processOrder = async (method) => {
         const btn = document.getElementById('btn-cash-pay');
         const originalContent = btn.innerHTML;
@@ -1442,6 +867,7 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
         btn.innerHTML = `<div class="flex items-center justify-center gap-2"><div class="w-6 h-6 border-4 border-gray-200 border-t-green-500 rounded-full animate-spin"></div> Processing...</div>`;
 
         try {
+            // IMPORTANT FIX: Re-fetch user data from local storage to ensure it's up-to-date before ordering
             const savedUser = localStorage.getItem('wowUser');
             if(savedUser) {
                 window.wowUser = JSON.parse(savedUser);
@@ -1454,62 +880,63 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             const orderData = {
                 orderId: orderID,
                 customer: { name: currentUser.name, phone: currentUser.phone },
-                customerName: currentUser.name,
-                customerMobile: currentUser.phone,
+                customerName: currentUser.name, // <<-- THIS IS THE FIX (To top-level field)
+                customerMobile: currentUser.phone, // <<-- THIS IS THE FIX (To top-level field)
                 items: window.wowCart,
                 totalAmount: grandTotal,
                 status: "pending", 
                 paymentMethod: method,
-                paymentStatus: "pending", // Always pending - admin must verify
-                orderType: window.orderType,
+                paymentStatus: "pending", 
+                orderType: window.orderType, // Add Order Type to Database
                 date: new Date().toLocaleDateString(),
                 time: new Date().toLocaleTimeString(),
                 timestamp: serverTimestamp(),
-                createdAt: new Date(),
-                platformFee: 1.98, // Log Fee
-                isFeeDeducted: false // Admin will deduct when they confirm payment
+                createdAt: new Date()
             };
 
-            // NOTE: NO auto wallet deduction here
-            // Admin must click "Accept & Deduct Fee" button to deduct ₹1.98
-            console.log("📦 Order placed - Admin will confirm and deduct fee");
-            
-            // PLACE ORDER (No wallet deduction - admin will verify and deduct manually)
-            const rtdbRef = push(ref(db, `restaurants/${RESTAURANT_ID}/orders`));
-            await set(rtdbRef, orderData);
-            const rtdbKey = rtdbRef.key; // Get RTDB key for real-time listening
-            
-            const docRef = await addDoc(collection(dbFirestore, "restaurants", RESTAURANT_ID, "orders"), orderData);
+            const rtdbPromise = push(ref(db, 'orders'), orderData);
+            // We need to await addDoc to get the reference ID for updating rating later
+            const docRef = await addDoc(collection(dbFirestore, "orders"), orderData);
             window.currentDocId = docRef.id;
-            window.currentOrderId = orderID; // Store order ID for payment status monitoring
-            window.currentRTDBKey = rtdbKey; // Store RTDB key for real-time updates
-            
-            console.log("✅ Order placed:", { orderID, rtdbKey, firestoreId: docRef.id });
+
+            await Promise.race([rtdbPromise, timeout(8000)]);
 
             const savedHistory = JSON.parse(localStorage.getItem('wowRecentOrders') || '[]');
-            const subtotal = window.wowCart.reduce((a,b) => a + (b.price * b.qty), 0);
-            const taxAmt = window.TAX_ENABLED ? (subtotal * (window.TAX_PERCENT / 100)) : 0;
-            
             savedHistory.unshift({
                 id: orderID,
                 amount: grandTotal,
-                subtotal: subtotal.toFixed(2),
-                tax: taxAmt.toFixed(2),
-                fee: (window.CONVENIENCE_FEE || 1.98).toFixed(2),
-                donation: window.donationAmt,
                 date: new Date().toLocaleDateString(),
                 time: new Date().toLocaleTimeString(),
-                items: window.wowCart.map(i => ({ ...i, price: i.price })),
-                paymentMethod: method,
-                orderType: window.orderType,
-                paymentStatus: 'pending',
-                paid: false
+                items: [...window.wowCart]
             });
             if(savedHistory.length > 10) savedHistory.pop();
             localStorage.setItem('wowRecentOrders', JSON.stringify(savedHistory));
             if(window.loadRecentOrders) window.loadRecentOrders();
 
             window.wowCart = [];
+            
+            // Step 4: Check karo agar koi offer selected tha aur wo Personal DB coupon tha
+            if (window.selectedOffer !== null && window.selectedOffer !== undefined) {
+                const usedOffer = window.offerList[window.selectedOffer];
+                
+                if (usedOffer && usedOffer.isPersonal && usedOffer.id) {
+                    // Firestore mein status update karo -> 'used'
+                    try {
+                        await updateDoc(doc(dbFirestore, "coupons", usedOffer.id), {
+                            status: 'used',
+                            usedAt: firestoreTimestamp(),
+                            usedOnOrder: orderID
+                        });
+                        console.log("✅ Coupon marked as USED in DB:", usedOffer.code);
+                    } catch (e) {
+                        console.error("Failed to mark coupon used", e);
+                    }
+                }
+            }
+
+            // Reset Selection
+            window.selectedOffer = null;
+            
             if(window.saveCartToStorage) window.saveCartToStorage();
             if(window.updateCartBar) window.updateCartBar();
             if(window.renderMenu && window.menuData) window.renderMenu(window.currentCategory === 'All' ? window.menuData : window.menuData.filter(i => i.category === window.currentCategory));
@@ -1518,25 +945,23 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             document.getElementById('final-amt').innerText = grandTotal;
             document.getElementById('receipt-date').innerText = new Date().toLocaleDateString();
             document.getElementById('receipt-time').innerText = new Date().toLocaleTimeString();
-            document.getElementById('receipt-customer').innerText = currentUser.name;
-            document.getElementById('receipt-order-type').innerText = window.orderType;
+            document.getElementById('receipt-customer').innerText = currentUser.name; // Update customer name on receipt
+            document.getElementById('receipt-order-type').innerText = window.orderType; // Update order type on receipt
 
-            // Initialize payment status monitoring
-            initPaymentStatusListener(rtdbKey, orderID);
-
-            // Show receipt / success screen on top and ensure main app won't block it
-            const successScreenEl = document.getElementById('success-screen');
-            const mainAppEl = document.getElementById('main-app');
-            if (mainAppEl) mainAppEl.classList.add('hidden');
-            if (successScreenEl) {
-                successScreenEl.classList.remove('hidden');
-                successScreenEl.classList.add('flex');
-                // ensure scroll starts at top
-                successScreenEl.scrollTop = 0;
-            }
+            document.getElementById('success-screen').classList.remove('hidden');
+            document.getElementById('success-screen').classList.add('flex');
             
-            // DO NOT show rating widget immediately - wait for payment confirmation
-            // Rating will be shown automatically when admin marks payment as done
+            // Trigger Rating Animation with staggered effect
+            setTimeout(() => {
+                document.getElementById('rating-widget').classList.remove('translate-y-full');
+                const stars = document.querySelectorAll('.star-rating i');
+                stars.forEach((star, index) => {
+                    star.classList.remove('visible'); // reset
+                    setTimeout(() => {
+                         star.classList.add('visible');
+                    }, index * 100); // 0.1s delay per star
+                });
+            }, 800);
 
             if(window.closePaymentModal) window.closePaymentModal();
             if(window.closeCheckout) window.closeCheckout();
@@ -1567,121 +992,11 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
         }, 2000);
     };
 
-    // --- DYNAMIC BRANDING & THEME ---
-    // Store brand config globally for feature access
-    window.brandConfig = {
-        enableDonations: true,
-        enableOffers: true,
-        enableRatings: true,
-        enableTakeaway: true
-    };
-
-    async function applyBranding() {
-        try {
-            // 1. Fetch Brand Config from Firebase
-            const brandRef = doc(dbFirestore, "restaurants", RESTAURANT_ID, "settings", "brandConfig");
-            const snapshot = await getDoc(brandRef);
-
-            if (snapshot.exists()) {
-                const data = snapshot.data();
-                
-                // Store feature toggles globally
-                window.brandConfig = {
-                    enableDonations: data.enableDonations !== false,
-                    enableOffers: data.enableOffers !== false,
-                    enableRatings: data.enableRatings !== false,
-                    enableTakeaway: data.enableTakeaway !== false,
-                    cafeName: data.cafeName || '',
-                    primaryColor: data.primaryColor || '#ea580c',
-                    secondaryColor: data.secondaryColor || '#dc2626'
-                };
-
-                // 2. Set Colors (CSS Variables)
-                const root = document.documentElement;
-                root.style.setProperty('--primary', data.primaryColor || '#ea580c');
-                root.style.setProperty('--secondary', data.secondaryColor || '#dc2626');
-                
-                // 3. Update Text Content
-                if(data.cafeName) document.title = data.cafeName;
-                const logoText = document.querySelector('h1.font-black'); 
-                if(logoText && data.cafeName) {
-                    const parts = data.cafeName.split(' ');
-                    const first = parts[0];
-                    const rest = parts.slice(1).join(' ');
-                    logoText.innerHTML = `${first}<span style="color: ${data.primaryColor || '#ea580c'}">${rest}</span>`;
-                }
-
-                // 4. Update Splash Screen & Header
-                const splash = document.getElementById('splash-screen');
-                if(splash) splash.style.background = `linear-gradient(to bottom right, ${data.primaryColor || '#ea580c'}, ${data.secondaryColor || '#dc2626'})`;
-
-                // 5. Update All Buttons dynamically
-                const buttons = document.querySelectorAll('button, .bg-orange-600, .text-orange-600');
-                buttons.forEach(btn => {
-                    if(btn.classList.contains('bg-orange-600')) {
-                        btn.style.backgroundColor = data.primaryColor;
-                        btn.classList.remove('bg-orange-600');
-                    }
-                    if(btn.classList.contains('text-orange-600')) {
-                        btn.style.color = data.primaryColor;
-                        btn.classList.remove('text-orange-600');
-                    }
-                });
-
-                // 6. Hide disabled features
-                applyFeatureToggles();
-
-                console.log("🎨 Branding Applied:", data.cafeName, "Features:", window.brandConfig);
-            } else {
-                console.log("📝 Using default branding (no config found)");
-            }
-        } catch (e) {
-            console.warn("Using default branding (Network error or no config):", e.message);
-        }
-    }
-
-    // Hide/Show features based on brandConfig
-    function applyFeatureToggles() {
-        // Hide Offers section if disabled
-        if (!window.brandConfig.enableOffers) {
-            const offersSection = document.getElementById('offers-section');
-            if (offersSection) offersSection.style.display = 'none';
-            
-            const offersTab = document.querySelector('[onclick*="offers"]');
-            if (offersTab) offersTab.style.display = 'none';
-        }
-        
-        // Hide Takeaway option if disabled
-        if (!window.brandConfig.enableTakeaway) {
-            const takeawayBtns = document.querySelectorAll('[data-type="Takeaway"], [onclick*="Takeaway"]');
-            takeawayBtns.forEach(btn => btn.style.display = 'none');
-        }
-        
-        // Hide Ratings if disabled
-        if (!window.brandConfig.enableRatings) {
-            const ratingElements = document.querySelectorAll('.star-rating, [data-rating], .rating-section');
-            ratingElements.forEach(el => el.style.display = 'none');
-        }
-        
-        // Hide Donations if disabled
-        if (!window.brandConfig.enableDonations) {
-            const donationElements = document.querySelectorAll('.donation-section, [data-donation], #donation-toggle');
-            donationElements.forEach(el => el.style.display = 'none');
-        }
-        
-        console.log("🔒 Feature toggles applied");
-    }
-
-    async function initUI() {
-        // Apply dynamic branding first
-        await applyBranding();
-        
+    function initUI() {
         document.getElementById('display-name').innerText = window.wowUser.name.split(' ')[0];
         document.getElementById('main-app').classList.remove('opacity-0');
         document.getElementById('main-app').classList.add('fade-in');
         
-        initSecurity(); // Initialize Security Check
-        loadTaxSettings(); // Load tax & convenience fee settings
         initAddonsSync(); 
         initMenuSync();
         initOffersSync();
@@ -1702,7 +1017,7 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     window.currentCategory = 'All';
     window.currentCustomItem = null; 
     window.donationAmt = 0;
-    // CONVENIENCE_FEE, TAX_ENABLED, TAX_PERCENT defined above at line 646
+    const PLATFORM_FEE = 0.98;
 
     window.initBanners = () => {
         const container = document.getElementById('banner-container');
@@ -1711,19 +1026,22 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             return;
         }
         
+        // LIMIT TO 3 CARDS ONLY
         const limitedOffers = window.offerList.slice(0, 3);
         
         container.innerHTML = limitedOffers.map(offer => {
+            // Logic: If URL exists, show photo, else gradient.
             const hasImg = offer.img && offer.img.startsWith('http');
             const bgStyle = hasImg 
                 ? `background-image: url('${offer.img}'); background-size: cover; background-position: center;` 
-                : `background-image: linear-gradient(to right, #f97316, #dc2626);`; 
+                : `background-image: linear-gradient(to right, #f97316, #dc2626);`; // Fallback gradient
             
+            // Use a gradient overlay for clarity and readability of white text
             const overlayClass = hasImg ? 'bg-gradient-to-t from-black/80 via-black/40 to-transparent' : 'bg-transparent';
             
             return `
             <div class="flex-shrink-0 w-64 h-32 rounded-2xl p-0 relative overflow-hidden shadow-lg snap-center" style="${bgStyle}">
-                <div class="absolute top-2 right-3 z-20 opacity-60 font-black text-[10px] tracking-widest text-white uppercase pointer-events-none drop-shadow-sm">Orderly</div>
+                <div class="absolute top-2 right-3 z-20 opacity-60 font-black text-[10px] tracking-widest text-white uppercase pointer-events-none drop-shadow-sm">WowCafe</div>
                 
                 <div class="relative z-10 h-full flex flex-col justify-end p-4 ${overlayClass}">
                     <div class="bg-white/20 text-white px-2 py-0.5 rounded w-fit text-[10px] font-bold mb-2 uppercase tracking-wider backdrop-blur-sm">
@@ -1736,8 +1054,9 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     };
 
     window.handleBrandingClick = () => {
-        // Direct link without popup
-        window.open("https://automation-x-rp3z.vercel.app/", "_blank");
+        if(confirm("Open AutomationX website?")) {
+            window.open("https://automation-x-rp3z.vercel.app/", "_blank");
+        }
     };
 
     window.saveCartToStorage = () => {
@@ -1811,6 +1130,7 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
         items.forEach(item => {
             const totalQty = window.wowCart.filter(c => c.parentId === item.id).reduce((sum, c) => sum + c.qty, 0);
             
+            // --- UPDATED: Force Green Dot for everything by default ---
             const typeColor = 'green'; 
             
             const bestsellerBadge = item.isBestseller 
@@ -1975,21 +1295,15 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     }
 
     window.addToCart = (id, parentId, name, variantDetails, price) => {
-        // Fix: Force price to be a number
-        const cleanPrice = Number(price) || 0;
-        
         const existing = window.wowCart.find(c => c.id === id);
         if(existing) {
             existing.qty++;
         } else {
-            window.wowCart.push({ id, parentId, name, variantDetails, price: cleanPrice, qty: 1 });
+            window.wowCart.push({ id, parentId, name, variantDetails, price, qty: 1 });
         }
         window.saveCartToStorage();
-        window.updateCartBar();
-        // Check if renderMenu exists before calling
-        if(window.renderMenu) {
-             window.renderMenu(window.currentCategory === 'All' ? window.menuData : window.menuData.filter(i => i.category === window.currentCategory));
-        }
+        updateCartBar();
+        renderMenu(window.currentCategory === 'All' ? window.menuData : window.menuData.filter(i => i.category === window.currentCategory));
     }
 
     window.updateQty = (id, change) => {
@@ -1999,9 +1313,9 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             if(item.qty <= 0) window.wowCart = window.wowCart.filter(c => c.id !== id);
         }
         window.saveCartToStorage(); 
-        window.updateCartBar();
-        window.renderBill();
-        window.renderMenu(window.currentCategory === 'All' ? window.menuData : window.menuData.filter(i => i.category === window.currentCategory));
+        updateCartBar();
+        renderBill();
+        renderMenu(window.currentCategory === 'All' ? window.menuData : window.menuData.filter(i => i.category === window.currentCategory));
     }
 
     window.editCartItem = (id) => {
@@ -2010,9 +1324,9 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             const parentId = window.wowCart[itemIndex].parentId;
             window.wowCart.splice(itemIndex, 1); 
             window.saveCartToStorage();
-            window.updateCartBar();
-            window.renderBill();
-            window.openCustomModal(parentId); 
+            updateCartBar();
+            renderBill();
+            openCustomModal(parentId); 
         }
     }
 
@@ -2032,22 +1346,16 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     }
 
     window.openCheckout = () => {
-        document.getElementById('customer-info-bill').innerText = window.wowUser ? window.wowUser.name : 'Guest';
-        document.getElementById('receipt-customer').innerText = window.wowUser ? window.wowUser.name : 'Guest';
+        document.getElementById('customer-info-bill').innerText = window.wowUser.name;
+        document.getElementById('receipt-customer').innerText = window.wowUser.name;
         const sheet = document.getElementById('checkout-sheet');
         sheet.classList.remove('hidden');
         setTimeout(() => {
             document.getElementById('checkout-bg').classList.remove('opacity-0');
             document.getElementById('checkout-panel').classList.remove('translate-y-full');
         }, 10);
-        window.renderBill();
-        window.renderOffers();
-        // Render recommended products when checkout opens
-        setTimeout(() => {
-            if (typeof window.renderRecommendedProducts === 'function') {
-                window.renderRecommendedProducts();
-            }
-        }, 300);
+        renderBill();
+        renderOffers();
     };
 
     window.closeCheckout = () => {
@@ -2076,158 +1384,20 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
                 </div>
             </div>
         `).join('');
-        window.calculateTotals();
-        
-        // Show recommended products after rendering cart
-        if (typeof window.renderRecommendedProducts === 'function') {
-            window.renderRecommendedProducts();
-        }
+        calculateTotals();
     }
-    
-    // --- SMART RECOMMENDATION ALGORITHM ---
-    window.getRecommendedProducts = () => {
-        if (!window.menuData || window.menuData.length === 0) return [];
-        
-        const cartCategories = new Set();
-        const cartItems = new Set();
-        
-        // Get categories and items from cart
-        window.wowCart.forEach(cartItem => {
-            const menuItem = window.menuData.find(m => m.id === cartItem.parentId);
-            if (menuItem) {
-                cartCategories.add(menuItem.category);
-                cartItems.add(cartItem.parentId);
-            }
-        });
-        
-        // Algorithm: Recommend products based on:
-        // 1. Best sellers (highest priority)
-        // 2. Same category as cart items
-        // 3. Popular items (high rating/orders)
-        // 4. Not already in cart
-        
-        const recommendations = window.menuData
-            .filter(item => {
-                // Don't recommend items already in cart
-                if (cartItems.has(item.id)) return false;
-                
-                // Must have variants/price
-                if (!item.variants || item.variants.length === 0) return false;
-                
-                return true;
-            })
-            .map(item => {
-                let score = 0;
-                
-                // Best seller boost (highest priority)
-                if (item.isBestseller || item.isBestSeller) score += 100;
-                
-                // Same category boost
-                if (cartCategories.has(item.category)) score += 50;
-                
-                // Rating boost
-                if (item.rating) score += item.rating * 10;
-                
-                // Popularity boost (if has orderCount)
-                if (item.orderCount) score += item.orderCount;
-                
-                return { ...item, recommendationScore: score };
-            })
-            .sort((a, b) => b.recommendationScore - a.recommendationScore)
-            .slice(0, 4); // Top 4 recommendations
-        
-        return recommendations;
-    };
-    
-    // --- RENDER RECOMMENDED PRODUCTS ---
-    window.renderRecommendedProducts = () => {
-        const recommendedSection = document.getElementById('recommended-products-section');
-        const recommendedList = document.getElementById('recommended-products-list');
-        
-        if (!recommendedSection || !recommendedList) return;
-        
-        const recommendations = window.getRecommendedProducts();
-        
-        if (recommendations.length === 0) {
-            recommendedSection.classList.add('hidden');
-            return;
-        }
-        
-        recommendedSection.classList.remove('hidden');
-        
-        recommendedList.innerHTML = recommendations.map(item => {
-            const firstVariant = item.variants[0];
-            const price = firstVariant?.price || item.price || 0;
-            const bestsellerBadge = (item.isBestseller || item.isBestSeller)
-                ? '<span class="absolute top-1 right-1 bg-yellow-500 text-white text-[8px] font-bold px-1 rounded"><i class="fas fa-star"></i></span>'
-                : '';
-            
-            return `
-                <div onclick="addRecommendedToCart('${item.id}')" class="bg-white rounded-xl p-3 border border-orange-200 shadow-sm hover:shadow-md transition-all cursor-pointer relative group">
-                    ${bestsellerBadge}
-                    <div class="w-full h-20 bg-gradient-to-br from-orange-100 to-red-100 rounded-lg mb-2 flex items-center justify-center">
-                        <i class="fas fa-utensils text-2xl text-orange-400"></i>
-                    </div>
-                    <h5 class="font-bold text-gray-800 text-xs mb-1 truncate">${item.name}</h5>
-                    <p class="text-[10px] text-gray-500 mb-2">${item.category}</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-bold text-orange-600">₹${price}</span>
-                        <button class="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-orange-600 transition">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    };
-    
-    // --- ADD RECOMMENDED PRODUCT TO CART ---
-    window.addRecommendedToCart = (itemId) => {
-        const item = window.menuData.find(m => m.id === itemId);
-        if (!item || !item.variants || item.variants.length === 0) return;
-        
-        const firstVariant = item.variants[0];
-        const variantId = `${itemId}-${firstVariant.size || 'default'}`;
-        const variantDetails = firstVariant.size || 'Regular';
-        const price = firstVariant.price || item.price || 0;
-        
-        window.addToCart(variantId, itemId, item.name, variantDetails, price);
-        
-        // Show feedback
-        if(typeof Toastify !== 'undefined') {
-            Toastify({ 
-                text: `Added ${item.name} to cart!`, 
-                className: "toast-center", 
-                style: { background: "#10B981" },
-                duration: 1500
-            }).showToast();
-        }
-        
-        // Re-render recommendations
-        window.renderRecommendedProducts();
-    };
 
     window.setDonation = (amt, btn) => {
-        // Toggle logic - if same amount clicked again, remove donation
-        if (window.donationAmt === amt) {
-            window.donationAmt = 0;
-            document.querySelectorAll('.donation-btn').forEach(b => b.classList.remove('active'));
-        } else {
-            window.donationAmt = amt;
-            document.querySelectorAll('.donation-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            // Reset love button
-            document.getElementById('love-btn-toggle').classList.remove('active');
-            document.getElementById('love-btn-toggle').innerHTML = `<i class="fas fa-heart animate-pulse"></i> Donate ₹10 & Spread Love`;
-            
-            // Show feedback
-            const originalText = `₹${amt}`;
-            btn.innerText = "Thanks!";
-            if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 50, origin: { y: 0.7 }, colors: ['#ec4899'] });
-            setTimeout(() => { btn.innerText = originalText; }, 1500);
-        }
-        window.calculateTotals();
+        window.donationAmt = amt;
+        document.getElementById('love-btn-toggle').classList.remove('active');
+        document.getElementById('love-btn-toggle').innerHTML = `<i class="fas fa-heart animate-pulse"></i> Donate ₹10 & Spread Love`;
+        updateDonationUI();
+        calculateTotals();
+        
+        const originalText = `₹${amt}`;
+        btn.innerText = "Thanks!";
+        if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 50, origin: { y: 0.7 }, colors: ['#ec4899'] });
+        setTimeout(() => { btn.innerText = originalText; }, 1500);
     }
 
     window.toggleLoveDonation = () => {
@@ -2243,7 +1413,7 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#ec4899', '#f472b6'] });
         }
         updateDonationUI();
-        window.calculateTotals();
+        calculateTotals();
     }
 
     window.updateDonationUI = () => {
@@ -2254,42 +1424,25 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     }
 
     window.calculateTotals = () => {
-        // Fix: Force convert price and qty to Number to prevent NaN or 0 errors
-        let total = window.wowCart.reduce((a,b) => a + (Number(b.price || 0) * Number(b.qty || 1)), 0);
-        
+        let total = window.wowCart.reduce((a,b) => a + (b.price * b.qty), 0);
         let discount = 0;
         if(window.selectedOffer !== null) {
             const offer = window.offerList[window.selectedOffer];
-            if(offer && total >= offer.minAmt) {
+            if(total >= offer.minAmt) {
                 if(offer.discountPercent > 0) discount = Math.round(total * (offer.discountPercent / 100));
-                else discount = offer.discountFlat || 0;
+                else discount = offer.discountFlat;
             } else window.selectedOffer = null;
         }
         
-        const taxableAmount = total - discount;
-        const tax = window.TAX_ENABLED ? (taxableAmount * (window.TAX_PERCENT / 100)) : 0;
-        
-        // Fix: Ensure fee is a number
-        const convFee = Number(window.CONVENIENCE_FEE || 1.98); 
-        const donation = Number(window.donationAmt || 0);
+        const tax = (total - discount) * 0.05;
+        const grand = (total - discount) + tax + PLATFORM_FEE + window.donationAmt;
 
-        const grand = taxableAmount + tax + convFee + donation;
-
-        document.getElementById('summary-total').innerText = total.toFixed(2);
+        document.getElementById('summary-total').innerText = total;
         document.getElementById('summary-tax').innerText = tax.toFixed(2);
-        document.getElementById('summary-convenience').innerText = convFee.toFixed(2);
-        document.getElementById('summary-donation').innerText = donation;
-        
-        // Grand total updates
+        document.getElementById('summary-donation').innerText = window.donationAmt;
         document.getElementById('summary-grand').innerText = grand.toFixed(2);
         document.getElementById('btn-pay-amt').innerText = grand.toFixed(2);
         document.getElementById('pay-modal-amt').innerText = grand.toFixed(2);
-        
-        const taxRow = document.getElementById('tax-row');
-        if (taxRow) {
-            taxRow.style.display = window.TAX_ENABLED ? 'flex' : 'none';
-            document.getElementById('tax-percent').innerText = window.TAX_PERCENT || 5;
-        }
         
         if(discount > 0) {
             document.getElementById('discount-row').classList.remove('hidden');
@@ -2318,63 +1471,19 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
                 <div class="text-[10px] font-bold ${isSelected ? 'text-orange-600' : 'text-blue-600'}">${isSelected ? 'APPLIED' : 'APPLY'}</div>
             </div>`;
         });
-        window.calculateTotals();
+        calculateTotals();
     }
 
     window.applyOffer = (index) => {
         const total = window.wowCart.reduce((a,b) => a + (b.price * b.qty), 0);
         if(window.selectedOffer === index) {
             window.selectedOffer = null;
-            window.renderOffers();
         } else {
-            if(total >= window.offerList[index].minAmt) {
-                window.selectedOffer = index;
-                const offer = window.offerList[index];
-                let savings = 0;
-                if(offer.discountPercent > 0) savings = Math.round(total * (offer.discountPercent / 100));
-                else savings = offer.discountFlat || 0;
-                
-                // Show savings celebration
-                if(savings > 0) {
-                    window.showSavingsCelebration(savings, offer.code);
-                }
-                window.renderOffers();
-            } else { 
-                if(typeof Toastify !== 'undefined') Toastify({text: `Add items worth ₹${window.offerList[index].minAmt} to apply`, className: "toast-center", style: {background: "#F59E0B"}, duration: 2500}).showToast(); 
-                return; 
-            }
+            if(total >= window.offerList[index].minAmt) window.selectedOffer = index;
+            else { if(typeof Toastify !== 'undefined') Toastify({text: `Add more items`, className: "toast-center", style: {background: "#F59E0B"}}).showToast(); return; }
         }
-        window.toggleOffers();
-    };
-    
-    // Savings celebration with confetti
-    window.showSavingsCelebration = (amount, code) => {
-        // Create celebration overlay
-        const overlay = document.createElement('div');
-        overlay.id = 'savings-celebration';
-        overlay.className = 'fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm';
-        overlay.innerHTML = `
-            <div class="bg-white rounded-3xl p-8 text-center max-w-xs mx-4 transform scale-0 animate-bounce-in shadow-2xl">
-                <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full mx-auto flex items-center justify-center mb-4 animate-pulse">
-                    <i class="fas fa-tag text-white text-3xl"></i>
-                </div>
-                <h2 class="text-2xl font-black text-gray-800 mb-2">🎉 Woohoo!</h2>
-                <p class="text-green-600 font-bold text-xl mb-1">You saved ₹${amount}</p>
-                <p class="text-gray-500 text-sm">with code <span class="font-bold text-orange-600">${code}</span></p>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-        
-        // Confetti effect
-        if(typeof confetti === 'function') {
-            confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 }, colors: ['#10B981', '#F59E0B', '#EF4444'] });
-        }
-        
-        // Remove after 2 seconds
-        setTimeout(() => {
-            overlay.classList.add('opacity-0');
-            setTimeout(() => overlay.remove(), 300);
-        }, 2000);
+        renderOffers();
+        toggleOffers();
     };
 
     window.openPaymentModal = () => {
@@ -2396,143 +1505,11 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
          }, 200);
     };
 
-    // --- CRITICAL FIX FOR BACK TO HOME BUTTON ---
-    const originalResetAppLogic = () => {
-        // 1. Hide Success Screen
-        const s = document.getElementById('success-screen');
-        if (s) {
-            s.classList.add('hidden');
-            s.classList.remove('flex');
-        }
-
-        // 2. Hide Rating Widget (if active)
-        const ratingWidget = document.getElementById('rating-widget');
-        if (ratingWidget) {
-            ratingWidget.classList.add('hidden');
-            ratingWidget.classList.remove('flex');
-        }
-
-        // 3. Force Close Checkout Sheet (Critical: otherwise it blocks main app)
-        const checkoutSheet = document.getElementById('checkout-sheet');
-        if (checkoutSheet) {
-            checkoutSheet.classList.add('hidden');
-            // Reset internal animations for next time
-            const bg = document.getElementById('checkout-bg');
-            const panel = document.getElementById('checkout-panel');
-            if(bg) bg.classList.add('opacity-0');
-            if(panel) panel.classList.add('translate-y-full');
-        }
-
-        // 4. Force Close Payment Modal
-        const payModal = document.getElementById('payment-modal');
-        if (payModal) {
-             payModal.classList.add('hidden');
-             payModal.classList.remove('flex');
-        }
-
-        // 5. Reset Cart Data
-        window.wowCart = [];
-        if(window.saveCartToStorage) window.saveCartToStorage();
-        if(window.updateCartBar) window.updateCartBar();
-
-        // 6. Ensure Main App is Visible
-        const mainApp = document.getElementById('main-app');
-        if (mainApp) {
-            mainApp.classList.remove('hidden');
-            mainApp.classList.remove('opacity-0');
-            mainApp.classList.add('fade-in'); // Trigger fade in animation
-            mainApp.style.opacity = '1'; // Force opacity just in case
-        }
-    };
-    
-    // Override resetApp to include cleanup (robust)
     window.resetApp = () => {
-        console.log("🏠 Resetting app to home...");
-
-        // Cleanup payment status listener (if it's an unsubscribe function)
-        try {
-            if (window.paymentStatusListener && typeof window.paymentStatusListener === 'function') {
-                console.log("🧹 Cleaning up payment status listener");
-                try { window.paymentStatusListener(); } catch(e) { console.warn('Listener unsubscribe failed', e); }
-            }
-        } catch (e) { console.warn('Error while cleaning payment listener', e); }
-
-        window.paymentStatusListener = null;
-
-        // Reset order tracking
-        window.currentOrderId = null;
-        window.currentRTDBKey = null;
-        window.currentDocId = null;
-        window.currentOrderPaid = false;
-
-        // Hide success screen, rating widget and any open modals/overlays
-        try {
-            const idsToHide = ['success-screen','rating-widget','checkout-sheet','payment-modal','notif-modal','bill-detail-modal','custom-modal','info-modal'];
-            idsToHide.forEach(id => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                el.classList.add('hidden');
-                el.classList.remove('flex');
-                // reset specific internal states
-                if (id === 'checkout-sheet') {
-                    const bg = document.getElementById('checkout-bg');
-                    const panel = document.getElementById('checkout-panel');
-                    if (bg) bg.classList.add('opacity-0');
-                    if (panel) panel.classList.add('translate-y-full');
-                }
-                if (id === 'payment-modal') {
-                    const panel = document.getElementById('payment-panel');
-                    if (panel) {
-                        panel.classList.remove('scale-100','opacity-100');
-                        panel.classList.add('scale-95','opacity-0');
-                    }
-                }
-            });
-        } catch(e) { console.warn('Error hiding modals', e); }
-
-        // Reset cart data and UI using original logic
-        try { originalResetAppLogic(); } catch(e) { console.warn('originalResetAppLogic missing or failed', e); }
-
-        // Ensure main app is visible as a last step
-        try {
-            const mainApp = document.getElementById('main-app');
-            if (mainApp) {
-                mainApp.classList.remove('hidden');
-                mainApp.classList.remove('opacity-0');
-                mainApp.classList.add('fade-in');
-                mainApp.style.opacity = '1';
-            }
-        } catch(e) {}
-
-        // Small delay to ensure visuals update
-        setTimeout(() => console.log("✅ App reset to home"), 120);
+        const s = document.getElementById('success-screen');
+        s.classList.add('hidden');
+        s.classList.remove('flex');
     };
-
-        // Ensure back-to-home button reliably triggers reset (attach handler and log)
-        try {
-            const btnHome = document.getElementById('btn-home');
-            if (btnHome) {
-                btnHome.removeAttribute('onclick');
-                btnHome.addEventListener('click', (e) => {
-                    console.log('🔘 btn-home clicked');
-                    try { window.resetApp(); } catch(err) { console.error('resetApp failed', err); }
-                });
-            } else {
-                console.warn('btn-home not found to attach listener');
-            }
-        } catch(e) { console.warn('Error attaching btn-home listener', e); }
-
-        // Fallback delegated listener to catch clicks even if element changes
-        document.addEventListener('click', (e) => {
-            try {
-                const btn = e.target.closest && e.target.closest('#btn-home');
-                if (btn) {
-                    console.log('🔘 delegated btn-home click');
-                    e.preventDefault();
-                    try { window.resetApp(); } catch(err) { console.error('resetApp failed (delegated)', err); }
-                }
-            } catch(err) { /* ignore */ }
-        });
 
     window.setOrderType = (t) => {
         window.orderType = t;
@@ -2552,53 +1529,14 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
         document.getElementById('hist-total').innerText = order.amount;
         document.getElementById('hist-date').innerText = `${order.date} at ${order.time}`;
         
-        // Show detailed breakdown
-        document.getElementById('hist-subtotal').innerText = order.subtotal || order.amount;
-        document.getElementById('hist-tax').innerText = order.tax || '0.00';
-        document.getElementById('hist-tax-percent').innerText = order.taxPercent || '5';
-        document.getElementById('hist-fee').innerText = order.fee || '1.98';
-        
-        // Discount
-        if (order.discount && order.discount > 0) {
-            document.getElementById('hist-discount-row').classList.remove('hidden');
-            document.getElementById('hist-discount').innerText = order.discount;
-        } else {
-            document.getElementById('hist-discount-row').classList.add('hidden');
-        }
-        
-        // Donation
-        if (order.donation && order.donation > 0) {
-            document.getElementById('hist-donation-row').classList.remove('hidden');
-            document.getElementById('hist-donation').innerText = order.donation;
-        } else {
-            document.getElementById('hist-donation-row').classList.add('hidden');
-        }
-        
-        // Payment status
-        const badge = document.getElementById('hist-payment-badge');
-        if (order.paymentStatus === 'paid' || order.paid) {
-            badge.className = 'mt-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold inline-block';
-            badge.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Paid';
-        } else {
-            badge.className = 'mt-2 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold inline-block';
-            badge.innerHTML = '<i class="fas fa-clock mr-1"></i> Pending';
-        }
-        
-        // Payment method & table
-        document.getElementById('hist-method').innerText = (order.paymentMethod || 'Cash') + ' Payment';
-        document.getElementById('hist-table').innerText = order.table ? `Table: ${order.table}` : (order.orderType || 'Dine-in');
-        
         const container = document.getElementById('hist-items');
         container.innerHTML = order.items.map(i => `
-            <div class="flex justify-between text-sm p-2 bg-white rounded-lg border border-gray-100">
-                <div class="flex-1">
+            <div class="flex justify-between text-sm">
+                <div>
                     <span class="text-gray-800 font-bold block">${i.name}</span>
-                    <span class="text-[10px] text-gray-500">${i.variantDetails || ''}</span>
+                    <span class="text-[10px] text-gray-500">[${i.variantDetails}]</span>
                 </div>
-                <div class="text-right">
-                    <span class="text-gray-600 font-bold">x${i.qty}</span>
-                    <span class="text-[10px] text-gray-400 block">₹${i.price || '--'}</span>
-                </div>
+                <span class="text-gray-500">x${i.qty}</span>
             </div>
         `).join('');
 
@@ -2616,11 +1554,11 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
             <p><strong>1. Payments:</strong> Currently accepting Cash on Counter only.</p>
             <p><strong>2. Refunds:</strong> Orders once prepared cannot be cancelled or refunded.</p>
             <p><strong>3. Outside Food:</strong> Consumption of outside food is strictly prohibited.</p>
-            <p><strong>4. Rights:</strong> Orderly reserves the right to admission.</p>
+            <p><strong>4. Rights:</strong> WowCafe reserves the right to admission.</p>
         `,
         'Contact': `
             <p><i class="fas fa-phone mr-2 text-orange-500"></i> +91 98765 43210</p>
-            <p><i class="fas fa-envelope mr-2 text-orange-500"></i> help@orderly.in</p>
+            <p><i class="fas fa-envelope mr-2 text-orange-500"></i> help@wowcafe.in</p>
             <p><i class="fas fa-map-marker-alt mr-2 text-orange-500"></i> Shop 12, Food Court, City Mall.</p>
         `,
         'Help': `
@@ -2643,4 +1581,4 @@ console.log("Connected to Restaurant:", RESTAURANT_ID);
     }
 </script>
 </body>
-    </html>
+</html>
