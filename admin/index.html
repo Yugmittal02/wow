@@ -28,14 +28,6 @@
         #initial-loader .brand { color: #f97316; font-size: 1.75rem; font-weight: 800; text-align: center; }
         #initial-loader .sub { color: #9ca3af; font-size: 0.9rem; margin-top: 10px; text-align: center; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* Graph ko bada hone se rokne ke liye */
-        .chart-container {
-            position: relative;
-            margin: auto;
-            height: 300px !important; /* Fixed Height */
-            width: 100%;
-            overflow: hidden;
-        }
     </style>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -530,11 +522,11 @@
                     <i class="fas fa-headset text-orange-600"></i> Contact Administrator
                 </h3>
                 <div class="space-y-2">
-                    <a href="tel:+918619152422" class="flex items-center gap-3 text-gray-600 hover:text-orange-600 transition">
+                    <a href="tel:+919876543210" class="flex items-center gap-3 text-gray-600 hover:text-orange-600 transition">
                         <i class="fas fa-phone w-5"></i>
-                        <span>+91 86191 52422</span>
+                        <span>+91 98765 43210</span>
                     </a>
-                    <a href="https://wa.me/918619152422" target="_blank" class="flex items-center gap-3 text-gray-600 hover:text-green-600 transition">
+                    <a href="https://wa.me/919876543210" target="_blank" class="flex items-center gap-3 text-gray-600 hover:text-green-600 transition">
                         <i class="fab fa-whatsapp w-5"></i>
                         <span>WhatsApp Support</span>
                     </a>
@@ -556,7 +548,7 @@
             <div class="max-w-7xl mx-auto flex items-center justify-center gap-3">
                 <i class="fas fa-exclamation-triangle text-yellow-300 text-lg"></i>
                 <span class="font-bold text-sm">⚠️ LOW BALANCE ALERT: Your wallet balance is below ₹100. Recharge now to avoid service interruption!</span>
-                <a href="https://wa.me/918619152422?text=Hi,%20I%20need%20to%20recharge%20my%20Orderly%20wallet" target="_blank" class="pointer-events-auto bg-white text-red-600 px-4 py-1.5 rounded-lg font-bold text-xs hover:bg-red-50 transition">
+                <a href="https://wa.me/919876543210?text=Hi,%20I%20need%20to%20recharge%20my%20Orderly%20wallet" target="_blank" class="pointer-events-auto bg-white text-red-600 px-4 py-1.5 rounded-lg font-bold text-xs hover:bg-red-50 transition">
                     <i class="fab fa-whatsapp mr-1"></i> Recharge Now
                 </a>
             </div>
@@ -1474,54 +1466,6 @@
                 <div id="section-offers" class="hide-section fade-in space-y-6 w-full max-w-7xl mx-auto">
                     <h2 class="text-2xl font-bold text-gray-800">Offers & Banners</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="offers-container"></div>
-                    
-                    <!-- Spin Wheel Management Section -->
-                    <div class="mt-8 glass-card p-6 rounded-2xl border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">🎡 Spin Wheel Management</h3>
-                                <p class="text-xs text-gray-500">Control spin wheel visibility and configure prizes for customers</p>
-                            </div>
-                            <div class="flex items-center gap-4">
-                                <!-- Wheel On/Off Toggle -->
-                                <div class="flex items-center gap-3 bg-white px-4 py-3 rounded-xl border border-purple-200 shadow-sm">
-                                    <i class="fas fa-dharmachakra text-purple-600 text-xl"></i>
-                                    <div>
-                                        <label for="wheel-enabled-toggle" class="text-sm font-bold text-gray-700 cursor-pointer block">Show Wheel</label>
-                                        <span class="text-[10px] text-gray-400">Toggle customer wheel</span>
-                                    </div>
-                                    <label class="relative inline-flex items-center cursor-pointer ml-2">
-                                        <input type="checkbox" id="wheel-enabled-toggle" onchange="toggleWheelEnabled()" class="sr-only peer">
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                                    </label>
-                                </div>
-                                <button onclick="openWheelPrizeModal()" class="px-4 py-2 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 shadow-lg">
-                                    <i class="fas fa-plus mr-2"></i>Add Prize
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Wheel Status Card -->
-                        <div id="wheel-status-card" class="mb-4 p-4 bg-white rounded-xl border border-gray-200">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <div id="wheel-status-icon" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                        <i class="fas fa-dharmachakra text-gray-400"></i>
-                                    </div>
-                                    <div>
-                                        <p class="font-bold text-gray-800" id="wheel-status-text">Wheel Status Loading...</p>
-                                        <p class="text-xs text-gray-500" id="wheel-prize-count">0 prizes configured</p>
-                                    </div>
-                                </div>
-                                <span id="wheel-status-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600">Loading...</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Prizes Grid -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3" id="wheel-prizes-container">
-                            <p class="col-span-full text-center text-gray-400 py-8">Loading wheel prizes...</p>
-                        </div>
-                    </div>
                 </div>
 
                 <div id="section-orders" class="hide-section fade-in w-full max-w-7xl mx-auto">
@@ -1624,9 +1568,7 @@
                                 <option value="30" selected>Last 30 Days</option>
                             </select>
                         </div>
-                        <div class="chart-container">
-                            <canvas id="revenue-chart"></canvas>
-                        </div>
+                        <canvas id="revenue-chart" height="200"></canvas>
                     </div>
 
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -2640,87 +2582,6 @@
                     class="w-full bg-red-50 text-red-600 font-bold py-2 rounded-xl hover:bg-red-100 border border-red-100 text-sm">Remove
                     Offer</button>
             </div>
-        </div>
-    </div>
-
-    <!-- Wheel Prize Editor Modal -->
-    <div id="wheel-prize-modal" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
-            <div class="p-4 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-pink-50 flex justify-between items-center">
-                <h3 class="font-bold text-lg text-purple-800">🎡 Edit Wheel Prize</h3>
-                <button onclick="closeWheelPrizeModal()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="p-6 space-y-4">
-                <input type="hidden" id="wheel-prize-id">
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Prize Text *</label>
-                    <input type="text" id="wheel-prize-text" placeholder="e.g. 10% OFF, ₹50 OFF, FREE Drink"
-                        class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Value</label>
-                        <input type="number" id="wheel-prize-value" placeholder="e.g. 10, 50, 100"
-                            class="w-full border p-3 rounded-xl outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Type</label>
-                        <select id="wheel-prize-type" class="w-full border p-3 rounded-xl outline-none">
-                            <option value="percent">Percentage (%)</option>
-                            <option value="flat">Flat Amount (₹)</option>
-                            <option value="free">Free Item</option>
-                            <option value="tryagain">Try Again (No Prize)</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Segment Color</label>
-                    <div class="flex gap-2 flex-wrap">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="wheel-color" value="#ef4444" class="sr-only" checked>
-                            <span class="w-8 h-8 rounded-full bg-red-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="wheel-color" value="#f59e0b" class="sr-only">
-                            <span class="w-8 h-8 rounded-full bg-amber-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="wheel-color" value="#10b981" class="sr-only">
-                            <span class="w-8 h-8 rounded-full bg-emerald-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="wheel-color" value="#3b82f6" class="sr-only">
-                            <span class="w-8 h-8 rounded-full bg-blue-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="wheel-color" value="#8b5cf6" class="sr-only">
-                            <span class="w-8 h-8 rounded-full bg-purple-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="wheel-color" value="#ec4899" class="sr-only">
-                            <span class="w-8 h-8 rounded-full bg-pink-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="wheel-color" value="#14b8a6" class="sr-only">
-                            <span class="w-8 h-8 rounded-full bg-teal-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="wheel-color" value="#6b7280" class="sr-only">
-                            <span class="w-8 h-8 rounded-full bg-gray-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
-                        </label>
-                    </div>
-                </div>
-                <button onclick="saveWheelPrize()"
-                    class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-purple-700">
-                    <i class="fas fa-save mr-2"></i>Save Prize
-                </button>
-                <button onclick="deleteWheelPrize()" id="btn-delete-wheel-prize"
-                    class="w-full bg-red-50 text-red-600 font-bold py-2 rounded-xl hover:bg-red-100 border border-red-100 text-sm hidden">
-                    <i class="fas fa-trash mr-2"></i>Delete Prize
-                </button>
-            </div>
-        </div>
-    </div>
         </div>
     </div>
 
@@ -3962,7 +3823,6 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <script type="module">
-
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getDatabase, ref, onValue, update, push, set, get, orderByChild } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
         import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, getDoc, onSnapshot, query, orderBy, limit, serverTimestamp, setDoc, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
@@ -3981,30 +3841,6 @@
         const app = initializeApp(firebaseConfig);
         const dbRTDB = getDatabase(app);
         const dbFirestore = getFirestore(app);
-
-        // Expose Firestore and helpers to window for use in non-module scripts
-        window.dbFirestore = dbFirestore;
-        window.collection = collection;
-        window.addDoc = addDoc;
-        window.updateDoc = updateDoc;
-        window.deleteDoc = deleteDoc;
-        window.doc = doc;
-        window.serverTimestamp = serverTimestamp;
-        window.onSnapshot = onSnapshot;
-        window.getDocs = getDocs;
-        window.query = query;
-        window.orderBy = orderBy;
-        window.limit = limit;
-        window.setDoc = setDoc;
-        window.getDoc = getDoc;
-        window.where = where;
-
-        // Expose save functions to window (if not already)
-        if (typeof window.saveInventoryItem !== 'function') window.saveInventoryItem = async () => {};
-        if (typeof window.saveTable !== 'function') window.saveTable = async () => {};
-        if (typeof window.saveStaff !== 'function') window.saveStaff = async () => {};
-        if (typeof window.saveExpense !== 'function') window.saveExpense = async () => {};
-        if (typeof window.saveSupplier !== 'function') window.saveSupplier = async () => {};
 
         // =====================================================
         // ðŸ›¡ï¸ SECURITY & CRASH PREVENTION SYSTEM v3.0
@@ -4482,8 +4318,6 @@
             initMenuLogic();
             initAddons();
             initOffers();
-            initWheelPrizes();
-            initWheelSettings();
             initSystemMonitors();
             window.addSizeRow();
             
@@ -5022,18 +4856,14 @@
 
         // Helper: UI Update (To keep code clean)
         const updateWalletUI = (balance) => {
-            const safeBalance = (typeof balance === 'number' && !isNaN(balance)) ? balance : 0;
-            const displayVal = `₹${safeBalance.toFixed(2)}`;
-            // Sidebar wallet
-            const elSidebar = document.getElementById('admin-wallet-display');
-            if(elSidebar) elSidebar.innerText = displayVal;
-            // Mobile Header wallet
-            const elMobile = document.getElementById('admin-wallet-mobile');
-            if(elMobile) elMobile.innerText = displayVal;
-            // *** FIX: Dashboard Card Wallet ***
-            const elDash = document.getElementById('dash-wallet-balance');
-            if(elDash) elDash.innerText = displayVal;
-            // Low Balance Warning Logic
+            const displayVal = `Rs.${balance.toFixed(2)}`;
+            const els = ['admin-wallet-display', 'admin-wallet-mobile', 'dash-wallet-balance'];
+            els.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.innerText = displayVal;
+            });
+
+            // Low Balance Warning
             const alertOverlay = document.getElementById('low-balance-overlay');
             if (alertOverlay) {
                 if (balance < 100) {
@@ -5047,15 +4877,6 @@
         };
 
         window.showToast = (msg, type = "success") => {
-
-            // Ensure wallet UI updates after DOM is loaded (in case listener is late)
-            document.addEventListener('DOMContentLoaded', () => {
-                if (typeof window.currentAdminBalance !== 'undefined') {
-                    updateWalletUI(window.currentAdminBalance);
-                } else {
-                    updateWalletUI(0);
-                }
-            });
             let bg = type === "success" ? "#10B981" : "#EF4444";
             if (type === "info") bg = "#3B82F6";
             if (type === "warning") bg = "#F59E0B";
@@ -5067,48 +4888,34 @@
 
         // --- NAVIGATION - STRICT VISIBILITY CONTROL ---
         window.switchTab = (tabName) => {
-            // *** FIX: Yahan saare tabs ke ID hone chahiye ***
-            const allTabs = [
-                'dashboard', 'live', 'pos', 'menu', 'inventory', 
-                'tables', 'staff', 'expenses', 'suppliers', 
-                'orders', 'transactions', 'crm', 'reports', 'offers', 'settings'
-            ];
-            allTabs.forEach(id => {
+            const tabs = ['dashboard', 'live', 'menu', 'orders', 'offers', 'transactions', 'pos', 'crm', 'settings', 'reports'];
+
+            tabs.forEach(id => {
                 const section = document.getElementById(`section-${id}`);
                 const nav = document.getElementById(`nav-${id}`);
-                // Sabko chupao
+
                 if (section) {
-                    section.classList.add('hide-section');
-                    section.classList.remove('fade-in'); // Animation reset
+                    section.classList.add('hide-section'); // Force hide
+                    if (id === tabName) {
+                        section.classList.remove('hide-section'); // Show target
+                    }
                 }
+
                 if (nav) {
                     nav.classList.remove('active');
-                }
-                // Jo chahiye use dikhao
-                if (id === tabName) {
-                    if (section) {
-                        section.classList.remove('hide-section');
-                        section.classList.add('fade-in'); // Animation add
-                    }
-                    if (nav) {
-                        nav.classList.add('active');
-                    }
+                    if (id === tabName) nav.classList.add('active');
                 }
             });
-            // Mobile sidebar auto-close
+
             if (window.innerWidth < 768) {
                 const sidebar = document.getElementById('sidebar');
-                if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
-                    window.toggleSidebar();
-                }
+                if (sidebar.classList.contains('sidebar-open')) window.toggleSidebar();
             }
-            // Data refresh on tab switch (Performance ke liye)
-            if (tabName === 'dashboard') window.updateDashboardStats();
-            if (tabName === 'inventory') window.renderInventoryTable();
-            if (tabName === 'expenses') window.calculateExpenseStats();
-            if (tabName === 'suppliers') window.renderSuppliersTable();
-            if (tabName === 'staff') window.renderStaffTable();
-            if (tabName === 'crm') window.processCRMData(); // CRM tab khulte hi data refresh
+            
+            // Update dashboard when switching to it
+            if (tabName === 'dashboard') {
+                updateDashboardStats();
+            }
         };
 
         window.toggleSidebar = () => {
@@ -5181,11 +4988,6 @@
                     let liveHtml = "";
                     let pending = 0, prep = 0, ready = 0, completed = 0;
                     let activeCount = 0;
-
-                    // Real-time update for dashboard stats
-                    if (typeof window.updateDashboardStats === 'function') {
-                        window.updateDashboardStats();
-                    }
 
                     if (data) {
                         const ordersArr = Object.keys(data).map(key => ({ id: key, ...data[key] }));
@@ -5499,11 +5301,11 @@
                 item.sizes.forEach((s, idx) => {
                     const isChecked = (idx === defaultSizeIndex) ? 'checked' : '';
                     sizeHtml += `
-<label class="flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50">
-    <div class="flex items-center gap-2"><input type="radio" name="pos_size" value="${idx}" ${isChecked} onchange="recalcPOSModalPrice()"><span class="text-sm font-medium">${s.name}</span></div>
-    <span class="text-xs font-bold">₹${s.price}</span>
-</label>
-`;
+            < label class="flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50">
+                            <div class="flex items-center gap-2"><input type="radio" name="pos_size" value="${idx}" ${isChecked} onchange="recalcPOSModalPrice()"><span class="text-sm font-medium">${s.name}</span></div>
+                            <span class="text-xs font-bold">₹${s.price}</span>
+                        </label >
+            `;
                 });
                 sizeList.innerHTML = sizeHtml;
             } else { sizeDiv.classList.add('hidden'); sizeList.innerHTML = ""; }
@@ -5515,11 +5317,11 @@
                     const addon = window.universalAddons[addonId];
                     if(addon) {
                         addonHtml += `
-<label class="flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50">
-    <div class="flex items-center gap-2"><input type="checkbox" class="pos-addon-check" value="${addonId}" data-price="${addon.price}" onchange="recalcPOSModalPrice()"><span class="text-sm font-medium">${addon.name}</span></div>
-    <span class="text-xs font-bold">+₹${addon.price}</span>
-</label>
-`;
+            < label class="flex justify-between items-center p-2 border rounded cursor-pointer hover:bg-orange-50">
+                                <div class="flex items-center gap-2"><input type="checkbox" class="pos-addon-check" value="${addonId}" data-price="${addon.price}" onchange="recalcPOSModalPrice()"><span class="text-sm font-medium">${addon.name}</span></div>
+                                <span class="text-xs font-bold">+₹${addon.price}</span>
+                            </label >
+            `;
                     }
                 });
                 addonList.innerHTML = addonHtml;
@@ -5590,35 +5392,23 @@
             window.posCart.forEach((item, index) => {
                 total += item.price * item.qty;
                 let details = "";
-                // Size ka display fix
-                if(item.size) {
-                    details += `<span class="bg-orange-100 text-orange-800 text-[10px] px-1 rounded mr-1">${item.size}</span>`;
-                }
-                // *** FIX: Add-ons ka display clean kiya ***
-                if(item.addons && item.addons.length > 0) {
-                    // Sirf naam dikhayenge comma laga ke
-                    const addonNames = item.addons.map(a => a.name).join(', ');
-                    details += `<span class="text-xs text-gray-500 block mt-0.5"><i class="fas fa-plus-circle text-[10px]"></i> ${addonNames}</span>`;
-                }
+                if(item.size) details += `<span class="bg-orange-100 text-orange-800 text-[10px] px-1 rounded"> ${ item.size }</span> `;
+                if(item.addons && item.addons.length > 0) details += `<span class="text-xs text-gray-500"> + ${ item.addons.map(a => a.name).join(', ') }</span> `;
                 html += `
-                <div class="bg-gray-50 p-2 rounded-lg border border-gray-200 mb-2">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-bold text-gray-800 text-sm">${item.name}</p>
-                            <div class="mb-1">${details}</div>
-                            <p class="text-xs text-gray-500">₹${item.price} x ${item.qty}</p>
-                        </div>
-                        <div class="flex items-center gap-2 h-fit mt-1">
-                            <button onclick="posAdjustQty(${index}, -1)" class="w-6 h-6 bg-white border rounded text-xs hover:bg-gray-100">-</button>
-                            <span class="text-sm font-bold w-4 text-center">${item.qty}</span>
-                            <button onclick="posAdjustQty(${index}, 1)" class="w-6 h-6 bg-white border rounded text-xs hover:bg-gray-100">+</button>
-                        </div>
+        <div class="bg-gray-50 p-2 rounded-lg border border-gray-200">
+        <div class="flex justify-between">
+            <div><p class="font-bold text-gray-800 text-sm">${item.name}</p><div class="mb-1">${details}</div><p class="text-xs text-gray-500">₹${item.price} x ${item.qty}</p></div>
+            <div class="flex items-center gap-2 h-fit">
+                <button onclick="posAdjustQty(${index}, -1)" class="w-6 h-6 bg-white border rounded text-xs">-</button>
+                <span class="text-sm font-bold w-4 text-center">${item.qty}</span>
+                <button onclick="posAdjustQty(${index}, 1)" class="w-6 h-6 bg-white border rounded text-xs">+</button>
+            </div>
+        </div>
                     </div>
-                </div>
-                `;
+            `;
             });
             container.innerHTML = html;
-            document.getElementById('pos-total-price').innerText = `₹${total}`;
+            document.getElementById('pos-total-price').innerText = `₹${ total }`;
         };
         window.posAdjustQty = (index, change) => {
             if(window.posCart[index].qty + change <= 0) window.posCart.splice(index, 1);
@@ -6048,96 +5838,36 @@
         }
 
         // --- CRM LOGIC ---
-
         window.processCRMData = () => {
             try {
-                const customersMap = {};
-                // Orders history se customer data nikal rahe hain
-                if(window.fullHistoryData && window.fullHistoryData.length > 0){
-                    window.fullHistoryData.forEach(order => {
-                        // Mobile number clean kar rahe hain (spaces hata ke)
-                        const rawMob = order.customerMobile || order.mobile || order.phone;
-                        if (rawMob && String(rawMob).trim().length > 5) {
-                            const key = String(rawMob).trim();
-                            if (!customersMap[key]) {
-                                customersMap[key] = {
-                                    id: order.orderId, // Temp ID
-                                    name: order.customerName || order.name || "Unknown",
-                                    mobile: key,
-                                    visits: 0,
-                                    lastVisit: new Date(0), // Old date init
-                                    spent: 0
-                                };
-                            }
-                            // Stats calculation
-                            customersMap[key].visits++;
-                            customersMap[key].spent += Number(order.totalAmount || order.total || 0);
-                            // Check date validity
-                            const oDate = order.jsDate || new Date(order.timestamp);
-                            if (oDate > customersMap[key].lastVisit) {
-                                customersMap[key].lastVisit = oDate;
-                            }
+                const customers = {};
+                window.fullHistoryData.forEach(order => {
+                    const mob = order.customerMobile || order.mobile;
+                    if (mob && String(mob).trim().length > 5) {
+                        const key = String(mob).trim();
+                        if (!customers[key]) {
+                            customers[key] = {
+                                name: sanitizer.escapeHtml(order.customerName || order.name || "Unknown"),
+                                mobile: sanitizer.escapeHtml(key),
+                                visits: 0,
+                                lastVisit: order.jsDate
+                            };
                         }
-                    });
-                }
-                // Object ko Array mein convert karo
-                window.crmData = Object.values(customersMap);
-                // *** FIX: UI Update Turant Karo ***
-                // Count update
-                const totalCustomers = window.crmData.length;
-                const crmTotalEl = document.getElementById('crm-total');
-                if(crmTotalEl) crmTotalEl.innerText = totalCustomers; // Yahan count update hoga
-                // Active customers (Last 30 days)
-                const now = new Date();
-                const activeCount = window.crmData.filter(c => {
-                    const diffTime = Math.abs(now - c.lastVisit);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                    return diffDays <= 30;
-                }).length;
-                const crmActiveEl = document.getElementById('crm-active');
-                if(crmActiveEl) crmActiveEl.innerText = activeCount;
-                // Table render karo
+                        customers[key].visits++;
+                        if (order.jsDate > customers[key].lastVisit) customers[key].lastVisit = order.jsDate;
+                    }
+                });
+                window.crmData = Object.values(customers);
+                // ðŸ›¡ï¸ MEMORY PROTECTION
+                window.crmData = memoryGuard.checkArraySize(window.crmData, 'crmData');
                 window.visibleCRMCount = 0;
                 document.getElementById('crm-table').innerHTML = "";
                 window.renderCRMBatch();
             } catch (error) {
-                console.error('CRM Processing error:', error);
+                console.error('ðŸ”´ CRM Processing error:', error);
+                window.showToast('Error processing customer data', 'error');
             }
         };
-
-        // Update CRM summary cards (customer tab)
-        function updateCRMStats() {
-            const total = window.crmData.length;
-            // Active = customers with visits in last 30 days
-            const now = new Date();
-            const active = window.crmData.filter(c => {
-                const last = c.lastVisit;
-                if (!last) return false;
-                const diff = (now - last) / (1000 * 60 * 60 * 24);
-                return diff <= 30;
-            }).length;
-            // Birthdays this month
-            const month = now.getMonth();
-            const birthdays = window.crmData.filter(c => {
-                if (!c.birthday) return false;
-                const bday = new Date(c.birthday);
-                return bday.getMonth() === month;
-            }).length;
-            // Top spenders (at least 1 order, sorted by spent)
-            const topSpenders = window.crmData
-                .filter(c => c.spent > 0)
-                .sort((a, b) => b.spent - a.spent)
-                .slice(0, 1);
-
-            const totalEl = document.getElementById('crm-total');
-            const activeEl = document.getElementById('crm-active');
-            const bdayEl = document.getElementById('crm-birthdays');
-            const vipEl = document.getElementById('crm-vip');
-            if (totalEl) totalEl.textContent = total;
-            if (activeEl) activeEl.textContent = active;
-            if (bdayEl) bdayEl.textContent = birthdays;
-            if (vipEl) vipEl.textContent = topSpenders.length > 0 ? topSpenders[0].name : '0';
-        }
 
         window.renderCRMBatch = () => {
             const table = document.getElementById('crm-table');
@@ -6211,7 +5941,6 @@
             const name = document.getElementById('m-name').value.trim();
             const price = document.getElementById('m-price').value;
             const isBestSeller = document.getElementById('m-bestseller').checked;
-            const isAvailable = document.getElementById('m-available').checked; // Read availability status
 
             if (!name || !price) return window.showToast("Name & Display Price required", "error");
 
@@ -6236,16 +5965,10 @@
             document.querySelectorAll('.addon-checkbox:checked').forEach(cb => linkedAddons.push(cb.value));
 
             const data = {
-                name, 
-                price: Number(price), 
-                category: document.getElementById('m-cat').value,
-                desc: document.getElementById('m-desc').value, 
-                img: document.getElementById('m-img').value,
+                name, price: Number(price), category: document.getElementById('m-cat').value,
+                desc: document.getElementById('m-desc').value, img: document.getElementById('m-img').value,
                 isBestSeller: isBestSeller,
-                available: isAvailable, // Save availability status so Customer knows if item is available
-                sizes, 
-                linkedAddons, 
-                updatedAt: serverTimestamp()
+                sizes, linkedAddons, updatedAt: serverTimestamp()
             };
 
             try {
@@ -6277,7 +6000,6 @@
             document.getElementById('m-img').value = item.img || '';
             document.getElementById('m-edit-id').value = id;
             document.getElementById('m-bestseller').checked = item.isBestSeller || false;
-            document.getElementById('m-available').checked = item.available !== false; // Load availability (default true)
 
             document.getElementById('size-container').innerHTML = '';
             if (item.sizes && item.sizes.length > 0) item.sizes.forEach(s => window.addSizeRow(s.name, s.price));
@@ -6301,7 +6023,6 @@
             document.getElementById('m-price').value = '';
             document.getElementById('m-edit-id').value = '';
             document.getElementById('m-bestseller').checked = false;
-            document.getElementById('m-available').checked = true; // Reset to available (default)
             document.getElementById('size-container').innerHTML = '';
             window.addSizeRow();
             document.querySelectorAll('.addon-checkbox').forEach(cb => cb.checked = false);
@@ -6416,222 +6137,38 @@
 
         window.saveOfferData = async () => {
             const id = document.getElementById('offer-edit-id').value;
-            const canvas = document.getElementById('revenue-chart');
-            if (!canvas || !window.fullHistoryData || window.fullHistoryData.length === 0) return;
+            const txt = document.getElementById('offer-text-input').value;
+            const disc = document.getElementById('offer-disc-input').value;
+            const minVal = document.getElementById('offer-min-input').value;
+            const img = document.getElementById('offer-img-input').value;
 
-            const period = parseInt(document.getElementById('chart-period')?.value || 30);
-            const now = new Date();
-            const startDate = new Date(); startDate.setDate(startDate.getDate() - period);
-
-            // Group by date
-            const dailyRevenue = {};
-            for (let i = 0; i < period; i++) {
-                const d = new Date(now);
-                d.setDate(d.getDate() - i);
-                dailyRevenue[d.toDateString()] = 0;
-            }
-
-            window.fullHistoryData.forEach(o => {
-                if (o.jsDate && o.jsDate > startDate) {
-                    const key = o.jsDate.toDateString();
-                    if (dailyRevenue.hasOwnProperty(key)) {
-                        dailyRevenue[key] += Number(o.totalAmount) || Number(o.total) || 0;
-                    }
-                }
-            });
-
-            // Prepare chart data
-            const labels = Object.keys(dailyRevenue).reverse().map(d => {
-                const date = new Date(d);
-                return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-            });
-            const data = Object.values(dailyRevenue).reverse();
-
-            // Destroy existing chart instance if exists
-            if (window.revenueChartInstance) {
-                window.revenueChartInstance.destroy();
-            }
-
-            // Create new chart
-            const ctx = canvas.getContext('2d');
-            window.revenueChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Revenue',
-                        data: data,
-                        borderColor: '#22c55e',
-                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#22c55e',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false, // Graph ko failne se rokta hai
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => String.fromCharCode(0x20B9) + ctx.raw.toLocaleString('en-IN')
-                            }
-                        }
-                    },
-                    scales: {
-                        y: { beginAtZero: true },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        };
-
-        window.editWheelPrize = async (prizeId) => {
-            try {
-                const docSnap = await getDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "wheel_prizes", prizeId));
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    document.getElementById('wheel-prize-id').value = prizeId;
-                    document.getElementById('wheel-prize-text').value = data.text || '';
-                    document.getElementById('wheel-prize-value').value = data.value || 0;
-                    document.getElementById('wheel-prize-type').value = data.type || 'percent';
-                    
-                    // Set color
-                    const colorRadio = document.querySelector(`input[name="wheel-color"][value="${data.color}"]`);
-                    if (colorRadio) colorRadio.checked = true;
-                    
-                    document.getElementById('btn-delete-wheel-prize').classList.remove('hidden');
-                    document.getElementById('wheel-prize-modal').classList.remove('hidden');
-                }
-            } catch (e) {
-                console.error("Error loading prize:", e);
-            }
-        };
-
-        window.closeWheelPrizeModal = () => {
-            document.getElementById('wheel-prize-modal').classList.add('hidden');
-        };
-
-        window.saveWheelPrize = async () => {
-            const id = document.getElementById('wheel-prize-id').value;
-            const text = document.getElementById('wheel-prize-text').value.trim();
-            const value = Number(document.getElementById('wheel-prize-value').value) || 0;
-            const type = document.getElementById('wheel-prize-type').value;
-            const color = document.querySelector('input[name="wheel-color"]:checked')?.value || '#6b7280';
-
-            if (!text) {
-                window.showToast("Enter prize text", "error");
-                return;
-            }
-
-            const prizeData = {
-                text,
-                value,
-                type,
-                color,
-                isFlat: type === 'flat',
-                isFree: type === 'free',
-                updatedAt: serverTimestamp()
-            };
-
-            try {
-                if (id) {
-                    await updateDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "wheel_prizes", id), prizeData);
-                } else {
-                    prizeData.createdAt = serverTimestamp();
-                    prizeData.order = Date.now();
-                    await addDoc(collection(dbFirestore, "restaurants", RESTAURANT_ID, "wheel_prizes"), prizeData);
-                }
-                window.showToast("Prize saved!", "success");
-                window.closeWheelPrizeModal();
-            } catch (e) {
-                console.error("Save prize error:", e);
-                window.showToast("Failed to save", "error");
-            }
-        };
-
-        window.deleteWheelPrize = async () => {
-            const id = document.getElementById('wheel-prize-id').value;
             if (!id) return;
 
-            window.showConfirm(() => {
-                deleteDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "wheel_prizes", id))
-                    .then(() => {
-                        window.showToast("Prize deleted", "success");
-                        window.closeWheelPrizeModal();
-                    })
-                    .catch(e => window.showToast("Delete failed", "error"));
-            }, "Delete this prize?");
-        };
-
-        // ========== WHEEL TOGGLE FUNCTIONALITY ==========
-        window.toggleWheelEnabled = async () => {
-            const toggle = document.getElementById('wheel-enabled-toggle');
-            const isEnabled = toggle.checked;
-            
             try {
-                await setDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "settings", "wheel"), {
-                    enabled: isEnabled,
-                    updatedAt: serverTimestamp()
+                await setDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "site_cards", id), {
+                    offerText: txt,
+                    discount: Number(disc),
+                    minOrderValue: Number(minVal),
+                    img
                 }, { merge: true });
-                
-                updateWheelStatusUI(isEnabled);
-                window.showToast(isEnabled ? "Spin wheel enabled for customers!" : "Spin wheel disabled", isEnabled ? "success" : "info");
+                window.showToast("Offer Updated", "success");
+                window.closeOfferModal();
             } catch (e) {
-                console.error("Toggle wheel error:", e);
-                toggle.checked = !isEnabled; // Revert
-                window.showToast("Failed to update wheel status", "error");
+                window.showToast("Update Failed", "error");
             }
         };
 
-        const updateWheelStatusUI = (isEnabled) => {
-            const statusIcon = document.getElementById('wheel-status-icon');
-            const statusText = document.getElementById('wheel-status-text');
-            const statusBadge = document.getElementById('wheel-status-badge');
-            
-            if (isEnabled) {
-                statusIcon.className = 'w-10 h-10 rounded-full bg-green-100 flex items-center justify-center';
-                statusIcon.innerHTML = '<i class="fas fa-dharmachakra text-green-600 animate-spin"></i>';
-                statusText.textContent = 'Spin Wheel is Active';
-                statusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-600';
-                statusBadge.textContent = 'ENABLED';
-            } else {
-                statusIcon.className = 'w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center';
-                statusIcon.innerHTML = '<i class="fas fa-dharmachakra text-gray-400"></i>';
-                statusText.textContent = 'Spin Wheel is Disabled';
-                statusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600';
-                statusBadge.textContent = 'DISABLED';
-            }
-        };
+        window.deleteOfferData = async () => {
+            const id = document.getElementById('offer-edit-id').value;
+            if (!id) return;
 
-        const initWheelSettings = async () => {
-            if (!RESTAURANT_ID) return;
-            
-            // Listen for wheel settings changes
-            onSnapshot(doc(dbFirestore, "restaurants", RESTAURANT_ID, "settings", "wheel"), (docSnap) => {
-                const toggle = document.getElementById('wheel-enabled-toggle');
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    toggle.checked = data.enabled || false;
-                    updateWheelStatusUI(data.enabled || false);
-                } else {
-                    toggle.checked = false;
-                    updateWheelStatusUI(false);
-                }
-            });
-            
-            // Listen for prize count
-            onSnapshot(collection(dbFirestore, "restaurants", RESTAURANT_ID, "wheel_prizes"), (snap) => {
-                const prizeCount = snap.size;
-                const prizeCountEl = document.getElementById('wheel-prize-count');
-                if (prizeCountEl) {
-                    prizeCountEl.textContent = `${prizeCount} prize${prizeCount !== 1 ? 's' : ''} configured`;
-                }
-            });
+            try {
+                await deleteDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "site_cards", id));
+                window.showToast("Offer Removed", "success");
+                window.closeOfferModal();
+            } catch (e) {
+                window.showToast("Delete Failed", "error");
+            }
         };
 
         // ========== ADVANCED DASHBOARD ANALYTICS ==========
@@ -6647,15 +6184,12 @@
         };
 
         window.initSalesChart = () => {
-            const canvas = document.getElementById('salesChart');
-            if (!canvas) return;
-
-            // Destroy previous chart instance if exists
-            if (window.salesChartInstance) {
-                window.salesChartInstance.destroy();
-            }
-
-            window.salesChartInstance = new Chart(canvas, {
+            const ctx = document.getElementById('salesChart');
+            if (!ctx) return;
+            
+            if (salesChart) salesChart.destroy();
+            
+            salesChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -6674,7 +6208,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, // Graph ko failne se rokta hai
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: { display: false }
                     },
@@ -6717,9 +6251,8 @@
             today.setHours(0, 0, 0, 0);
             
             try {
-                // Get only last 500 orders for performance
-                const { query, limitToLast } = await import('https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js');
-                const ordersRef = query(ref(dbRTDB, `restaurants/${RESTAURANT_ID}/orders`), limitToLast(500));
+                // Get today's orders
+                const ordersRef = ref(dbRTDB, `restaurants/${RESTAURANT_ID}/orders`);
                 const snapshot = await get(ordersRef);
                 
                 if (snapshot.exists()) {
@@ -6942,8 +6475,7 @@
             }
             
             try {
-                const { query, limitToLast } = await import('https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js');
-                const ordersRef = query(ref(dbRTDB, `restaurants/${RESTAURANT_ID}/orders`), limitToLast(500));
+                const ordersRef = ref(dbRTDB, `restaurants/${RESTAURANT_ID}/orders`);
                 const snapshot = await get(ordersRef);
                 
                 if (!snapshot.exists()) {
@@ -7168,7 +6700,14 @@ Report generated by Orderly Admin Dashboard
         window.initDashboard = () => {
             initSalesChart();
             updateDashboardStats();
-            // setInterval removed to avoid repeated full data fetches
+            
+            // Auto-refresh dashboard every 30 seconds
+            setInterval(() => {
+                const dashSection = document.getElementById('section-dashboard');
+                if (dashSection && !dashSection.classList.contains('hide-section')) {
+                    updateDashboardStats();
+                }
+            }, 30000);
         };
 
         // Init - only focus on login pin, rest is handled by initAdminFeatures after validation
@@ -9819,142 +9358,3 @@ Report generated by Orderly Admin Dashboard
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
