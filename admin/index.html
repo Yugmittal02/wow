@@ -1466,6 +1466,22 @@
                 <div id="section-offers" class="hide-section fade-in space-y-6 w-full max-w-7xl mx-auto">
                     <h2 class="text-2xl font-bold text-gray-800">Offers & Banners</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="offers-container"></div>
+                    
+                    <!-- Spin Wheel Prizes Section -->
+                    <div class="mt-8">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">🎡 Spin Wheel Prizes</h3>
+                                <p class="text-xs text-gray-500">Configure prizes shown on customer spin wheel after payment</p>
+                            </div>
+                            <button onclick="openWheelPrizeModal()" class="px-4 py-2 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 shadow-lg">
+                                <i class="fas fa-plus mr-2"></i>Add Prize
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3" id="wheel-prizes-container">
+                            <p class="col-span-full text-center text-gray-400 py-8">Loading wheel prizes...</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="section-orders" class="hide-section fade-in w-full max-w-7xl mx-auto">
@@ -2582,6 +2598,87 @@
                     class="w-full bg-red-50 text-red-600 font-bold py-2 rounded-xl hover:bg-red-100 border border-red-100 text-sm">Remove
                     Offer</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Wheel Prize Editor Modal -->
+    <div id="wheel-prize-modal" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
+            <div class="p-4 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-pink-50 flex justify-between items-center">
+                <h3 class="font-bold text-lg text-purple-800">🎡 Edit Wheel Prize</h3>
+                <button onclick="closeWheelPrizeModal()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="wheel-prize-id">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Prize Text *</label>
+                    <input type="text" id="wheel-prize-text" placeholder="e.g. 10% OFF, ₹50 OFF, FREE Drink"
+                        class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Value</label>
+                        <input type="number" id="wheel-prize-value" placeholder="e.g. 10, 50, 100"
+                            class="w-full border p-3 rounded-xl outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Type</label>
+                        <select id="wheel-prize-type" class="w-full border p-3 rounded-xl outline-none">
+                            <option value="percent">Percentage (%)</option>
+                            <option value="flat">Flat Amount (₹)</option>
+                            <option value="free">Free Item</option>
+                            <option value="tryagain">Try Again (No Prize)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Segment Color</label>
+                    <div class="flex gap-2 flex-wrap">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="wheel-color" value="#ef4444" class="sr-only" checked>
+                            <span class="w-8 h-8 rounded-full bg-red-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="wheel-color" value="#f59e0b" class="sr-only">
+                            <span class="w-8 h-8 rounded-full bg-amber-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="wheel-color" value="#10b981" class="sr-only">
+                            <span class="w-8 h-8 rounded-full bg-emerald-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="wheel-color" value="#3b82f6" class="sr-only">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="wheel-color" value="#8b5cf6" class="sr-only">
+                            <span class="w-8 h-8 rounded-full bg-purple-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="wheel-color" value="#ec4899" class="sr-only">
+                            <span class="w-8 h-8 rounded-full bg-pink-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="wheel-color" value="#14b8a6" class="sr-only">
+                            <span class="w-8 h-8 rounded-full bg-teal-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="wheel-color" value="#6b7280" class="sr-only">
+                            <span class="w-8 h-8 rounded-full bg-gray-500 block ring-2 ring-transparent hover:ring-gray-300"></span>
+                        </label>
+                    </div>
+                </div>
+                <button onclick="saveWheelPrize()"
+                    class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-purple-700">
+                    <i class="fas fa-save mr-2"></i>Save Prize
+                </button>
+                <button onclick="deleteWheelPrize()" id="btn-delete-wheel-prize"
+                    class="w-full bg-red-50 text-red-600 font-bold py-2 rounded-xl hover:bg-red-100 border border-red-100 text-sm hidden">
+                    <i class="fas fa-trash mr-2"></i>Delete Prize
+                </button>
+            </div>
+        </div>
+    </div>
         </div>
     </div>
 
@@ -4318,6 +4415,7 @@
             initMenuLogic();
             initAddons();
             initOffers();
+            initWheelPrizes();
             initSystemMonitors();
             window.addSizeRow();
             
@@ -6169,6 +6267,124 @@
             } catch (e) {
                 window.showToast("Delete Failed", "error");
             }
+        };
+
+        // ========== SPIN WHEEL PRIZES MANAGEMENT ==========
+        const initWheelPrizes = () => {
+            if (!RESTAURANT_ID) return;
+            
+            onSnapshot(collection(dbFirestore, "restaurants", RESTAURANT_ID, "wheel_prizes"), (snap) => {
+                const prizes = [];
+                snap.forEach(d => prizes.push({ id: d.id, ...d.data() }));
+                
+                // Sort by order if exists
+                prizes.sort((a, b) => (a.order || 0) - (b.order || 0));
+                
+                let html = "";
+                if (prizes.length === 0) {
+                    html = `<p class="col-span-full text-center text-gray-400 py-8">No prizes configured. Add prizes to enable spin wheel for customers.</p>`;
+                } else {
+                    prizes.forEach((prize, idx) => {
+                        const typeLabel = prize.type === 'percent' ? '%' : prize.type === 'flat' ? '₹' : prize.type === 'free' ? '🎁' : '🔄';
+                        html += `
+                        <div onclick="editWheelPrize('${prize.id}')" class="cursor-pointer bg-white rounded-xl p-3 border-2 hover:border-purple-400 transition-all group shadow-sm">
+                            <div class="w-full h-16 rounded-lg mb-2 flex items-center justify-center text-white font-bold text-xs" style="background-color: ${prize.color || '#6b7280'}">
+                                ${prize.text}
+                            </div>
+                            <p class="text-xs text-gray-500 text-center">${typeLabel} ${prize.value || 0}</p>
+                        </div>`;
+                    });
+                }
+                document.getElementById('wheel-prizes-container').innerHTML = html;
+            });
+        };
+
+        window.openWheelPrizeModal = (prizeId = null) => {
+            document.getElementById('wheel-prize-id').value = '';
+            document.getElementById('wheel-prize-text').value = '';
+            document.getElementById('wheel-prize-value').value = '';
+            document.getElementById('wheel-prize-type').value = 'percent';
+            document.querySelector('input[name="wheel-color"][value="#ef4444"]').checked = true;
+            document.getElementById('btn-delete-wheel-prize').classList.add('hidden');
+            document.getElementById('wheel-prize-modal').classList.remove('hidden');
+        };
+
+        window.editWheelPrize = async (prizeId) => {
+            try {
+                const docSnap = await getDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "wheel_prizes", prizeId));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('wheel-prize-id').value = prizeId;
+                    document.getElementById('wheel-prize-text').value = data.text || '';
+                    document.getElementById('wheel-prize-value').value = data.value || 0;
+                    document.getElementById('wheel-prize-type').value = data.type || 'percent';
+                    
+                    // Set color
+                    const colorRadio = document.querySelector(`input[name="wheel-color"][value="${data.color}"]`);
+                    if (colorRadio) colorRadio.checked = true;
+                    
+                    document.getElementById('btn-delete-wheel-prize').classList.remove('hidden');
+                    document.getElementById('wheel-prize-modal').classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error("Error loading prize:", e);
+            }
+        };
+
+        window.closeWheelPrizeModal = () => {
+            document.getElementById('wheel-prize-modal').classList.add('hidden');
+        };
+
+        window.saveWheelPrize = async () => {
+            const id = document.getElementById('wheel-prize-id').value;
+            const text = document.getElementById('wheel-prize-text').value.trim();
+            const value = Number(document.getElementById('wheel-prize-value').value) || 0;
+            const type = document.getElementById('wheel-prize-type').value;
+            const color = document.querySelector('input[name="wheel-color"]:checked')?.value || '#6b7280';
+
+            if (!text) {
+                window.showToast("Enter prize text", "error");
+                return;
+            }
+
+            const prizeData = {
+                text,
+                value,
+                type,
+                color,
+                isFlat: type === 'flat',
+                isFree: type === 'free',
+                updatedAt: serverTimestamp()
+            };
+
+            try {
+                if (id) {
+                    await updateDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "wheel_prizes", id), prizeData);
+                } else {
+                    prizeData.createdAt = serverTimestamp();
+                    prizeData.order = Date.now();
+                    await addDoc(collection(dbFirestore, "restaurants", RESTAURANT_ID, "wheel_prizes"), prizeData);
+                }
+                window.showToast("Prize saved!", "success");
+                window.closeWheelPrizeModal();
+            } catch (e) {
+                console.error("Save prize error:", e);
+                window.showToast("Failed to save", "error");
+            }
+        };
+
+        window.deleteWheelPrize = async () => {
+            const id = document.getElementById('wheel-prize-id').value;
+            if (!id) return;
+
+            window.showConfirm(() => {
+                deleteDoc(doc(dbFirestore, "restaurants", RESTAURANT_ID, "wheel_prizes", id))
+                    .then(() => {
+                        window.showToast("Prize deleted", "success");
+                        window.closeWheelPrizeModal();
+                    })
+                    .catch(e => window.showToast("Delete failed", "error"));
+            }, "Delete this prize?");
         };
 
         // ========== ADVANCED DASHBOARD ANALYTICS ==========
@@ -9358,6 +9574,27 @@ Report generated by Orderly Admin Dashboard
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
