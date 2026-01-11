@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Wow Cafe | Premium App</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { corePlugins: { preflight: true } }</script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -683,9 +684,7 @@
     // Added 'id' parameter so Admin and Customer use the same ID
     const urlParams = new URLSearchParams(window.location.search);
     const RESTAURANT_ID = urlParams.get('id') || urlParams.get('r') || urlParams.get('restaurant') || 'Orderly';
-    console.log('ðŸª Restaurant ID:', RESTAURANT_ID);
-
-    window.rawMenuDocs = [];
+        window.rawMenuDocs = [];
     window.allAddons = {}; 
     window.currentDocId = null; // Store Firestore Document ID for rating
     window.customerSiteSettings = {}; // Store customer site settings (QR, UPI, etc.)
@@ -774,8 +773,7 @@
                 // Only show items that are available (available !== false)
                 // If available is undefined or true, show the item
                 if (item.available === false) {
-                    console.log("ðŸš« Item hidden (unavailable):", item.name);
-                    return; // Skip this item
+                    return; // Skip unavailable items
                 }
                 
                 let safeSizes = [];
@@ -1115,7 +1113,7 @@
                             usedAt: firestoreTimestamp(),
                             usedOnOrder: orderID
                         });
-                        console.log("âœ… Coupon marked as USED in DB:", usedOffer.code);
+                        // Coupon marked as used
                     } catch (e) {
                         console.error("Failed to mark coupon used", e);
                     }
@@ -1855,3 +1853,5 @@
 </script>
 </body>
 </html>
+
+
